@@ -1,0 +1,2 @@
+imprimir_info/build/app/app.pkg filter=lfs diff=lfs merge=lfs -text
+imprimir_info/dist/app.exe filter=lfs diff=lfs merge=lfs -text
