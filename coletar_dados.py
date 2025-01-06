@@ -35,7 +35,7 @@ def copy_tab():
 
 def copy_click(x, y):
     py.click(x, y)
-    time.sleep(0.5)
+    time.sleep(1)
     py.hotkey("ctrl", "c")
 
 def carregar_dados_existentes(caminho_arquivo):
