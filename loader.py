@@ -30,6 +30,9 @@ def salvar_dados(dados, caminho_arquivo):
 def filtrar_nome(df, nome):
     return df[df["nome"] == nome].drop_duplicates(subset="nome", keep="first")
 
+def filtrar_nome_no_drop(df, nome):
+    return df[df["nome"] == nome]
+
 def carregar_arquivo_json(caminho_arquivo=None):
     if not caminho_arquivo:
         caminho_arquivo = filedialog.askopenfilename(

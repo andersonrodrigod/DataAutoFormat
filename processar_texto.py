@@ -1,5 +1,6 @@
 import re
-from palavras import regras_substituicao, substituicoes
+from palavras import regras_substituicao, substituicoes, palavras_parecer, parecer_block
+from loader import filtrar_nome_no_drop, filtrar_nome
 
 
 def processar_data(texto):
@@ -66,101 +67,124 @@ def deletar_frases(texto, frases):
         
     return texto
 
+def consulta(texto, medico):
+    if "MEDICO TRANSCRICAO" in medico or "PELO PLANO" in texto:
+        return "CONSULTA FOI PARTICULAR OU PELO PLANO?"
+    
+def endereco(texto, procedimento):
+    if "ANGIOGRAFIA" in procedimento or "ENDEREÇO" in texto or "ENDERECO" in texto:
+        return "Seu endereço permanece o mesmo do sistema?"
 
-def separar_questionamento(texto, questiona_texto):
+def formatar_solicitacao(texto, condicoes):
     if texto:
-        padrao = rf"([^.?]*\b(?:{'|'.join(map(re.escape, questiona_texto))})\b.*?(?:[.!?]|$))"
-        
-        # Encontrar todas as ocorrências no texto
-        resultados = re.finditer(padrao, texto)
-        
-        questionamentos_encontrados = []
+       
+        palavras = '|'.join(condicoes) 
+        padrao = rf'ANEXAR\s*(.*?)(\s*(?:{palavras})\s*|\s*\.)|$'
 
-        # Para cada ocorrência, adicione ao lista
-        for resultado in resultados:
-            questionamentos_encontrados.append(resultado.group(0).strip())
+        resultado = re.search(padrao, texto)
 
-        # Se houver mais de uma ocorrência, junte-as com um espaço
-        if questionamentos_encontrados:
-            return " ".join(questionamentos_encontrados)
+        if resultado:
+            # Condição 1: Encontrar o padrão e verificar se encontrou a palavra-chave
+            if resultado.group(2):
+                return resultado.group(1).strip()  # Retorna tudo depois de ANEXAR até a palavra-chave
+            else:
+                return None  # Caso não tenha a palavra-chave, retorna até o ponto
+        else:
+            # Condição 2: Caso não encontre o padrão ANEXAR
+            return None
+   
+def formatar_questionamento(texto, questiona_texto, condicoes):
+    if texto:
+        palavras_iniciais_regex = '|'.join(questiona_texto)
+        palavras = '|'.join(condicoes)
+        padrao = rf'({palavras_iniciais_regex})\s*(.*?)(?:\s*(?:{palavras})\s*|\.|$)'
+
+        resultado = re.search(padrao, texto)
+
+        if resultado:
+            if resultado.group(2):  # Verifica se o grupo 2 não é None ou vazio
+                return resultado.group(2).strip()  # Retorna o texto após as palavras iniciais até encontrar "palavras" ou ponto
+            else:
+                return None  # Caso o grupo 2 seja vazio ou None
+        else:
+            return None  # Caso não encontre nenhum padrão
 
     return None
 
-def seperar_textos(questionamento, texto, endereco):
-    if questionamento and questionamento in texto:
-        texto = texto.replace(questionamento, "").strip()
-    
-    if endereco and endereco in texto:
-        texto = texto.replace(endereco, "").strip()
-
-    return texto
-
-def confirma_endereco(texto, endereco):
-    if texto:
-        if endereco in texto:
-            return endereco
-        else:
-            return None
-
-def enviar_telegrama(texto, telegrama):
-    if texto:
-        for item in telegrama:
-            if item in texto:
-                texto = texto.split(item)[0].strip() 
-
-    return texto
-
-    
-def verificar_textos(texto, questionamento, endereco):
-    texto = remover_caracteres(texto, regras_substituicao)
+def formatar_texto(nome, procedimento, solicitacao, questionamento, consulta_plano, endereco):
     resultado = []
+    if nome:
+        resultado.append(f'Olá tudo bom? aqui é do *HAPVIDA NOTREDAME* falo com *{nome}*?\n\n') 
 
-    if texto and questionamento and endereco:
-        resultado.append(f"A auditoria está solicitando: {texto}. para dar continuidade á análise do procedimento.")
-        resultado.append(f"A auditoria está questionando se {questionamento}")
-        resultado.append(f"o seu endereço permanece o mesmo?")
-    elif texto and questionamento:
-        resultado.append(f"A auditoria está solicitando: {texto}. para dar continuidade á análise do procedimento.")
-        resultado.append(f"A auditoria está questionando se {questionamento}")
-    elif texto and endereco:
-        resultado.append(f"A auditoria está solicitando: {texto}. para dar continuidade á análise do procedimento.")
-        resultado.append(f"o seu endereço permanece o mesmo?")
-    elif texto:
-        resultado.append(f"A auditoria está solicitando: {texto}. para dar continuidade á análise do procedimento.")
-    elif questionamento and endereco:
-        resultado.append(f"A auditoria está questionando se {questionamento}")
-        resultado.append(f"o seu endereço permanece o mesmo?")
-    elif questionamento:
-        resultado.append(f"A auditoria está questionando se {questionamento}")
-    elif endereco:
-        resultado.append(f"o seu endereço permanece o mesmo?")
-    else:
-        resultado.append("sem informações")
+    if procedimento:
+        resultado.append(f'É sobre o procedimento que foi dado entrada *{procedimento}*\n\n')
 
-    return " ".join(resultado)
+    if solicitacao:
+        resultado.append(f'A auditoria está solicitando: *{solicitacao}* para dar continuidade a análise do procedimento.\n\n')
 
+    if questionamento:
+        resultado.append(f'A auditoria questiona se: *{questionamento}*\n\n')
+    
+    if consulta_plano:
+        resultado.append(f'A auditoria questiona se: *{consulta_plano}*\n\n')
 
-def texto_procedimento(texto):
-    return f'É sobre o procedimento que foi dado entrada *{texto}*'
+    if solicitacao:
+        resultado.append("*Obs:* Gentileza enviar a foto legível (através deste whatsapp) A foto precisa ser da folha inteira e sem cortar nenhuma informação.\n\n")
 
-def texto_nome(nome):
-    return f'Olá tudo bem? aqui e do *hapvida* nesse contato falo com {nome}'
+    if endereco:
+        resultado.append(endereco)
 
-def texto_plano(texto):
-     if "PELO PLANO" in texto and "CONSULTA CONFIRMADA" not in texto:
-        return "A auditoria questiona *SE A CONSULTA FOI PELO PLANO OU PARTICULAR* "
-
-def texto_observação(texto):
-    if ("ANEXAR" in texto or "ANEXAAR" in texto) and "NÃO ANEXAR" not in texto and "NAO ANEXAR" not in texto:
-        return "*Obs:* Gentileza enviar a foto legível (através deste whatsapp) A foto precisa ser da folha inteira e sem cortar nenhuma informação."
+    if resultado:
+        return "".join(resultado)
     else:
         return None
     
-def texto_solicitacao(texto):
-    resultado = ""
-    for chave, valor in texto.items():
-        if valor is not None:
-            resultado += f"{valor}\n\n"
+def buscar_parecer(texto, palavras_parecer, parecer_block):
+    if texto:
+        palavras_parecer = '|'.join(palavras_parecer)
+        parecer_block = '|'.join(parecer_block)
+
+        padrao = rf'({palavras_parecer})\s*(.*?)(?:\s*(?:{parecer_block})\s*|\(|\.|$)'
+
+        resultado = re.search(padrao, texto)
+
+        if resultado:
+            grupo1 = resultado.group(1).strip()
+
+            if resultado.group(2): 
+                grupo2 = resultado.group(2).strip()
+            else:
+                grupo2 = ''  
+
+            return f"{grupo1} {grupo2}".strip()
     
+    return None
+  
+ 
+def formatar_texto_parecer(nome, codigo, procedimentos, info_medico):
+    codigo_nome_procedimento = []
+
+    nome = nome
+    codigo = codigo
+
+    info = buscar_parecer(info_medico, palavras_parecer, parecer_block)
+    
+    for cod_proc, nome_proc in procedimentos:
+        if cod_proc not in codigo_nome_procedimento:
+            codigo_nome_procedimento.append(f"{cod_proc} - {nome_proc}\n")
+    
+    header = f"{nome} - {codigo}\n"
+
+    if codigo_nome_procedimento:
+        codigo_nome_procedimento = "".join(codigo_nome_procedimento)
+    
+    resultado = f"PARECER / NDI MINAS / {header}\nBom dia,\n\n{info}\n\n{header}{codigo_nome_procedimento}"
+
+
     return resultado
-    
+
+
+
+
+
+

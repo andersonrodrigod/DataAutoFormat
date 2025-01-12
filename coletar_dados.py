@@ -109,7 +109,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
             "codigo_procedimento": codigo_procedimento,
             "nome_procedimento": nome_procedimento,
             "info_assistente": info_assistente,
-            "info_medico": info_medic,
+            "info_medico": f"{info_medic}.",
             "medico_solicitante": medico_solicitante
         }
 

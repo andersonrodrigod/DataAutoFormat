@@ -1,6 +1,5 @@
-from execucao_texto import processar_dados_por_nome 
-from processar_texto import texto_solicitacao
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, carregar_arquivo_erro, filtrar_nome, salvar_dados
+from execucao_texto import processar_dados_por_nome, processar_parecer_nome 
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, carregar_arquivo_erro, filtrar_nome, salvar_dados 
 from coletar_dados import save_data
 import customtkinter as ctk
 from tkinter import messagebox
@@ -55,7 +54,7 @@ class Carregar(ctk.CTkFrame):
             carregar_arquivo_erro(caminho_pasta)
             self.grid_forget()
             self.menu.grid(row=0, column=0, columnspan=3, sticky="nsew")  
-            return df, caminho_pasta
+            return df, caminho, caminho_pasta
         else:
             messagebox.showwarning("Aviso", "Nenhum arquivo foi carregado corretamente.")
         return df
@@ -152,8 +151,11 @@ class Formatar_texto(ctk.CTkFrame):
         self.textarea_texto = ctk.CTkTextbox(self.frame_coluna1, height=300, width=570)
         self.textarea_texto.grid(row=3, column=1, padx=(10, 20))
 
-        self.btn_enviar = ctk.CTkButton(self.frame_coluna1, text="Formatar", width=400, height=35, command=self.organizar_texto)
-        self.btn_enviar.grid(row=4, column=1, pady=(15, 500))
+        self.btn_formatar_texto = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto", width=400, height=35, command=self.organizar_texto)
+        self.btn_formatar_texto.grid(row=4, column=1, pady=(15, 0))
+
+        self.btn_formatar_parecer = ctk.CTkButton(self.frame_coluna1, text="Formatar Parecer", width=400, height=35, command=self.organizar_parecer)
+        self.btn_formatar_parecer.grid(row=5, column=1, pady=(10, 500))
   
     def organizar_texto(self):
         nome_digitado = self.input_nome.get()
@@ -161,7 +163,6 @@ class Formatar_texto(ctk.CTkFrame):
 
         if df is not None:
             resultado = processar_dados_por_nome(df, nome_digitado)
-            resultado = texto_solicitacao(resultado)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
@@ -192,6 +193,17 @@ class Formatar_texto(ctk.CTkFrame):
 
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")
+
+    def organizar_parecer(self):
+        nome_digitado = self.input_nome.get()
+
+        df = ler_arquivo(self.parent.caminho)
+        if df is not None:
+            resultado = processar_parecer_nome(df, nome_digitado)
+            self.textarea_texto.delete('0.0', 'end')
+            self.textarea_texto.insert('0.0', f'{resultado}')
+        else:
+            print("nenhum dado carregado")
 
     def enviar_erro(self):
         df = ler_arquivo(self.parent.caminho)
