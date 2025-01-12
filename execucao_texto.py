@@ -6,9 +6,7 @@ import pandas as pd
 
 
 
-nome = "LUCIANO MARCOS FERREIRA"
 
-df = pd.read_json("./dados/dados_coletados.json")
 
 def processar_dados_por_nome(df, nome):
     bf = filtrar_nome(df, nome)

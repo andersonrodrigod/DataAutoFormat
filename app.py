@@ -12,6 +12,7 @@ class App(ctk.CTk):
 
         self.df = None
         self.caminho = None
+        self.caminho_pasta = None
         
         self.grid_columnconfigure((0, 1, 2), weight=1)
         self.grid_columnconfigure(0, weight=1, minsize=333)
@@ -54,7 +55,7 @@ class Carregar(ctk.CTkFrame):
             carregar_arquivo_erro(caminho_pasta)
             self.grid_forget()
             self.menu.grid(row=0, column=0, columnspan=3, sticky="nsew")  
-            return df, caminho, caminho_pasta
+            return df,caminho, caminho_pasta
         else:
             messagebox.showwarning("Aviso", "Nenhum arquivo foi carregado corretamente.")
         return df
