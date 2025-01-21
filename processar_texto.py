@@ -18,7 +18,7 @@ def processar_data(texto):
 
 def remover_datas(texto):
     
-    texto_sem_datas = re.sub(r"\b\d{2}[-/:]\d{2}[-/:](20|21|22|23|24|25)\b[^\w\s]*", "", texto)
+    texto_sem_datas = re.sub(r"\b\d{2}[-/:]\d{2}[-/:](20|21|22|23|24|25|2020|2021|2022|2023|2024|2025)\b[^\w\s]*", "", texto)
 
     texto = texto_sem_datas.strip()
 
@@ -79,7 +79,7 @@ def formatar_solicitacao(texto, condicoes):
     if texto:
        
         palavras = '|'.join(condicoes) 
-        padrao = rf'ANEXAR\s*(.*?)(\s*(?:{palavras})\s*|\s*\.)|$'
+        padrao = rf'ANEXAR|SOLICITAR|\s*(.*?)(\s*(?:{palavras})\s*|\s*\.)|$'
 
         resultado = re.search(padrao, texto)
 

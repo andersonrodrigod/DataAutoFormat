@@ -26,11 +26,12 @@ def processar_dados_por_nome(df, nome):
     info_medico = bf["info_medico"].iloc[0]
     nome_procedimento = bf["nome_procedimento"].iloc[0]
     medico_solicitante = bf["medico_solicitante"].iloc[0]
-    texto_editado = remover_datas(info_medico)
-    texto_editado = processar_data(texto_editado)
 
     consulta_plano = consulta(info_medico, medico_solicitante)
     confirmar_endereco = endereco(info_medico, nome_procedimento)
+
+    texto_editado = remover_datas(info_medico)
+    texto_editado = processar_data(texto_editado)
 
     deletar_consulta = deletar_frases(texto_editado, frases_delete)
     questionamento = formatar_questionamento(deletar_consulta, questiona_texto, block_questionamento)

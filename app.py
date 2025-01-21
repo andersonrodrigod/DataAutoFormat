@@ -136,7 +136,7 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_enviar_erro = ctk.CTkButton(self.frame_coluna0, text="Enviar Erro", command=self.enviar_erro)
         self.btn_enviar_erro.grid(row=1, column=0, pady=(5, 5),  padx=(10, 10), sticky="w")
 
-         # ==== Coluna 1 (com Frame para Botões) ====
+        # ==== Coluna 1 (com Frame para Botões) ====
         self.frame_coluna1 = ctk.CTkFrame(self)
         self.frame_coluna1.grid(row=0, column=1, padx=(5, 5), pady=10, sticky="nw")
         
@@ -157,13 +157,18 @@ class Formatar_texto(ctk.CTkFrame):
 
         self.btn_formatar_parecer = ctk.CTkButton(self.frame_coluna1, text="Formatar Parecer", width=400, height=35, command=self.organizar_parecer)
         self.btn_formatar_parecer.grid(row=5, column=1, pady=(10, 500))
+
+        # ==== Coluna 1 (com Frame para Botões) ====
+        self.frame_coluna2 = ctk.CTkFrame(self)
+        self.frame_coluna1.grid(row=0, column=1, padx=(5, 5), pady=10, sticky="nw")
+        
   
     def organizar_texto(self):
         nome_digitado = self.input_nome.get()
-        df = ler_arquivo(self.parent.caminho)
+        df_caminho = ler_arquivo(self.parent.caminho)
 
-        if df is not None:
-            resultado = processar_dados_por_nome(df, nome_digitado)
+        if df_caminho is not None:
+            resultado = processar_dados_por_nome(df_caminho, nome_digitado)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
@@ -198,23 +203,23 @@ class Formatar_texto(ctk.CTkFrame):
     def organizar_parecer(self):
         nome_digitado = self.input_nome.get()
 
-        df = ler_arquivo(self.parent.caminho)
-        if df is not None:
-            resultado = processar_parecer_nome(df, nome_digitado)
+        df_caminho = ler_arquivo(self.parent.caminho)
+        if df_caminho is not None:
+            resultado = processar_parecer_nome(df_caminho, nome_digitado)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
             print("nenhum dado carregado")
 
     def enviar_erro(self):
-        df = ler_arquivo(self.parent.caminho)
+        df_caminho = ler_arquivo(self.parent.caminho)
         pasta_caminho = f"{self.parent.caminho_pasta}/erro.json"
         nome_digitado = self.input_nome.get()
         try:
             if nome_digitado:
-                df = filtrar_nome(df, nome_digitado)
-                df = df.to_dict(orient="records")
-                salvar_dados(df, pasta_caminho)
+                df_nome = filtrar_nome(df_caminho, nome_digitado)
+                df_dados = df_nome.to_dict(orient="records")
+                salvar_dados(df_dados, pasta_caminho)
                 
         except Exception as e:
             print(f"Erro em coletar dados {e}")
