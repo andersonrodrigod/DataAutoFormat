@@ -1,0 +1,4 @@
+pyinstaller --onefile --add-data "coletar_dados.py;." --add-data "cordenadas.py;." --add-data "execucao_texto.py;." --add-data "loader.py;." --add-data "palavras.py;." app.py
+
+
+										

@@ -1,10 +1,12 @@
 [
     {
-        "codigo_carteira_x":61,
-        "codigo_carteira_y":592,
+        "codigo_carteira_x":40,
+        "codigo_carteira_y":145,
         "info_medico_x":75,
         "info_medico_y":703,
         "info_assistente_x":38,
-        "info_assistente_y":774
+        "info_assistente_y":774,
+        "codigo_procedimento_x": 41,
+        "codigo_procedimento_y": 537
     }
 ]

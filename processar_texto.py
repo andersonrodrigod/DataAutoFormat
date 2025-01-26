@@ -1,5 +1,5 @@
 import re
-from palavras import regras_substituicao, substituicoes, palavras_parecer, parecer_block
+from palavras import regras_substituicao, substituicoes, palavras_parecer, parecer_block, exame_angio, categorias
 from loader import filtrar_nome_no_drop, filtrar_nome
 
 
@@ -182,6 +182,75 @@ def formatar_texto_parecer(nome, codigo, procedimentos, info_medico):
 
 
     return resultado
+
+
+def texto_nome(nome):
+    return f'Olá tudo bom? aqui é do *HAPVIDA NOTREDAME* falo com *{nome}*?\n\n'
+
+def texto_procedimento(procedimento):
+    return f'É sobre o procedimento que foi dado entrada *{procedimento}*\n\n'
+
+def texto_obs():
+    return f'\n\n*Obs:* Gentileza enviar a foto legível (através deste whatsapp) A foto precisa ser da folha inteira e sem cortar nenhuma informação.\n\n'
+
+def texto_angio_tc():
+    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *RESSONÂNCIA CARDIACA*\n- *CINTILO MIOCARDIO*\n- *TESTE ERGOMETRICO*\n- *ECOCARDIOGRAMA COM ESTRESSE FARMACOLOGICO*\n- *CATETERISMO*\n\nPoderia nos enviar por aqui os exames realizados?\n\nSeu endereço permanece o mesmo do sistema?'
+
+def texto_otorrino():
+    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *NASOFIBROLARINGOSCOPIA (LAUDO E IMAGENS)*\n- *TOMOGRAFIA DA FACE (LAUDO E IMAGENS)*\n- *RAIO X CAVUM*\n\nPoderia nos enviar por aqui os exames realizados?'
+
+def texto_tratamento_ocular():
+    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *ACUIDADE VISUAL*\n- *TOMOGRAFIA DE COERENCIA OPTICA*\n\nPoderia nos enviar por aqui os exames realizados?'
+
+def implante_anel():
+    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *PENTACAM*\n- *CERATOSCOPIA*\n\nPoderia nos enviar por aqui os exames realizados?'
+
+def ptose():
+    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *CAPIMETRIA*\n- *FOTO DOS OLHOS*\n\nPoderia nos enviar por aqui os exames realizados?'
+
+
+def definir_texto_procedimento(procedimento):
+    exame = None
+    for categoria, exames in categorias.items():
+        if procedimento in exames:
+            exame = categoria
+            break
+
+    if exame == "Angio":
+        return  texto_angio_tc()
+    
+    if exame == "Tratamento Ocular":
+        return  texto_tratamento_ocular()
+    
+    if exame == "Implante de Anel":  
+        return  implante_anel()
+
+    if exame == "Ptose":
+        return  ptose()
+
+    if exame == "Naso":
+        return  texto_otorrino()
+
+        
+    return 'TEXTO DE PROCEDIMENTO NÃO ENCONTRADO'
+
+
+
+    
+    
+        
+
+    
+
+    
+        
+
+
+
+
+
+
+
 
 
 

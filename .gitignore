@@ -1,1 +1,8 @@
+# Ignorar diretórios __pycache__
 __pycache__/
+
+# Ignorar arquivos JSON específicos
+cordenadas.json
+dados_coletados.json
+dados_coletados_padrão.json
+erro.json

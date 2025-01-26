@@ -5,6 +5,7 @@ import time
 import json
 import pandas as pd
 from cordenadas import carregar_cordenada
+from palavras import todos_codigos # exame_angio, exame_tratamento_ocular, exame_implante_anel, exame_ptose, exame_naso
 
 def cod():
     return pyperclip.paste()
@@ -35,8 +36,14 @@ def copy_tab():
 
 def copy_click(x, y):
     py.click(x, y)
+    py.click(x, y)
     time.sleep(1)
     py.hotkey("ctrl", "c")
+
+def copy_tab_proc():
+    time.sleep(0.5)
+    py.hotkey("ctrl", "c")
+    time.sleep(0.5)
 
 def carregar_dados_existentes(caminho_arquivo):
     if os.path.exists(caminho_arquivo):
@@ -60,7 +67,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
     processando_cordenadas = carregar_cordenada(cordenadas_caminho)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
     
@@ -123,4 +130,45 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         import traceback
         traceback.print_exc()
         raise
+
+
+def coletar_dados_padrao(caminho_coletar_padrao, cordernadas):
+    
+    processando_cordenadas = carregar_cordenada(cordernadas)
+
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
+
+    cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente 
+
+    cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
+
+    cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y = cordenada_codigo_procedimento
+
+    copy_tab_proc()
+    codigo_procedimento = cod_proc()
+    if codigo_procedimento in todos_codigos:
+        print(f'existe o codigo {codigo_procedimento} na lista')
+        copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        info_assistente = info_assistent()
+        print(f"esse é meu info assistente {info_assistente}")
+        if info_assistente not in ["CTT REALIZADO", "FEITOCTT", "CTT REALIZADO.", "FEITO CTT."]:
+            py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+            time.sleep(0.5)
+            print("executando savedata")
+            save_data(caminho_coletar_padrao, cordernadas)
+            print("executei")
+            py.click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
+            time.sleep(0.5)
+        else:
+            py.click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
+            py.press("down")
+           
+    else:
+        py.press("down")
+
+
+
+
+
+
 
