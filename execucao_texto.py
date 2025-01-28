@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from loader import filtrar_nome, filtrar_nome_no_drop
-from palavras import substituicoes, regras_substituicao, delete_texto, questiona_texto, frases_delete, block_questionamento
+from palavras import substituicoes, regras_substituicao, delete_texto, questiona_texto, frases_delete, block_questionamento, questionamento_texto
 from processar_texto import substituir_texto, remover_caracteres, deletar_texto, deletar_info_medico, deletar_frases, processar_data, remover_datas, formatar_solicitacao, formatar_questionamento, consulta, endereco, formatar_texto, formatar_texto_parecer, texto_nome, texto_procedimento, definir_texto_procedimento, texto_obs
 import pandas as pd
 import numpy as np
@@ -35,7 +35,7 @@ def processar_dados_por_nome(df, nome):
     texto_editado = processar_data(texto_editado)
 
     deletar_consulta = deletar_frases(texto_editado, frases_delete)
-    questionamento = formatar_questionamento(deletar_consulta, questiona_texto, block_questionamento)
+    questionamento = formatar_questionamento(deletar_consulta, questionamento_texto, block_questionamento)
     questionamento = deletar_texto(questionamento, delete_texto)
     questionamento = substituir_texto(questionamento, substituicoes)
     questionamento = remover_caracteres(questionamento , regras_substituicao)
@@ -66,10 +66,6 @@ def processar_parecer_nome(df, nome):
 
     return resultado
 
-
-df = pd.read_json("dados_coletados_padrao.json")
-
-
 def exibir_usuarios_padrao(df):
     usuario_nome = df[["nome", "codigo"]].drop_duplicates(subset="nome", keep="first")
     usuario_nome = usuario_nome.to_numpy()
@@ -82,7 +78,6 @@ def exibir_usuarios_padrao(df):
     
     return "\n".join(resultados)
     
-nome = "LINDOMAR FERNANDES DA SILVA"
     
 def processar_dado_padrao_por_nome(df, nome):
     bf = filtrar_nome(df, nome) 

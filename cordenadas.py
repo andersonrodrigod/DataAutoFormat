@@ -1,7 +1,5 @@
 import pandas as pd
 
-caminho = "cordenadas.json"
-
 def carregar_cordenada(caminho):
     df = pd.read_json(caminho)
 
@@ -28,11 +26,6 @@ def carregar_cordenada(caminho):
     return codigo_carteira, info_medico, info_assistente, codigo_procedimento 
 
 
-
-
-resultado = carregar_cordenada(caminho)
-
-print(resultado)
 
 
    

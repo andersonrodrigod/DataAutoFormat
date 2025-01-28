@@ -1,5 +1,5 @@
 import re
-from palavras import regras_substituicao, substituicoes, palavras_parecer, parecer_block, exame_angio, categorias
+from palavras import regras_substituicao, substituicoes, palavras_parecer, parecer_block, categorias
 from loader import filtrar_nome_no_drop, filtrar_nome
 
 
@@ -41,7 +41,8 @@ def deletar_texto(texto, delete_texto):
         for item in delete_texto:
             if item in texto:  
                 texto = texto.split(item, 1)[0] 
-    return texto
+        return texto
+        
 
 def deletar_info_medico(texto):
     if texto:
@@ -67,6 +68,15 @@ def deletar_frases(texto, frases):
         
     return texto
 
+def deletar_solicitar_parecer(texto):
+    # Definir o padrão para encontrar "SOLICITAR PARECER" e tudo o que vem depois
+    padrao = r'SOLICITAR\s+PARECER.*'
+    
+    # Substituir todas as ocorrências encontradas por uma string vazia
+    texto_modificado = re.sub(padrao, '.', texto)
+    
+    return texto_modificado
+
 def consulta(texto, medico):
     if "MEDICO TRANSCRICAO" in medico or "PELO PLANO" in texto:
         return "CONSULTA FOI PARTICULAR OU PELO PLANO?"
@@ -77,37 +87,41 @@ def endereco(texto, procedimento):
 
 def formatar_solicitacao(texto, condicoes):
     if texto:
-       
-        palavras = '|'.join(condicoes) 
-        padrao = rf'ANEXAR|SOLICITAR|\s*(.*?)(\s*(?:{palavras})\s*|\s*\.)|$'
+
+        texto = deletar_solicitar_parecer(texto)
+
+        palavras = '|'.join(condicoes)
+        padrao = rf'(ANEXAR|SOLICITAR)\s+(.*?)(?:\s+(?:{palavras})\s*|\s*\.)'
 
         resultado = re.search(padrao, texto)
 
         if resultado:
-            # Condição 1: Encontrar o padrão e verificar se encontrou a palavra-chave
-            if resultado.group(2):
-                return resultado.group(1).strip()  # Retorna tudo depois de ANEXAR até a palavra-chave
+            if resultado.group(1):
+                return resultado.group(2).strip() if resultado.group(2) else None
             else:
-                return None  # Caso não tenha a palavra-chave, retorna até o ponto
+                return None
         else:
-            # Condição 2: Caso não encontre o padrão ANEXAR
             return None
-   
-def formatar_questionamento(texto, questiona_texto, condicoes):
+    return None
+
+def formatar_questionamento(texto, questionamento_texto, condicoes):
     if texto:
-        palavras_iniciais_regex = '|'.join(questiona_texto)
+        palavras_iniciais_regex = '|'.join(questionamento_texto)
         palavras = '|'.join(condicoes)
         padrao = rf'({palavras_iniciais_regex})\s*(.*?)(?:\s*(?:{palavras})\s*|\.|$)'
 
         resultado = re.search(padrao, texto)
 
         if resultado:
-            if resultado.group(2):  # Verifica se o grupo 2 não é None ou vazio
-                return resultado.group(2).strip()  # Retorna o texto após as palavras iniciais até encontrar "palavras" ou ponto
-            else:
-                return None  # Caso o grupo 2 seja vazio ou None
+            texto_extraido = resultado.group(1).strip()
+            if "POSSUI" in texto_extraido:
+                questionamento = resultado.group(2).strip()
+                return f"POSSUI {questionamento}"  
+            elif resultado.group(2):
+                return resultado.group(2)
+            return None
         else:
-            return None  # Caso não encontre nenhum padrão
+            return None
 
     return None
 
@@ -123,10 +137,10 @@ def formatar_texto(nome, procedimento, solicitacao, questionamento, consulta_pla
         resultado.append(f'A auditoria está solicitando: *{solicitacao}* para dar continuidade a análise do procedimento.\n\n')
 
     if questionamento:
-        resultado.append(f'A auditoria questiona se: *{questionamento}*\n\n')
+        resultado.append(f'A auditoria questiona se: *{questionamento}?*\n\n')
     
     if consulta_plano:
-        resultado.append(f'A auditoria questiona se: *{consulta_plano}*\n\n')
+        resultado.append(f'A auditoria questiona se: *{consulta_plano}?*\n\n')
 
     if solicitacao:
         resultado.append("*Obs:* Gentileza enviar a foto legível (através deste whatsapp) A foto precisa ser da folha inteira e sem cortar nenhuma informação.\n\n")

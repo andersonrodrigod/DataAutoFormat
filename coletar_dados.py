@@ -5,7 +5,7 @@ import time
 import json
 import pandas as pd
 from cordenadas import carregar_cordenada
-from palavras import todos_codigos # exame_angio, exame_tratamento_ocular, exame_implante_anel, exame_ptose, exame_naso
+from palavras import todos_codigos, block_padrao  # exame_angio, exame_tratamento_ocular, exame_implante_anel, exame_ptose, exame_naso
 
 def cod():
     return pyperclip.paste()
@@ -115,7 +115,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
             "nome": nome,
             "codigo_procedimento": codigo_procedimento,
             "nome_procedimento": nome_procedimento,
-            "info_assistente": info_assistente,
+            "info_assistente": f"{info_assistente}.",
             "info_medico": f"{info_medic}.",
             "medico_solicitante": medico_solicitante
         }
@@ -147,22 +147,17 @@ def coletar_dados_padrao(caminho_coletar_padrao, cordernadas):
     copy_tab_proc()
     codigo_procedimento = cod_proc()
     if codigo_procedimento in todos_codigos:
-        print(f'existe o codigo {codigo_procedimento} na lista')
         copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         info_assistente = info_assistent()
-        print(f"esse é meu info assistente {info_assistente}")
-        if info_assistente not in ["CTT REALIZADO", "FEITOCTT", "CTT REALIZADO.", "FEITO CTT."]:
+        if not any(item in info_assistente for item in block_padrao):
             py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
             time.sleep(0.5)
-            print("executando savedata")
             save_data(caminho_coletar_padrao, cordernadas)
-            print("executei")
             py.click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
             time.sleep(0.5)
         else:
             py.click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
             py.press("down")
-           
     else:
         py.press("down")
 
