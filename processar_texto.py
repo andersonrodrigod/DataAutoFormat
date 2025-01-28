@@ -68,14 +68,27 @@ def deletar_frases(texto, frases):
         
     return texto
 
-def deletar_solicitar_parecer(texto):
-    # Definir o padrão para encontrar "SOLICITAR PARECER" e tudo o que vem depois
-    padrao = r'SOLICITAR\s+PARECER.*'
+def deletar_erros_ortograficos_solicitacoes(texto):
+
     
-    # Substituir todas as ocorrências encontradas por uma string vazia
-    texto_modificado = re.sub(padrao, '.', texto)
-    
+    texto_modificado = re.sub(r'(\S)ANEXAR', r'\1 ANEXAR', texto)
+    texto_modificado = re.sub(r'ANEXAR(\S)', r'ANEXAR \1', texto_modificado)
+    texto_modificado = re.sub(r'SOLICITAR\s+PARECER.*', '.', texto_modificado)
+         
     return texto_modificado
+
+import re
+
+def verificar_confirmar_endereco(texto):
+    # Definir o padrão para "CONFIRMAR" seguido de "ENDEREÇO" ou "O ENDEREÇO"
+    padrao = r'\bCONFIRMAR\s+(?:O\s+)?ENDEREÇO(?:\s*\S*)?'
+    
+    # Verificar se o padrão é encontrado no texto
+    if re.search(padrao, texto):
+        return ""  # Retorna uma string vazia se encontrar o padrão
+    else:
+        return texto  # Retorna o texto original caso contrário
+
 
 def consulta(texto, medico):
     if "MEDICO TRANSCRICAO" in medico or "PELO PLANO" in texto:
@@ -88,7 +101,7 @@ def endereco(texto, procedimento):
 def formatar_solicitacao(texto, condicoes):
     if texto:
 
-        texto = deletar_solicitar_parecer(texto)
+        texto = deletar_erros_ortograficos_solicitacoes(texto)
 
         palavras = '|'.join(condicoes)
         padrao = rf'(ANEXAR|SOLICITAR)\s+(.*?)(?:\s+(?:{palavras})\s*|\s*\.)'
