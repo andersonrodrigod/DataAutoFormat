@@ -4,10 +4,45 @@ from palavras import cordenadas
 import os
 import json
 
+
+
+def criar_arquivo_novo_dados():
+    caminho_pasta = filedialog.askdirectory()
+
+    if not caminho_pasta:
+        print("operação cancelada")
+        return
+
+    if os.path.exists(caminho_pasta + "/dados_coletados.json"):
+        messagebox.showinfo("ATENÇÃO", "Já existe um arquivo de dados_coletados na pasta, carregue o arquivo de dados_coletados para continuar")
+
+    else:
+        df = pd.DataFrame()
+        df.to_json("dados_coletados.json", orient="records", indent=4)
+        messagebox.showinfo("Sucesso", "Arquivo criado com sucesso, carregue o arquivo criado de dados_coletadoas para continuar")
+
 def criar_arquivo_cordenadas(caminho_pasta):
     if caminho_pasta and not os.path.exists(caminho_pasta + "/cordenadas.json"):
         df = pd.DataFrame([cordenadas])
         df.to_json("cordenadas.json", orient="records", indent=4)
+        print("arquivo criado com sucesso")
+
+def criar_arquivo_erro(caminho_pasta):
+    if caminho_pasta and not os.path.exists(caminho_pasta + "/erro.json"):
+        df = pd.DataFrame()
+        df.to_json("erro.json", orient="records", indent=4)
+        print("arquivo criado com sucesso")
+
+def criar_arquivo_coletar_padrao(caminho_pasta):
+    if caminho_pasta and not os.path.exists(caminho_pasta + "/dados_coletados_padrao.json"):
+        df = pd.DataFrame()
+        df.to_json("dados_coletados_padrao.json", orient="records", indent=4)
+        print("arquivo criado com sucesso")
+
+def criar_arquivo_parecer_telegrama(caminho_pasta):
+    if caminho_pasta and not os.path.exists(caminho_pasta + "/parecer_telegrama.json"):
+        df = pd.DataFrame({"TELEGRAMA": [[]], "PARECER": [[]]})
+        df.to_json("parecer_telegrama.json", orient="records", indent=4)
         print("arquivo criado com sucesso")
 
 def ler_arquivo(arquivo):
@@ -34,9 +69,10 @@ def filtrar_nome_no_drop(df, nome):
     return df[df["nome"] == nome]
 
 def carregar_arquivo_json(caminho_arquivo=None):
+    messagebox.showinfo("ATENÇÃO", "Selecione o arquivo JSON dados_coletados")
     if not caminho_arquivo:
         caminho_arquivo = filedialog.askopenfilename(
-            title="Selecione um arquivo JSON",
+            title="Selecione o arquivo JSON dados_coletados",
             filetypes=[("Arquivos JSON", "*.json")]
         )
 
@@ -48,9 +84,6 @@ def carregar_arquivo_json(caminho_arquivo=None):
             messagebox.showinfo("Sucesso", "Arquivo JSON carregado com sucesso")
             if df is not None:
                 return df, caminho_arquivo, caminho_pasta
-            else:
-                print("Nenhum dado foi carregado")
-                return None, caminho_arquivo, caminho_pasta
             
         except ValueError as e:
             messagebox.showerror("Erro", f"Erro ao ler o arquivo JSON:\n{e}")
@@ -60,45 +93,12 @@ def carregar_arquivo_json(caminho_arquivo=None):
     else:
         messagebox.showwarning("Aviso", "Nenhum arquivo foi selecionado")
 
-        return None, None
+        return None
     
-def criar_arquivo_erro(caminho_pasta):
-    if caminho_pasta and not os.path.exists(caminho_pasta + "/erro.json"):
-        df = pd.DataFrame()
-        df.to_json("erro.json", orient="records", indent=4)
-        print("arquivo criado com sucesso")
+
+    
 
 
-def criar_arquivo_coletar_padrao(caminho_pasta):
-    if caminho_pasta and not os.path.exists(caminho_pasta + "/dados_coletados_padrao.json"):
-        df = pd.DataFrame()
-        df.to_json("dados_coletados_padrao.json", orient="records", indent=4)
-        print("arquivo criado com sucesso")
 
 
-def criar_arquivo():
-    caminho_do_arquivo = filedialog.asksaveasfilename(
-        defaultextension=".json",
-        filetypes=[("JSON files", ".json"), ("All files", ".")],
-        title="Salvar arquivo"
-    )
-
-    posicao = {
-        "codigo_carteira": [
-            {"x": 0, "y": 0}
-        ],
-        "info_meidico" : [
-            {"x": 0, "y": 0}
-        ],
-        "info_assistente": [
-            {"x": 0, "y": 0}
-        ]
-    }
-
-    if caminho_do_arquivo:
-        with open(caminho_do_arquivo, "w", encoding="utf-8") as arquivo:
-            json.dump(posicao, arquivo, indent=4)
-            print(f"arquivo {caminho_do_arquivo} criado com sucesso")       
-   
-        
 

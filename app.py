@@ -1,6 +1,6 @@
-from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome 
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao 
-from coletar_dados import save_data, coletar_dados_padrao
+from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_telegrama_parecer 
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_parecer_telegrama 
+from coletar_dados import save_data, save_dados_padrao, save_info_assistente
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -14,10 +14,8 @@ class App(ctk.CTk):
         self.caminho = None
         self.caminho_pasta = None
         
-        self.grid_columnconfigure((0, 1, 2), weight=1)
-        self.grid_columnconfigure(0, weight=1, minsize=333)
-        self.grid_columnconfigure(1, weight=1, minsize=333)
-        self.grid_columnconfigure(2, weight=1, minsize=333)
+        self.grid_columnconfigure((0, 1, 2), weight=1, uniform="cols")
+        self.grid_rowconfigure(0, weight=1)
 
         self.registrar_cordenada = Registrar_cordenada(self)
         self.formatar_texto = Formatar_texto(self) 
@@ -43,24 +41,33 @@ class Carregar(ctk.CTkFrame):
         self.label_info_inicial.grid(row=0, column=1, pady=15, padx=(0, 0))
 
         self.btn_carregar_arquivo = ctk.CTkButton(self, text="Carregar Arquivo", command=self.carregar_dados)
-        self.btn_carregar_arquivo.grid(row=1, column=1, pady=15, padx=(10, 0))
+        self.btn_carregar_arquivo.grid(row=1, column=1, pady=(10, 0), padx=(10, 0))
+
+        self.btn_novo_arquivo = ctk.CTkButton(self, text="Novo Arquivo", command=self.novo_arquivo_dados)
+        self.btn_novo_arquivo.grid(row=2, column=1, pady=(10, 5), padx=(10, 0))
 
     def carregar_dados(self):
-        df, caminho, caminho_pasta = carregar_arquivo_json()
-        if df is not None:
+        resultado = carregar_arquivo_json()
+        if resultado:
+            df, caminho, caminho_pasta = resultado
             self.app.df = df
             self.app.caminho = caminho
             self.app.caminho_pasta = caminho_pasta
             criar_arquivo_cordenadas(caminho_pasta)
             criar_arquivo_erro(caminho_pasta)
             criar_arquivo_coletar_padrao(caminho_pasta)
+            criar_arquivo_parecer_telegrama(caminho_pasta)
             self.grid_forget()
             self.menu.grid(row=0, column=0, columnspan=3, sticky="nsew")  
             return df,caminho, caminho_pasta
         else:
             messagebox.showwarning("Aviso", "Nenhum arquivo foi carregado corretamente.")
-        return df
+        return 
 
+    def novo_arquivo_dados(self):
+        criar_arquivo_novo_dados()
+
+        
 class Menu(ctk.CTkFrame):
     def __init__(self, parent, formatar_texto, registrar_cordenada):
         super().__init__(parent)
@@ -123,54 +130,62 @@ class Formatar_texto(ctk.CTkFrame):
         self.parent = parent
         self.cordenadas = "cordenadas.json"
 
-        self.grid_columnconfigure(0, weight=1, minsize=210)
-        self.grid_columnconfigure(1, weight=3, minsize=580)
-        self.grid_columnconfigure(2, weight=1, minsize=210 )
+        # Configuração das colunas para centralização
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=3)
+        self.grid_columnconfigure(2, weight=1)
 
         # ==== Coluna 0 (com Frame para Botões) ====
         self.frame_coluna0 = ctk.CTkFrame(self)
-        self.frame_coluna0.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+        self.frame_coluna0.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
         self.btn_coletar_dados = ctk.CTkButton(self.frame_coluna0, text="Coletar Dados", command=lambda: self.quantidade_coletar_dados("dados"), width=170)
         self.btn_coletar_dados.grid(row=0, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
+        self.btn_coletar_dados_info_assistente = ctk.CTkButton(self.frame_coluna0, text="Coletar Info Assistente", command=lambda: self.quantidade_coletar_dados("assistente"), width=170)
+        self.btn_coletar_dados_info_assistente.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
         self.btn_enviar_erro = ctk.CTkButton(self.frame_coluna0, text="Enviar Erro", command=self.enviar_erro, width=170)
-        self.btn_enviar_erro.grid(row=1, column=0, pady=(5, 5),  padx=(10, 10), sticky="w")
+        self.btn_enviar_erro.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
         # ==== Coluna 1 (com Frame para Botões) ====
         self.frame_coluna1 = ctk.CTkFrame(self)
-        self.frame_coluna1.grid(row=0, column=1, padx=(5, 5), pady=1, sticky="nw")
-        
+        self.frame_coluna1.grid(row=0, column=1, padx=(5, 5), pady=10, sticky="nsew")
+
         self.label_title = ctk.CTkLabel(self.frame_coluna1, text="Formatação de Texto", width=580)
-        self.label_title.grid(row=0, column=1, pady=15, padx=(1, 1))
+        self.label_title.grid(row=0, column=0, pady=15, padx=(1, 1), sticky="ew")
 
         self.label_nome = ctk.CTkLabel(self.frame_coluna1, text="Nome: ", width=50)
-        self.label_nome.grid(row=2, column=1, pady=15, padx=(1, 1), sticky="w")
+        self.label_nome.grid(row=1, column=0, pady=15, padx=(1, 1), sticky="w")
 
         self.input_nome = ctk.CTkEntry(self.frame_coluna1, placeholder_text="Digite o Nome", width=520)
-        self.input_nome.grid(row=2, column=1, padx=(0, 20), sticky="e")
+        self.input_nome.grid(row=1, column=0, padx=(0, 20), sticky="e")
 
         self.textarea_texto = ctk.CTkTextbox(self.frame_coluna1, height=300, width=550)
-        self.textarea_texto.grid(row=3, column=1, padx=(10, 23))
+        self.textarea_texto.grid(row=2, column=0, padx=(10, 23), pady=(10, 10), sticky="nsew")
 
         self.btn_formatar_texto = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto", width=400, height=35, command=self.organizar_texto)
-        self.btn_formatar_texto.grid(row=4, column=1, pady=(15, 0), padx=(10, 23))
+        self.btn_formatar_texto.grid(row=3, column=0, pady=(15, 0), padx=(10, 23), sticky="ew")
 
         self.btn_formatar_texto_padrao = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto Padrão", width=400, height=35, command=self.organizar_texto_padrao)
-        self.btn_formatar_texto_padrao.grid(row=5, column=1, pady=(10, 0), padx=(10, 23))
+        self.btn_formatar_texto_padrao.grid(row=4, column=0, pady=(10, 0), padx=(10, 23), sticky="ew")
 
         self.btn_formatar_parecer = ctk.CTkButton(self.frame_coluna1, text="Formatar Parecer", width=400, height=35, command=self.organizar_parecer)
-        self.btn_formatar_parecer.grid(row=6, column=1, pady=(10, 500), padx=(10, 23))
+        self.btn_formatar_parecer.grid(row=5, column=0, pady=(10, 10), padx=(10, 23), sticky="ew")
 
         # ==== Coluna 2 (com Frame para Botões) ====
         self.frame_coluna2 = ctk.CTkFrame(self)
-        self.frame_coluna2.grid(row=0, column=2, padx=(5, 5), pady=10, sticky="nw")
+        self.frame_coluna2.grid(row=0, column=2, padx=(5, 5), pady=10, sticky="nsew")
 
         self.btn_coletar_padrão = ctk.CTkButton(self.frame_coluna2, text="Coletar Padrão", command=lambda: self.quantidade_coletar_dados("padrão"), width=170)
         self.btn_coletar_padrão.grid(row=0, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
         self.btn_exibir_coletar_padrao = ctk.CTkButton(self.frame_coluna2, text="Exibir Pacientes Padrão", command=self.organizar_nome_usuario, width=170)
         self.btn_exibir_coletar_padrao.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
+        self.btn_exibir_parecer_telegrama = ctk.CTkButton(self.frame_coluna2, text="Exibir Parecer Telegrama", command=self.organizar_telegrama_parecer, width=170)
+        self.btn_exibir_parecer_telegrama.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
         
   
     def organizar_texto(self):
@@ -206,8 +221,18 @@ class Formatar_texto(ctk.CTkFrame):
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
             self.textarea_texto.insert('0.0', "Nenhum dado encontrado")
+    
+    def organizar_telegrama_parecer(self):
+        caminho_arquivo = f'{self.parent.caminho_pasta}/parecer_telegrama.json'
+        df_caminho = ler_arquivo(caminho_arquivo)
 
-  
+        if df_caminho is not None:
+            resultado = exibir_telegrama_parecer(df_caminho)
+            self.textarea_texto.delete('0.0', 'end')
+            self.textarea_texto.insert('0.0', f'{resultado}')
+        else:
+            self.textarea_texto.insert('0.0', "nenhum dado encontrado")
+
     def quantidade_coletar_dados(self, tipo):
         dialog = ctk.CTkInputDialog(title="Número de Coletas", text="Digite o número de coletas")
         try:
@@ -224,6 +249,8 @@ class Formatar_texto(ctk.CTkFrame):
                 self.coletar_dados(quantidade)
             elif tipo == "padrão":
                 self.coletar_dados_padrao(quantidade)
+            elif tipo == "assistente":
+                self.coletar_info_assistente(quantidade)
 
         except (ValueError, TypeError):
             messagebox.showerror("Erro", "Por favor, insira um número inteiro válido.")
@@ -243,7 +270,17 @@ class Formatar_texto(ctk.CTkFrame):
         caminho_coletar_padrao = f"{self.parent.caminho_pasta}/dados_coletados_padrao.json"
         try:
             for i in range(quantidade):
-                dados = coletar_dados_padrao(caminho_coletar_padrao, cordenada)
+                dados = save_dados_padrao(caminho_coletar_padrao, cordenada)
+        except Exception as e:
+            print(f"Erro em coletar_dados: {e}")
+
+    def coletar_info_assistente(self, quantidade):
+        cordenada = f'{self.parent.caminho_pasta}/cordenadas.json'
+        caminho_parecer_telegrama = f'{self.parent.caminho_pasta}/parecer_telegrama.json'
+
+        try:
+            for i in range(quantidade):
+                dados = save_info_assistente(caminho_parecer_telegrama, cordenada)
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")
 

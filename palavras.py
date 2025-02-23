@@ -83,12 +83,15 @@ cordenadas =  {
     "info_medico_x": 75,
     "info_medico_y": 703,
     "info_assistente_x": 38,
-    "info_assistente_y": 774
+    "info_assistente_y": 774,
+    "codigo_procedimento_x": 534,
+    "codigo_procedimento_y": 931
 }
 
 
 # ------------------------------------------------------------- // ----------------------------------------------------------------------------
 
+# Bloco Padrão
 
 block_padrao = ["CTT REALIZADO", "FEITOCTT", "CTT REALIZADO.", "FEITO CTT."]
 
@@ -110,8 +113,11 @@ categorias = {
     "Naso": exame_naso,
 }
 
+# ------------------------------------------------------------- // ----------------------------------------------------------------------------
 
+# Bloco Info Assistente
 
+palavras_info_assistente = ["PARECER", "TELEGRAMA"]
 
 
 

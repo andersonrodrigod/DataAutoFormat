@@ -13,16 +13,7 @@ def processar_dados_por_nome(df, nome):
     bf = filtrar_nome(df, nome)
 
     if bf.empty:
-        return {
-            "nome": None,
-            "mensagem": f"O nome '{nome}' não foi encontrado no banco de dados.",
-            "procedimento": None,
-            "solicitacoes": None,
-            "questionamento": None,
-            "observacao": None,
-            "consulta_plano": None,
-            "endereco": None
-        }    
+        return "NOME SELECINADO NÃO FOI COLETADO. COLETE OS DADOS DO PACIENTE PARA FORMATAR TEXTO DE SOLICITAÇÃO"
     
     info_medico = bf["info_medico"].iloc[0]
     nome_procedimento = bf["nome_procedimento"].iloc[0]
@@ -32,7 +23,9 @@ def processar_dados_por_nome(df, nome):
     confirmar_endereco = endereco(info_medico, nome_procedimento)
 
     texto_editado = remover_datas(info_medico)
+    
     texto_editado = processar_data(texto_editado)
+    
 
     deletar_consulta = deletar_frases(texto_editado, frases_delete)
     questionamento = formatar_questionamento(deletar_consulta, questionamento_texto, block_questionamento)
@@ -57,6 +50,10 @@ def processar_dados_por_nome(df, nome):
 
 def processar_parecer_nome(df, nome):
     bf_drop = filtrar_nome(df, nome)
+
+    if bf_drop.empty:
+        return "NOME SELECIONADO NÃO FOI COLETADO, COLETE TODOS OS PROCEDIMENTOS PARA FORMATAR TEXTO DO PARECER"
+
     bf_no_drop = filtrar_nome_no_drop(df, nome)
     cod_carteira = bf_drop["codigo"].iloc[0]
     info_medico = bf_drop["info_medico"].iloc[0]
@@ -64,8 +61,9 @@ def processar_parecer_nome(df, nome):
 
     resultado = formatar_texto_parecer(nome, cod_carteira, procedimentos, info_medico)
 
-    return resultado
 
+    return resultado
+    
 def exibir_usuarios_padrao(df):
     usuario_nome = df[["nome", "codigo"]].drop_duplicates(subset="nome", keep="first")
     usuario_nome = usuario_nome.to_numpy()
@@ -77,7 +75,31 @@ def exibir_usuarios_padrao(df):
         resultados.append(resultado)
     
     return "\n".join(resultados)
+
+
+
+
+def exibir_telegrama_parecer(df):
+    if not df.empty:
+        df_telegrama = df.explode("TELEGRAMA")[["TELEGRAMA"]].drop_duplicates().dropna()
+        df_parecer = df.explode("PARECER")[["PARECER"]].drop_duplicates().dropna()
+
+        df_telegrama = "\n".join(df_telegrama["TELEGRAMA"].astype(str).tolist()).strip()
+        df_parecer = "\n".join(df_parecer["PARECER"].astype(str).tolist()).strip()
+
+        return f"TEEGRAMA:\n{df_telegrama}\n\nPARECER:\n{df_parecer}"
+    else:
+        return "NÃO FOI COLETADO NENHUM PARECER OU TELEGRAMA"
+
     
+
+
+
+
+
+
+
+
     
 def processar_dado_padrao_por_nome(df, nome):
     bf = filtrar_nome(df, nome) 
@@ -91,6 +113,9 @@ def processar_dado_padrao_por_nome(df, nome):
         texto_procedimento_formatado = texto_procedimento(nome_procedimento)
         texto_codigo_procedimento = definir_texto_procedimento(codigo_procedimento)
         return f"{texto_nome_formatado}{texto_procedimento_formatado}{texto_codigo_procedimento}{texto_obs()}"
+    
+
+
         
 
 

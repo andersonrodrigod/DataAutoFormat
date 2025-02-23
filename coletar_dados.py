@@ -5,7 +5,7 @@ import time
 import json
 import pandas as pd
 from cordenadas import carregar_cordenada
-from palavras import todos_codigos, block_padrao  # exame_angio, exame_tratamento_ocular, exame_implante_anel, exame_ptose, exame_naso
+from palavras import todos_codigos, block_padrao, palavras_info_assistente 
 
 def cod():
     return pyperclip.paste()
@@ -35,7 +35,6 @@ def copy_tab():
     py.press("tab")
 
 def copy_click(x, y):
-    py.click(x, y)
     py.click(x, y)
     time.sleep(1)
     py.hotkey("ctrl", "c")
@@ -131,8 +130,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         traceback.print_exc()
         raise
 
-
-def coletar_dados_padrao(caminho_coletar_padrao, cordernadas):
+def save_dados_padrao(caminho_coletar_padrao, cordernadas):
     
     processando_cordenadas = carregar_cordenada(cordernadas)
 
@@ -161,9 +159,89 @@ def coletar_dados_padrao(caminho_coletar_padrao, cordernadas):
     else:
         py.press("down")
 
+def salvar_parecer(caminho, dados):
+    with open(caminho, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=4, ensure_ascii=False)
+
+    print(f'Dado adicionado em "PARECER" com sucesso!')
+
+def salvar_telegrama(caminho, dados ):
+    # Salvar os dados no arquivo JSON
+    with open(caminho, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=4, ensure_ascii=False)
+
+    print(f'Dado adicionado em "TELEGRAMA" com sucesso!')
+
+def save_info_assistente(caminho, cordernadas):
+
+    processando_cordenadas = carregar_cordenada(cordernadas)
+
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
+
+    cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
+
+    cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente
+
+    loop_encontrar_palavra_info_assistente = False
+
+    time.sleep(0.8)
+    copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+    py.hotkey("ctrl", "c")
+    time.sleep(0.5)
+    info_assistente = info_assistent()
+
+    palavra_encontrada = [item for item in palavras_info_assistente if item in info_assistente]
+
+    print(palavra_encontrada)
+
+    if "TELEGRAMA" in palavra_encontrada:
+        palavra_parecer_telegrama = "TELEGRAMA"
+    elif "PARECER" in palavra_encontrada:
+        palavra_parecer_telegrama = "PARECER"
+    else:
+        palavra_parecer_telegrama = None
+    
+    if palavra_parecer_telegrama:
+        copy_click( cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+        time.sleep(0.5)
+        py.hotkey("ctrl", "c")
+        time.sleep(0.5)
+        codigo = cod()
+        py.press("tab")
+        copy_tab_proc()
+        time.sleep(0.5)
+        nome = name()
+        palavra_parecer_telegrama = palavra_encontrada
+        usuario = f'{codigo} - {nome}'
+        print(usuario)
+        time.sleep(0.5)
+        
+        with open(caminho, "r", encoding="utf-8") as f:
+            dados = json.load(f)
+            print("Dados carregados do arquivo:", dados)  
+    
+        if "TELEGRAMA" in palavra_parecer_telegrama :
+            dados[0]["TELEGRAMA"].append(usuario)
+            salvar_parecer(caminho, dados)
+        elif "PARECER" in palavra_parecer_telegrama:
+            dados[1]["PARECER"].append(usuario)
+            salvar_telegrama(caminho, dados)
+
+        with open(caminho, "r", encoding="utf-8") as f:
+            dados_atualizados = json.load(f)
+            print("Dados após a atualização:", dados_atualizados)  
 
 
-
-
-
+        py.hotkey("shift", "tab")
+        time.sleep(0.5)
+        py.press("down")
+        time.sleep(0.5)
+        
+        return dados_atualizados
+    
+    else: 
+        py.press("down")
+    
+    
+    
 
