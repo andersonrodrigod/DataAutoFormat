@@ -41,8 +41,14 @@ def criar_arquivo_coletar_padrao(caminho_pasta):
 
 def criar_arquivo_parecer_telegrama(caminho_pasta):
     if caminho_pasta and not os.path.exists(caminho_pasta + "/parecer_telegrama.json"):
-        df = pd.DataFrame({"TELEGRAMA": [[]], "PARECER": [[]]})
-        df.to_json("parecer_telegrama.json", orient="records", indent=4)
+        dados = {
+            "TELEGRAMA": [],
+            "PARECER": []
+        } 
+
+        with open(caminho_pasta + "/parecer_telegrama.json", "w", encoding="utf-8") as f:
+            json.dump(dados, f, indent=4, ensure_ascii=False)
+        
         print("arquivo criado com sucesso")
 
 def ler_arquivo(arquivo):

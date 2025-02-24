@@ -186,60 +186,42 @@ def save_info_assistente(caminho, cordernadas):
 
     time.sleep(0.8)
     copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
-    py.hotkey("ctrl", "c")
-    time.sleep(0.5)
     info_assistente = info_assistent()
 
     palavra_encontrada = [item for item in palavras_info_assistente if item in info_assistente]
 
-    print(palavra_encontrada)
-
-    if "TELEGRAMA" in palavra_encontrada:
-        palavra_parecer_telegrama = "TELEGRAMA"
-    elif "PARECER" in palavra_encontrada:
-        palavra_parecer_telegrama = "PARECER"
-    else:
-        palavra_parecer_telegrama = None
-    
-    if palavra_parecer_telegrama:
-        copy_click( cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-        time.sleep(0.5)
-        py.hotkey("ctrl", "c")
-        time.sleep(0.5)
+    if "TELEGRAMA" in palavra_encontrada or "PARECER" in palavra_encontrada:
+        copy_click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
         codigo = cod()
+        time.sleep(0.5)
         py.press("tab")
         copy_tab_proc()
-        time.sleep(0.5)
         nome = name()
-        palavra_parecer_telegrama = palavra_encontrada
         usuario = f'{codigo} - {nome}'
-        print(usuario)
-        time.sleep(0.5)
+        palavra_parecer_telegrama = palavra_encontrada
         
         with open(caminho, "r", encoding="utf-8") as f:
             dados = json.load(f)
-            print("Dados carregados do arquivo:", dados)  
-    
-        if "TELEGRAMA" in palavra_parecer_telegrama :
-            dados[0]["TELEGRAMA"].append(usuario)
-            salvar_parecer(caminho, dados)
-        elif "PARECER" in palavra_parecer_telegrama:
-            dados[1]["PARECER"].append(usuario)
+            print("Dados carregados do arquivo:", dados) 
+
+        if "TELEGRAMA" in palavra_parecer_telegrama:
+            palavra_parecer_telegrama = "TELEGRAMA"
+            dados[palavra_parecer_telegrama].append(usuario)
             salvar_telegrama(caminho, dados)
-
-        with open(caminho, "r", encoding="utf-8") as f:
-            dados_atualizados = json.load(f)
-            print("Dados após a atualização:", dados_atualizados)  
-
+        elif "PARECER" in palavra_parecer_telegrama:
+            palavra_parecer_telegrama = "PARECER"
+            dados[palavra_parecer_telegrama].append(usuario)
+            salvar_parecer(caminho, dados)
+        else:
+            palavra_parecer_telegrama = None 
 
         py.hotkey("shift", "tab")
         time.sleep(0.5)
         py.press("down")
         time.sleep(0.5)
         
-        return dados_atualizados
-    
     else: 
+        copy_click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
         py.press("down")
     
     

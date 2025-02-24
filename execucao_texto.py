@@ -79,26 +79,20 @@ def exibir_usuarios_padrao(df):
 
 
 
+
 def exibir_telegrama_parecer(df):
     if not df.empty:
-        df_telegrama = df.explode("TELEGRAMA")[["TELEGRAMA"]].drop_duplicates().dropna()
-        df_parecer = df.explode("PARECER")[["PARECER"]].drop_duplicates().dropna()
+        df_telegrama = df["TELEGRAMA"].drop_duplicates()
+        df_parecer = df["PARECER"].drop_duplicates()
 
-        df_telegrama = "\n".join(df_telegrama["TELEGRAMA"].astype(str).tolist()).strip()
-        df_parecer = "\n".join(df_parecer["PARECER"].astype(str).tolist()).strip()
+        df_telegrama = "\n".join(df_telegrama.astype(str)).strip()
+        df_parecer = "\n".join(df_parecer.astype(str)).strip()
 
         return f"TEEGRAMA:\n{df_telegrama}\n\nPARECER:\n{df_parecer}"
     else:
         return "NÃO FOI COLETADO NENHUM PARECER OU TELEGRAMA"
 
     
-
-
-
-
-
-
-
 
     
 def processar_dado_padrao_por_nome(df, nome):
