@@ -6,9 +6,6 @@ import pandas as pd
 import numpy as np
 
 
-
-
-
 def processar_dados_por_nome(df, nome):
     bf = filtrar_nome(df, nome)
 
@@ -61,7 +58,6 @@ def processar_parecer_nome(df, nome):
 
     resultado = formatar_texto_parecer(nome, cod_carteira, procedimentos, info_medico)
 
-
     return resultado
     
 def exibir_usuarios_padrao(df):
@@ -76,10 +72,6 @@ def exibir_usuarios_padrao(df):
     
     return "\n".join(resultados)
 
-
-
-
-
 def exibir_telegrama_parecer(df):
     if not df.empty:
         df_telegrama = df["TELEGRAMA"].drop_duplicates()
@@ -92,9 +84,6 @@ def exibir_telegrama_parecer(df):
     else:
         return "NÃO FOI COLETADO NENHUM PARECER OU TELEGRAMA"
 
-    
-
-    
 def processar_dado_padrao_por_nome(df, nome):
     bf = filtrar_nome(df, nome) 
     nome_procedimento = bf["nome_procedimento"].iloc[0]

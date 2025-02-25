@@ -1,5 +1,5 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_telegrama_parecer 
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_parecer_telegrama 
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_parecer_telegrama, ler_arquivo_frame 
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
 import customtkinter as ctk
 from tkinter import messagebox
@@ -224,7 +224,7 @@ class Formatar_texto(ctk.CTkFrame):
     
     def organizar_telegrama_parecer(self):
         caminho_arquivo = f'{self.parent.caminho_pasta}/parecer_telegrama.json'
-        df_caminho = ler_arquivo(caminho_arquivo)
+        df_caminho = ler_arquivo_frame(caminho_arquivo)
 
         if df_caminho is not None:
             resultado = exibir_telegrama_parecer(df_caminho)

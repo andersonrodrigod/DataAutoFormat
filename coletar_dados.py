@@ -159,6 +159,11 @@ def save_dados_padrao(caminho_coletar_padrao, cordernadas):
     else:
         py.press("down")
 
+def carregar_dados(caminho):
+    with open(caminho, "r", encoding="utf-8") as f:
+        dados = json.load(f)
+        return dados 
+
 def salvar_parecer(caminho, dados):
     with open(caminho, "w", encoding="utf-8") as f:
         json.dump(dados, f, indent=4, ensure_ascii=False)
@@ -200,9 +205,7 @@ def save_info_assistente(caminho, cordernadas):
         usuario = f'{codigo} - {nome}'
         palavra_parecer_telegrama = palavra_encontrada
         
-        with open(caminho, "r", encoding="utf-8") as f:
-            dados = json.load(f)
-            print("Dados carregados do arquivo:", dados) 
+        dados = carregar_dados(caminho)
 
         if "TELEGRAMA" in palavra_parecer_telegrama:
             palavra_parecer_telegrama = "TELEGRAMA"
@@ -225,5 +228,3 @@ def save_info_assistente(caminho, cordernadas):
         py.press("down")
     
     
-    
-

@@ -54,6 +54,15 @@ def criar_arquivo_parecer_telegrama(caminho_pasta):
 def ler_arquivo(arquivo):
     return pd.read_json(arquivo)
 
+def ler_arquivo_frame(arquivo):
+    with open(arquivo, "r", encoding="utf-8") as f:
+        dados = json.load(f)
+
+    
+    df = pd.DataFrame({key: pd.Series(value) for key, value in dados.items()})
+
+    return df
+
 def salvar_dados(dados, caminho_arquivo):
     if os.path.exists(caminho_arquivo):
         with open(caminho_arquivo, 'r', encoding='utf-8') as f:
