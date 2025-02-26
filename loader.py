@@ -39,14 +39,19 @@ def criar_arquivo_coletar_padrao(caminho_pasta):
         df.to_json("dados_coletados_padrao.json", orient="records", indent=4)
         print("arquivo criado com sucesso")
 
-def criar_arquivo_parecer_telegrama(caminho_pasta):
-    if caminho_pasta and not os.path.exists(caminho_pasta + "/parecer_telegrama.json"):
+def criar_arquivo_processos(caminho_pasta):
+    if caminho_pasta and not os.path.exists(caminho_pasta + "/processos.json"):
         dados = {
             "TELEGRAMA": [],
-            "PARECER": []
+            "PARECER": [],
+            "RETORNO": [], #AJ1 AJ2 AJ3
+            "PENDENTE": [], #cobro
+            "AGUARDANDO": [], #AGD
+            "PRIMEIRO CONTATO": [],
+            "SEM OBSERVACAO": []
         } 
 
-        with open(caminho_pasta + "/parecer_telegrama.json", "w", encoding="utf-8") as f:
+        with open(caminho_pasta + "/processos.json", "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=4, ensure_ascii=False)
         
         print("arquivo criado com sucesso")

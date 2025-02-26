@@ -120,7 +120,9 @@ categorias = {
 palavras_info_assistente = ["PARECER", "TELEGRAMA"]
 
 
+# Bloco info Medico
 
+palavras_info_medico = ["URGENTE", "PARECER", "TELEGRAMA"]
 
 
 

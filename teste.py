@@ -26,15 +26,15 @@ user = f"{name} - {codigo}"
 
 palavras = ["TELEGRAMA", "PARECER"]
 
-arquivo_telegram_parecer = "parecer_telegrama.json"
+arquivo_telegram_parecer = "processos.json"
 
-info_assistente = "ENVIO TELEGRAMA"
+info_assistente = "ENVIO PARECER NO GRUPO DE APOIO TELEGRAMA?"
 
 palavra_encontrada = [item for item in palavras if item in info_assistente]
 
 print(palavra_encontrada)
 
-if "TELEGRAMA" in palavra_encontrada or "PARECER" in palavra_encontrada:
+if palavra_encontrada:
     dados = carregar_dados_telegrama_parecer(arquivo_telegram_parecer)
 
     if "TELEGRAMA" in palavra_encontrada:

@@ -72,17 +72,27 @@ def exibir_usuarios_padrao(df):
     
     return "\n".join(resultados)
 
-def exibir_telegrama_parecer(df):
+def exibir_processos(df):
     if not df.empty:
-        df_telegrama = df["TELEGRAMA"].drop_duplicates()
-        df_parecer = df["PARECER"].drop_duplicates()
+        df_telegrama = df["TELEGRAMA"].drop_duplicates().dropna()
+        df_parecer = df["PARECER"].drop_duplicates().dropna()
+        df_retorno = df["RETORNO"].drop_duplicates().dropna()
+        df_pendente = df["PENDENTE"].drop_duplicates().dropna()
+        df_aguardando = df["AGUARDANDO"].drop_duplicates().dropna()
+        df_primeiro_contato = df["PRIMEIRO CONTATO"].drop_duplicates().dropna()
+        df_sem_observacao = df["SEM OBSERVACAO"].drop_duplicates().dropna()
 
         df_telegrama = "\n".join(df_telegrama.astype(str)).strip()
         df_parecer = "\n".join(df_parecer.astype(str)).strip()
+        df_retorno = "\n".join(df_retorno.astype(str)).strip()
+        df_pendente = "\n".join(df_pendente.astype(str)).strip()
+        df_aguardando = "\n".join(df_aguardando.astype(str)).strip()
+        df_primeiro_contato = "\n".join(df_primeiro_contato.astype(str)).strip()
+        df_sem_observacao = "\n".join(df_sem_observacao.astype(str)).strip()
 
-        return f"TEEGRAMA:\n{df_telegrama}\n\nPARECER:\n{df_parecer}"
+        return f"TEEGRAMA:\n{df_telegrama}\n\nPARECER:\n{df_parecer}\n\nRETORNO:\n{df_retorno}\n\nPENDENTE:\n{df_pendente}\n\nAGUARDANDO:\n{df_aguardando}\n\nPRIMEIRO CONTATO:\n{df_primeiro_contato}\n\nSEM OBSERVAÇÃO:\n{df_sem_observacao}\n"
     else:
-        return "NÃO FOI COLETADO NENHUM PARECER OU TELEGRAMA"
+        return "NÃO FOI COLETADO NENHUM DADO"
 
 def processar_dado_padrao_por_nome(df, nome):
     bf = filtrar_nome(df, nome) 

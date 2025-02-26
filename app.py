@@ -1,9 +1,10 @@
-from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_telegrama_parecer 
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_parecer_telegrama, ler_arquivo_frame 
+from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_processos, ler_arquivo_frame 
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
+
 class App(ctk.CTk):
     def __init__(self, title, size):
         super().__init__()
@@ -56,7 +57,7 @@ class Carregar(ctk.CTkFrame):
             criar_arquivo_cordenadas(caminho_pasta)
             criar_arquivo_erro(caminho_pasta)
             criar_arquivo_coletar_padrao(caminho_pasta)
-            criar_arquivo_parecer_telegrama(caminho_pasta)
+            criar_arquivo_processos(caminho_pasta)
             self.grid_forget()
             self.menu.grid(row=0, column=0, columnspan=3, sticky="nsew")  
             return df,caminho, caminho_pasta
@@ -183,8 +184,8 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_exibir_coletar_padrao = ctk.CTkButton(self.frame_coluna2, text="Exibir Pacientes Padrão", command=self.organizar_nome_usuario, width=170)
         self.btn_exibir_coletar_padrao.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
-        self.btn_exibir_parecer_telegrama = ctk.CTkButton(self.frame_coluna2, text="Exibir Parecer Telegrama", command=self.organizar_telegrama_parecer, width=170)
-        self.btn_exibir_parecer_telegrama.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+        self.btn_exibir_processos = ctk.CTkButton(self.frame_coluna2, text="Exibir Processos", command=self.organizar_exibir_processos, width=170)
+        self.btn_exibir_processos.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
         
   
@@ -222,12 +223,12 @@ class Formatar_texto(ctk.CTkFrame):
         else:
             self.textarea_texto.insert('0.0', "Nenhum dado encontrado")
     
-    def organizar_telegrama_parecer(self):
-        caminho_arquivo = f'{self.parent.caminho_pasta}/parecer_telegrama.json'
+    def organizar_exibir_processos(self):
+        caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
         df_caminho = ler_arquivo_frame(caminho_arquivo)
 
         if df_caminho is not None:
-            resultado = exibir_telegrama_parecer(df_caminho)
+            resultado = exibir_processos(df_caminho)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
@@ -276,11 +277,11 @@ class Formatar_texto(ctk.CTkFrame):
 
     def coletar_info_assistente(self, quantidade):
         cordenada = f'{self.parent.caminho_pasta}/cordenadas.json'
-        caminho_parecer_telegrama = f'{self.parent.caminho_pasta}/parecer_telegrama.json'
+        caminho_filtrar_processo = f'{self.parent.caminho_pasta}/processos.json'
 
         try:
             for i in range(quantidade):
-                dados = save_info_assistente(caminho_parecer_telegrama, cordenada)
+                dados = save_info_assistente(caminho_filtrar_processo, cordenada)
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")
 
