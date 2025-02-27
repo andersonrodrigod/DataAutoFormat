@@ -90,7 +90,7 @@ def exibir_processos(df):
         df_primeiro_contato = "\n".join(df_primeiro_contato.astype(str)).strip()
         df_sem_observacao = "\n".join(df_sem_observacao.astype(str)).strip()
 
-        return f"TEEGRAMA:\n{df_telegrama}\n\nPARECER:\n{df_parecer}\n\nRETORNO:\n{df_retorno}\n\nPENDENTE:\n{df_pendente}\n\nAGUARDANDO:\n{df_aguardando}\n\nPRIMEIRO CONTATO:\n{df_primeiro_contato}\n\nSEM OBSERVAÇÃO:\n{df_sem_observacao}\n"
+        return f"TEEGRAMA:\n{df_telegrama}\n\nPARECER:\n{df_parecer}\n\nRETORNO:\n{df_retorno}\n\nAGUARDANDO:\n{df_aguardando}\n\nPENDENTE:\n{df_pendente}\n\nPRIMEIRO CONTATO:\n{df_primeiro_contato}\n\nSEM OBSERVAÇÃO:\n{df_sem_observacao}\n"
     else:
         return "NÃO FOI COLETADO NENHUM DADO"
 

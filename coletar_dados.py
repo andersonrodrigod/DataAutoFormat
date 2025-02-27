@@ -168,7 +168,7 @@ def salvar_processo(caminho, dados):
     with open(caminho, "w", encoding="utf-8") as f:
         json.dump(dados, f, indent=4, ensure_ascii=False)
 
-    print(f'Dado adicionado em "PARECER" com sucesso!')
+    print(f'Dado adicionado com sucesso!')
 
 def save_info_assistente(caminho, cordenadas):
 
@@ -180,13 +180,27 @@ def save_info_assistente(caminho, cordenadas):
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente
 
-    loop_encontrar_palavra_info_assistente = False
-
     time.sleep(0.8)
     copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
     info_assistente = info_assistent()
 
     palavra_encontrada = [item for item in palavras_info_assistente if item in info_assistente]
+
+    if not palavra_encontrada:
+        copy_click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+        codigo = cod()
+        time.sleep(0.5)
+        py.press("tab")
+        copy_tab_proc()
+        nome = name()
+        usuario = f'{codigo} - {nome}'
+
+        dados = carregar_dados(caminho)
+
+        palavra_processo = "SEM OBSERVACAO"   
+        dados[palavra_processo].append(usuario)
+        salvar_processo(caminho, dados)
+
 
     if palavra_encontrada:
         copy_click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
@@ -196,62 +210,36 @@ def save_info_assistente(caminho, cordenadas):
         copy_tab_proc()
         nome = name()
         usuario = f'{codigo} - {nome}'
+
         palavra_processo = palavra_encontrada
-        
+
         dados = carregar_dados(caminho)
 
         if "TELEGRAMA" in palavra_processo:
             palavra_processo = "TELEGRAMA"
-            dados[palavra_processo].append(usuario)
-            salvar_processo(caminho, dados)
         elif "PARECER" in palavra_processo:
             palavra_processo = "PARECER"
-            dados[palavra_processo].append(usuario)
-            salvar_processo(caminho, dados)
-        elif "AJ1" in palavra_processo:
-            palavra_processo = "RETORNO"
-            dados[palavra_processo].append(usuario)
-            salvar_processo(caminho, dados)
-        elif "COBRO" in palavra_processo:
-            palavra_processo = "PENDENTE"
-            dados[palavra_processo].append(usuario)
-            salvar_processo(caminho, dados)
         elif "AGD" in palavra_processo or "AGUARDO" in palavra_processo:
             palavra_processo = "AGUARDANDO"
-            dados[palavra_processo].append(usuario)
-            salvar_processo(caminho, dados)
-        elif "FEITO CTT." in palavra_processo or "CTT REALIZADO" in palavra_processo:
+        elif "AJ1" in palavra_processo:
+            palavra_processo = "RETORNO"
+        elif "COBRO" in palavra_processo:
+            palavra_processo = "PENDENTE"
+        elif "FEITO CTT" in palavra_processo or "CTT REALIZADO" in palavra_processo:
             palavra_processo = "PRIMEIRO CONTATO"
-        else:
-            dados[palavra_processo].append(usuario)
-            salvar_processo(caminho, dados)
 
-        py.hotkey("shift", "tab")
-        time.sleep(0.5)
-        py.press("down")
-        time.sleep(0.5)
-        
-    else: 
-        copy_click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-        py.press("down")
+        dados[palavra_processo].append(usuario)
+        salvar_processo(caminho, dados)
+                  
+    py.hotkey("shift", "tab")
+    time.sleep(0.5)
+    py.press("down")
+    time.sleep(0.5)
+
+
+
     
     
-def save_info_assistente(caminho, cordenadas):
-
-    processando_cordenadas = carregar_cordenada(cordenadas)
-
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
-
-    cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
     
-    cordenada_info_medico_x, cordenada_info_medico_y = cordenada_info_medico
-
-    cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente 
-
-    time.sleep(0.8)
-    copy_click(cordenada_info_medico_x, cordenada_info_medico_y)
-    info_medico = info_medico()
-
-    palavra_encontrada = [item for item in palavras_info_medico if item in info_medico]
 
     
