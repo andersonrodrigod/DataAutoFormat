@@ -4,6 +4,6 @@ __pycache__/
 # Ignorar arquivos JSON específicos
 cordenadas.json
 dados_coletados.json
-dados_coletados_padrão.json
+dados_coletados_padrao.json
 erro.json
 parecer_telegrama.json
