@@ -180,7 +180,8 @@ def save_info_assistente(caminho, cordenadas):
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente
 
-    time.sleep(0.8)
+    copy_tab_proc()
+
     copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
     info_assistente = info_assistent()
 

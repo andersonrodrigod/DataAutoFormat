@@ -1,11 +1,6 @@
 import json
 import pandas as pd
 
-def salvar_parecer(caminho, dados):
-    with open(caminho, "w", encoding="utf-8") as f:
-        json.dump(dados, f, indent=4, ensure_ascii=False)
-
-    print(f'Dado adicionado em "PARECER" com sucesso!')
 
 def salvar_telegrama(caminho, dados):
     # Salvar os dados no arquivo JSON
@@ -21,6 +16,11 @@ def carregar_dados_telegrama_parecer(caminho):
 
 name = "ANDERSON RODRIGO RODRIGUES DOS SANTOS"
 codigo = "3010I258574003"
+
+usuario = {
+    "nome": name,
+    "codigo": codigo
+}
 
 user = f"{name} - {codigo}"
 
