@@ -1,9 +1,10 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_processos, ler_arquivo_frame 
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_processos
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
+import time
 
 class App(ctk.CTk):
     def __init__(self, title, size):
@@ -225,7 +226,7 @@ class Formatar_texto(ctk.CTkFrame):
     
     def organizar_exibir_processos(self):
         caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
-        df_caminho = ler_arquivo_frame(caminho_arquivo)
+        df_caminho = ler_arquivo(caminho_arquivo)
 
         if df_caminho is not None:
             resultado = exibir_processos(df_caminho)
@@ -280,8 +281,10 @@ class Formatar_texto(ctk.CTkFrame):
         caminho_filtrar_processo = f'{self.parent.caminho_pasta}/processos.json'
 
         try:
+            time.sleep(2)
             for i in range(quantidade):
                 dados = save_info_assistente(caminho_filtrar_processo, cordenada)
+            
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")
 

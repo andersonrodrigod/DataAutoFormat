@@ -1,9 +1,11 @@
 from collections import OrderedDict
 from loader import filtrar_nome, filtrar_nome_no_drop
-from palavras import substituicoes, regras_substituicao, delete_texto, questiona_texto, frases_delete, block_questionamento, questionamento_texto
+from palavras import substituicoes, regras_substituicao, delete_texto, questiona_texto, frases_delete, block_questionamento, questionamento_texto, tipos_observacao
 from processar_texto import substituir_texto, remover_caracteres, deletar_texto, deletar_info_medico, deletar_frases, processar_data, remover_datas, formatar_solicitacao, formatar_questionamento, consulta, endereco, formatar_texto, formatar_texto_parecer, texto_nome, texto_procedimento, definir_texto_procedimento, texto_obs
+from funcoes import ajustar_nome_codigo
 import pandas as pd
 import numpy as np
+
 
 
 def processar_dados_por_nome(df, nome):
@@ -72,27 +74,17 @@ def exibir_usuarios_padrao(df):
     
     return "\n".join(resultados)
 
+
 def exibir_processos(df):
-    if not df.empty:
-        df_telegrama = df["TELEGRAMA"].drop_duplicates().dropna()
-        df_parecer = df["PARECER"].drop_duplicates().dropna()
-        df_retorno = df["RETORNO"].drop_duplicates().dropna()
-        df_pendente = df["PENDENTE"].drop_duplicates().dropna()
-        df_aguardando = df["AGUARDANDO"].drop_duplicates().dropna()
-        df_primeiro_contato = df["PRIMEIRO CONTATO"].drop_duplicates().dropna()
-        df_sem_observacao = df["SEM OBSERVACAO"].drop_duplicates().dropna()
+    resultados = []
+    
+    for tipo in tipos_observacao:
+        usuarios = df[df["tipo"] == tipo][["codigo", "nome"]].to_numpy()
+        resultado = f"{tipo}:\n{ajustar_nome_codigo(usuarios)}"
+        resultados.append(resultado)
 
-        df_telegrama = "\n".join(df_telegrama.astype(str)).strip()
-        df_parecer = "\n".join(df_parecer.astype(str)).strip()
-        df_retorno = "\n".join(df_retorno.astype(str)).strip()
-        df_pendente = "\n".join(df_pendente.astype(str)).strip()
-        df_aguardando = "\n".join(df_aguardando.astype(str)).strip()
-        df_primeiro_contato = "\n".join(df_primeiro_contato.astype(str)).strip()
-        df_sem_observacao = "\n".join(df_sem_observacao.astype(str)).strip()
-
-        return f"TEEGRAMA:\n{df_telegrama}\n\nPARECER:\n{df_parecer}\n\nRETORNO:\n{df_retorno}\n\nAGUARDANDO:\n{df_aguardando}\n\nPENDENTE:\n{df_pendente}\n\nPRIMEIRO CONTATO:\n{df_primeiro_contato}\n\nSEM OBSERVAÇÃO:\n{df_sem_observacao}\n"
-    else:
-        return "NÃO FOI COLETADO NENHUM DADO"
+    return "\n\n".join(resultados)
+    
 
 def processar_dado_padrao_por_nome(df, nome):
     bf = filtrar_nome(df, nome) 

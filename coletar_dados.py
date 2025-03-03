@@ -5,7 +5,8 @@ import time
 import json
 import pandas as pd
 from cordenadas import carregar_cordenada
-from palavras import todos_codigos, block_padrao, palavras_info_assistente, palavras_info_medico 
+from palavras import todos_codigos, block_padrao, palavras_info_assistente, mapeamento_palavras_info_assistente
+from funcoes import encontrar_palavra, obter_palavra
 
 def cod():
     return pyperclip.paste()
@@ -28,11 +29,23 @@ def info_assistent():
 def info_medico():
     return pyperclip.paste()
 
+def copy():
+    py.hotkey("ctrl", "c")
+
 def copy_tab():
     time.sleep(0.5)
     py.hotkey("ctrl", "c")
     time.sleep(0.5)
     py.press("tab")
+
+def tab_copy():
+    py.press("tab")
+    time.sleep(0.5)
+    py.hotkey("ctrl", "c")
+    time.sleep(0.5)
+
+def shift_tab():
+    py.press("shift", "tab")
 
 def copy_click(x, y):
     py.click(x, y)
@@ -180,67 +193,42 @@ def save_info_assistente(caminho, cordenadas):
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente
 
-    copy_tab_proc()
+    copy()
 
-    copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
-    info_assistente = info_assistent()
+    codigo = cod()
 
-    palavra_encontrada = [item for item in palavras_info_assistente if item in info_assistente]
+    dados = carregar_dados(caminho)
 
-    if not palavra_encontrada:
-        copy_click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-        codigo = cod()
-        time.sleep(0.5)
-        py.press("tab")
-        copy_tab_proc()
-        nome = name()
-        usuario = f'{codigo} - {nome}'
+    df = pd.DataFrame(dados)
 
-        dados = carregar_dados(caminho)
+    if not df.empty and codigo in df["codigo"].values:
+        py.press("down")
+        print("Codigo já está no banco de dados")
+    else:
+        copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        info_assistente = info_assistent()
 
-        palavra_processo = "SEM OBSERVACAO"   
-        dados[palavra_processo].append(usuario)
-        salvar_processo(caminho, dados)
-
-
-    if palavra_encontrada:
-        copy_click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-        codigo = cod()
-        time.sleep(0.5)
-        py.press("tab")
-        copy_tab_proc()
-        nome = name()
-        usuario = f'{codigo} - {nome}'
+        palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
+        palavra_encontrada = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
 
         palavra_processo = palavra_encontrada
 
-        dados = carregar_dados(caminho)
+        py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+        time.sleep(0.5)
 
-        if "TELEGRAMA" in palavra_processo:
-            palavra_processo = "TELEGRAMA"
-        elif "PARECER" in palavra_processo:
-            palavra_processo = "PARECER"
-        elif "AGD" in palavra_processo or "AGUARDO" in palavra_processo:
-            palavra_processo = "AGUARDANDO"
-        elif "AJ1" in palavra_processo:
-            palavra_processo = "RETORNO"
-        elif "COBRO" in palavra_processo:
-            palavra_processo = "PENDENTE"
-        elif "FEITO CTT" in palavra_processo or "CTT REALIZADO" in palavra_processo:
-            palavra_processo = "PRIMEIRO CONTATO"
+        tab_copy()
+        nome = name()
 
-        dados[palavra_processo].append(usuario)
+        shift_tab()
+
+        usuario = {
+            "nome": nome,
+            "codigo": codigo,
+            "tipo": palavra_processo
+        }
+
+        dados.append(usuario)
         salvar_processo(caminho, dados)
-                  
-    py.hotkey("shift", "tab")
-    time.sleep(0.5)
-    py.press("down")
-    time.sleep(0.5)
 
-
-
-    
-    
-    
 
     

@@ -117,7 +117,21 @@ categorias = {
 
 # Bloco Info Assistente
 
-palavras_info_assistente = ["PARECER", "TELEGRAMA"]
+tipos_observacao = ["TELEGRAMA", "PARECER", "RETORNO", "AGUARDANDO", "PENDENTE", "PRIMEIRO CONTATO", "SEM OBSERVACAO"]
+
+palavras_info_assistente = ["TELEGRAMA", "PARECER", "AJ1", "AGD", "AGUARDO", "COBRO", "FEITO CTT", "CTT REALIZADO"]
+
+mapeamento_palavras_info_assistente = {
+    "TELEGRAMA": "TELEGRAMA",
+    "PARECER": "PARECER",
+    "AJ1": "RETORNO",
+    "AGD": "AGUARDANDO",
+    "AGUARDO": "AGUARDANDO",
+    "COBRO": "PENDENTE",
+    "FEITO CTT": "PRIMEIRO CONTATO",
+    "CTT REALIZADO": "PRIMEIRO CONTATO",
+    "SEM OBSERVACAO": "SEM OBSERVACAO"
+}
 
 
 # Bloco info Medico
