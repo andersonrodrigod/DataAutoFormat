@@ -278,12 +278,13 @@ class Formatar_texto(ctk.CTkFrame):
 
     def coletar_info_assistente(self, quantidade):
         cordenada = f'{self.parent.caminho_pasta}/cordenadas.json'
-        caminho_filtrar_processo = f'{self.parent.caminho_pasta}/processos.json'
+        caminho_processo = f'{self.parent.caminho_pasta}/processos.json'
 
         try:
             time.sleep(2)
+            caminho_coletar = self.parent.caminho
             for i in range(quantidade):
-                dados = save_info_assistente(caminho_filtrar_processo, cordenada)
+                dados = save_info_assistente(caminho_processo, cordenada, caminho_coletar)
             
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")

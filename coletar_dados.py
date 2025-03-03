@@ -183,7 +183,7 @@ def salvar_processo(caminho, dados):
 
     print(f'Dado adicionado com sucesso!')
 
-def save_info_assistente(caminho, cordenadas):
+def save_info_assistente(caminho, cordenadas, caminho_coletar):
 
     processando_cordenadas = carregar_cordenada(cordenadas)
 
@@ -229,6 +229,9 @@ def save_info_assistente(caminho, cordenadas):
 
         dados.append(usuario)
         salvar_processo(caminho, dados)
+
+        if palavra_processo == "SEM OBSERVACAO":
+            save_data(caminho_coletar, cordenadas)
 
 
     
