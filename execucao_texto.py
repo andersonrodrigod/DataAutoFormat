@@ -76,14 +76,27 @@ def exibir_usuarios_padrao(df):
 
 
 def exibir_processos(df):
-    resultados = []
-    
-    for tipo in tipos_observacao:
-        usuarios = df[df["tipo"] == tipo][["codigo", "nome"]].to_numpy()
-        resultado = f"{tipo}:\n{ajustar_nome_codigo(usuarios)}"
-        resultados.append(resultado)
+    resultado = ""
 
-    return "\n\n".join(resultados)
+    # Loop para filtrar e gerar o texto de cada tipo
+    for tipo in tipos_observacao:
+        # Filtra o DataFrame para as linhas onde o tipo corresponde ao valor na lista
+        df_filtrado = df[df['tipo'] == tipo]
+        
+        # Adiciona o título do tipo
+        resultado += f"{tipo}:\n"
+        
+        # Adiciona as linhas filtradas
+        for index, row in df_filtrado.iterrows():
+            resultado += f"{row['codigo']}\t{row['nome']}\n"
+        
+        resultado += "\n" + "="*50 + "\n"  # Para separar visualmente os tipos
+
+    # Retorna o resultado final
+    return resultado
+
+
+
     
 
 def processar_dado_padrao_por_nome(df, nome):

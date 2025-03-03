@@ -1,6 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_processos
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
+from planilhas import df_shet_processos
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -186,9 +187,7 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_exibir_coletar_padrao.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
         self.btn_exibir_processos = ctk.CTkButton(self.frame_coluna2, text="Exibir Processos", command=self.organizar_exibir_processos, width=170)
-        self.btn_exibir_processos.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
-
-        
+        self.btn_exibir_processos.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")   
   
     def organizar_texto(self):
         nome_digitado = self.input_nome.get()
@@ -225,11 +224,11 @@ class Formatar_texto(ctk.CTkFrame):
             self.textarea_texto.insert('0.0', "Nenhum dado encontrado")
     
     def organizar_exibir_processos(self):
-        caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
-        df_caminho = ler_arquivo(caminho_arquivo)
+        #caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
+        #df_caminho = ler_arquivo(caminho_arquivo)
 
-        if df_caminho is not None:
-            resultado = exibir_processos(df_caminho)
+        if df_shet_processos is not None:
+            resultado = exibir_processos(df_shet_processos)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
