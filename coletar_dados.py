@@ -7,6 +7,10 @@ import pandas as pd
 from cordenadas import carregar_cordenada
 from palavras import todos_codigos, block_padrao, palavras_info_assistente, mapeamento_palavras_info_assistente
 from funcoes import encontrar_palavra, obter_palavra
+from datetime import datetime
+from planilhas import sheet_processos
+from pytz import timezone
+
 
 def cod():
     return pyperclip.paste()
@@ -183,7 +187,7 @@ def salvar_processo(caminho, dados):
 
     print(f'Dado adicionado com sucesso!')
 
-def save_info_assistente(caminho, cordenadas):
+def save_info_assistente(caminho, cordenadas, caminho_coletar):
 
     processando_cordenadas = carregar_cordenada(cordenadas)
 
@@ -221,14 +225,29 @@ def save_info_assistente(caminho, cordenadas):
 
         shift_tab()
 
+        fuso_horario = timezone("America/Sao_Paulo")
+        agora = datetime.now(fuso_horario)
+
+        data = agora.strftime("%Y-%m-%d")
+        hora = agora.strftime("%H:%M")
+
         usuario = {
             "nome": nome,
             "codigo": codigo,
-            "tipo": palavra_processo
+            "tipo": palavra_processo,
+            "data": data,
+            "hora": hora
         }
 
+        usuario_sheet = [
+            [nome, codigo, palavra_processo, data, hora]
+        ]
+
         dados.append(usuario)
+        sheet_processos.append_rows(usuario_sheet)
         salvar_processo(caminho, dados)
 
+        if palavra_processo == "SEM OBSERVACAO":
+            save_data(caminho_coletar, cordenadas)
 
     

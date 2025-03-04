@@ -15,4 +15,5 @@ SHEET_ID = "1m9cDBnlICdon3E2FP1F-toCTroFGJy43JebFE5xLkps"
 sheet_processos = client.open_by_key(SHEET_ID).sheet1
 
 
-df_shet_processos = pd.DataFrame(sheet_processos.get_all_values()[1:], columns=["nome", "codigo", "tipo", "data", "hora", "visto", "resolvido"])
+def carregar_dados_sheet_processos():
+    return pd.DataFrame(sheet_processos.get_all_values()[1:], columns=["nome", "codigo", "tipo", "data", "hora", "visto", "resolvido", "visto_data_hora", "resolvido_data_hora"])

@@ -63,16 +63,21 @@ def processar_parecer_nome(df, nome):
     return resultado
     
 def exibir_usuarios_padrao(df):
-    usuario_nome = df[["nome", "codigo"]].drop_duplicates(subset="nome", keep="first")
-    usuario_nome = usuario_nome.to_numpy()
 
-    resultados = []
+    if not df.empty:
+        usuario_nome = df[["nome", "codigo"]].drop_duplicates(subset="nome", keep="first")
+        usuario_nome = usuario_nome.to_numpy()
 
-    for nome, codigo in usuario_nome:
-        resultado = f"{codigo} - {nome}"
-        resultados.append(resultado)
-    
-    return "\n".join(resultados)
+        resultados = []
+
+        for nome, codigo in usuario_nome:
+            resultado = f"{codigo} - {nome}"
+            resultados.append(resultado)
+        
+        
+        return "\n".join(resultados)
+    else:
+        return "num valor padrão foi varrido"        
 
 
 def exibir_processos(df):
@@ -101,6 +106,7 @@ def exibir_processos(df):
 
 def processar_dado_padrao_por_nome(df, nome):
     bf = filtrar_nome(df, nome) 
+
     nome_procedimento = bf["nome_procedimento"].iloc[0]
     codigo_procedimento = str(bf["codigo_procedimento"].iloc[0])
 
