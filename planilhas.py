@@ -12,7 +12,11 @@ client = gspread.authorize(creds)
 
 SHEET_ID = "1m9cDBnlICdon3E2FP1F-toCTroFGJy43JebFE5xLkps"
 
+SHEET_ID_COLETAR_DADOS = "1dxncCavrAwjPDoH7UREOpttnLVZyJgYXLEr-Zn3Mq9g"
+
 sheet_processos = client.open_by_key(SHEET_ID).sheet1
+
+sheet_coletar_dados = client.open_by_key(SHEET_ID_COLETAR_DADOS).sheet1
 
 
 

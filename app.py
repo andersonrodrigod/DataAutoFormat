@@ -36,8 +36,6 @@ class App(ctk.CTk):
     def alterar_tamanho(self, novo_tamanho):
         self.geometry(novo_tamanho)
 
-       
-
 class Check_list(ctk.CTkToplevel):
     def __init__(self, parent):#
         super().__init__(parent)
@@ -54,16 +52,15 @@ class Check_list(ctk.CTkToplevel):
         scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=500)#
         scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
 
-        df = carregar_dados_sheet_processos()
-        dados = df.to_dict(orient="records")
+        self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
 
         acoes_frame = ctk.CTkFrame(self)
         acoes_frame.pack(pady=10, padx=20, fill="x")
 
-        bottoes_processos(botoes_frame, dados, scrollable_frame)
-        filtrar_nome_processos(dados, "TODOS", scrollable_frame)
+        bottoes_processos(botoes_frame, self.dados, scrollable_frame)
+        filtrar_nome_processos(self.dados, "TODOS", scrollable_frame)
 
-        confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=lambda: salvar_alteracoes_sheet(dados, self))
+        confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=lambda: salvar_alteracoes_sheet(self.dados, self))
         confirm_button.pack(side="left", padx=10, pady=10, expand=True, fill="x")
 
         # Botão de Atualizar Dados
@@ -71,17 +68,17 @@ class Check_list(ctk.CTkToplevel):
         atualizar_button.pack(side="left", padx=10, pady=10, expand=True, fill="x")
 
 
+
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
     
     def atualizar_dados(self, botoes_frame, scrollable_frame):
         # Recarregar dados da planilha
-        df = carregar_dados_sheet_processos()  # Função que carrega dados
-        dados = df.to_dict(orient="records")
+        self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
         
-        # Atualizar a interface
-        bottoes_processos(botoes_frame, dados, scrollable_frame)
-        filtrar_nome_processos(dados, "TODOS", scrollable_frame)
-    
+        # Atualiza os elementos na interface com os novos dados
+        bottoes_processos(botoes_frame, self.dados, scrollable_frame)
+        filtrar_nome_processos(self.dados, "TODOS", scrollable_frame)
+        messagebox.showinfo("Atualização", "Os dados foram atualizados com sucesso!")
     
     def fechar_janela(self):
         self.withdraw()
@@ -129,7 +126,6 @@ class Carregar(ctk.CTkFrame):
     def novo_arquivo_dados(self):
         criar_arquivo_novo_dados()
 
-        
 class Menu(ctk.CTkFrame):
     def __init__(self, parent, formatar_texto, registrar_cordenada):
         super().__init__(parent)
@@ -404,9 +400,6 @@ class Formatar_texto(ctk.CTkFrame):
             self.check_list = Check_list(self)
         self.check_list.deiconify()
         
-
-
-
 if __name__ == "__main__":
     app = App("DATAFORMAT", "1000x700")
     app.mainloop()

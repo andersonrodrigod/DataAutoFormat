@@ -39,7 +39,7 @@ def bottoes_processos(frame, dados, scrollable_frame):
 
 def on_checkbox_click(index, tipo, checkbox_var, dados):
     dados[index][tipo] = checkbox_var.get()  # Atualiza o dado local
-    print(f"Checkbox '{tipo}' da linha {index} clicado: {checkbox_var.get()}")
+    #print(f"Checkbox '{tipo}' da linha {index} clicado: {checkbox_var.get()}")
 
 def salvar_alteracoes_sheet(dados, top_level_window):
     try:
@@ -64,9 +64,11 @@ def salvar_alteracoes_sheet(dados, top_level_window):
         # Atualiza as células em massa com uma única requisição
         sheet_processos.batch_update(updates)
 
+        top_level_window.lift()
         messagebox.showinfo("Sucesso", "Alterações salvas com sucesso!")
         top_level_window.lift()
     except Exception as e:
+        top_level_window.lift()
         messagebox.showerror("Erro", f"Ocorreu um erro ao salvar as alterações: {e}")
         top_level_window.lift()
 

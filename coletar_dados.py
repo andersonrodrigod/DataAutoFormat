@@ -8,7 +8,7 @@ from cordenadas import carregar_cordenada
 from palavras import todos_codigos, block_padrao, palavras_info_assistente, mapeamento_palavras_info_assistente
 from funcoes import encontrar_palavra, obter_palavra
 from datetime import datetime
-from planilhas import sheet_processos
+from planilhas import sheet_processos, sheet_coletar_dados
 from pytz import timezone
 
 
@@ -136,7 +136,12 @@ def save_data(caminho_arquivo, cordenadas_caminho):
             "medico_solicitante": medico_solicitante
         }
 
+        dados_sheet = [
+            [codigo, nome, codigo_procedimento, nome_procedimento, info_assistente, info_medic, medico_solicitante]
+        ]
+
         dados_existentes.append(dados)
+        sheet_coletar_dados.append_rows(dados_sheet)
         salvar_dados(dados_existentes, caminho_arquivo)
 
         return dados
