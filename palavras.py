@@ -114,6 +114,11 @@ categorias = {
 }
 
 # ------------------------------------------------------------- // ----------------------------------------------------------------------------
+#Bloco Processos
+
+botoes_filtro = ["TODOS", "TELEGRAMA", "PARECER", "RETORNO", "AGUARDANDO", "PENDENTE", "PRIMEIRO CONTATO", "SEM OBSERVACAO"]
+
+
 
 # Bloco Info Assistente
 

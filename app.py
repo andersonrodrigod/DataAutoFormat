@@ -1,6 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_processos
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
+from funcoes import bottoes_processos, filtrar_nome_processos, salvar_alteracoes_sheet
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
 from tkinter import messagebox
@@ -16,28 +17,74 @@ class App(ctk.CTk):
         self.df = None
         self.caminho = None
         self.caminho_pasta = None
+        #self.check_list = None 
         
         self.grid_columnconfigure((0, 1, 2), weight=1, uniform="cols")
         self.grid_rowconfigure(0, weight=1)
 
-        
+        self.check_list = Check_list(self)
         self.registrar_cordenada = Registrar_cordenada(self)
-        self.formatar_texto = Formatar_texto(self) 
+        self.formatar_texto = Formatar_texto(self, self.check_list, self) 
         self.menu = Menu(self, self.formatar_texto, self.registrar_cordenada) 
         self.carregar = Carregar(self, self.menu, self)
-        self.check_list = Check_list(self)
         #self.registrar_cordenada.grid(row=0, column=0, columnspan=3, sticky="nsew")
         self.carregar.grid(row=0, column=0, columnspan=3, sticky="nsew")
         #self.formatar_texto.grid(row=0, column=0, columnspan=3, sticky="nsew")
         #self.menu.grid(row=0, column=0, columnspan=3, sticky="nsew")""".
+        #self.check_list.pack(pady=10, padx=20, fill="x")
 
     def alterar_tamanho(self, novo_tamanho):
         self.geometry(novo_tamanho)
-        
 
-class Check_list(ctk.CTkFrame):
-    def __init__(self, parent):
+       
+
+class Check_list(ctk.CTkToplevel):
+    def __init__(self, parent):#
         super().__init__(parent)
+        
+        #self.app = app
+
+        self.parent = parent
+
+        self.parent.alterar_tamanho("1240x700")
+
+        botoes_frame = ctk.CTkFrame(self)#
+        botoes_frame.pack(pady=10, padx=20, fill="x")
+
+        scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=500)#
+        scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
+
+        df = carregar_dados_sheet_processos()
+        dados = df.to_dict(orient="records")
+
+        acoes_frame = ctk.CTkFrame(self)
+        acoes_frame.pack(pady=10, padx=20, fill="x")
+
+        bottoes_processos(botoes_frame, dados, scrollable_frame)
+        filtrar_nome_processos(dados, "TODOS", scrollable_frame)
+
+        confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=lambda: salvar_alteracoes_sheet(dados, self))
+        confirm_button.pack(side="left", padx=10, pady=10, expand=True, fill="x")
+
+        # Botão de Atualizar Dados
+        atualizar_button = ctk.CTkButton(acoes_frame, text="Atualizar Dados", command=lambda: self.atualizar_dados(botoes_frame, scrollable_frame))
+        atualizar_button.pack(side="left", padx=10, pady=10, expand=True, fill="x")
+
+
+        self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+    
+    def atualizar_dados(self, botoes_frame, scrollable_frame):
+        # Recarregar dados da planilha
+        df = carregar_dados_sheet_processos()  # Função que carrega dados
+        dados = df.to_dict(orient="records")
+        
+        # Atualizar a interface
+        bottoes_processos(botoes_frame, dados, scrollable_frame)
+        filtrar_nome_processos(dados, "TODOS", scrollable_frame)
+    
+    
+    def fechar_janela(self):
+        self.withdraw()
         
 class Carregar(ctk.CTkFrame):
     def __init__(self, parent, menu, app):
@@ -71,7 +118,7 @@ class Carregar(ctk.CTkFrame):
             criar_arquivo_coletar_padrao(caminho_pasta)
             criar_arquivo_processos(caminho_pasta)
             self.grid_forget()
-            self.app.alterar_tamanho("1200x800")
+            self.app.alterar_tamanho("1000x700")
 
             self.menu.grid(row=0, column=0, columnspan=3, sticky="nsew")  
             return df,caminho, caminho_pasta
@@ -140,11 +187,12 @@ class Registrar_cordenada(ctk.CTkFrame):
         botao2.grid(row=2, column=1, pady=(5, 600), padx=5, sticky="nsew")
 
 class Formatar_texto(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, check_list, app):
         super().__init__(parent)
 
         self.parent = parent
-        self.cordenadas = "cordenadas.json" # <<< isso aqui parecer se inutil
+        self.check_list = check_list
+        self.app = app
 
         
         self.grid_columnconfigure(0, weight=1)
@@ -202,7 +250,7 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_exibir_processos = ctk.CTkButton(self.frame_coluna2, text="Exibir Processos", command=self.organizar_exibir_processos, width=170)
         self.btn_exibir_processos.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")   
 
-        self.btn_check_list = ctk.CTkButton(self.frame_coluna2, width=170, text="Check List")
+        self.btn_check_list = ctk.CTkButton(self.frame_coluna2, width=170, text="Check List", command=self.tela_check_list)
         self.btn_check_list.grid(row=3, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
     def validar_entrada(self, nome_digitado, df_caminho, textarea, mensagem_vazia="Nenhum nome foi digitado.", mensagem_df_vazio="Nenhum dado encontrado."):
@@ -352,8 +400,10 @@ class Formatar_texto(ctk.CTkFrame):
             print(f"Erro em coletar dados {e}")
 
     def tela_check_list(self):
-        self.grid_forget()
-        self.menu.grid(row=0, column=0, columnspan=3, sticky="nsew")  
+        if not self.check_list:
+            self.check_list = Check_list(self)
+        self.check_list.deiconify()
+        
 
 
 

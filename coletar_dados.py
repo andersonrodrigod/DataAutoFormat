@@ -236,11 +236,14 @@ def save_info_assistente(caminho, cordenadas, caminho_coletar):
             "codigo": codigo,
             "tipo": palavra_processo,
             "data": data,
-            "hora": hora
+            "hora": hora,
+            "visto": False,
+            "verificar": False,
+            "resolvido": False
         }
 
         usuario_sheet = [
-            [nome, codigo, palavra_processo, data, hora]
+            [nome, codigo, palavra_processo, data, hora, False, False, False]
         ]
 
         dados.append(usuario)
