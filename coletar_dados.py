@@ -49,7 +49,7 @@ def tab_copy():
     time.sleep(0.5)
 
 def shift_tab():
-    py.press("shift", "tab")
+    py.hotkey("shift", "tab")
 
 def copy_click(x, y):
     py.click(x, y)

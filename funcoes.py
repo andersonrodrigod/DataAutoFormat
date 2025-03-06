@@ -3,6 +3,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 import tkinter as tk
 from planilhas import sheet_processos
+import pandas as pd
 
 def encontrar_palavra(palavras, info):
     for palavra in palavras:
@@ -33,9 +34,10 @@ def bottoes_processos(frame, dados, scrollable_frame):
         botao = ctk.CTkButton(
             frame,
             text=texto,
-            command=lambda t=texto: filtrar_nome_processos(dados, t, scrollable_frame)
+            command=lambda t=texto:  filtrar_nome_processos(dados, t, scrollable_frame)
         )
         botao.grid(row=0, column=i, padx=5, pady=5)
+
 
 def on_checkbox_click(index, tipo, checkbox_var, dados):
     dados[index][tipo] = checkbox_var.get()  # Atualiza o dado local
@@ -60,8 +62,8 @@ def salvar_alteracoes_sheet(dados, top_level_window):
                 'range': f'H{i}',  # Coluna 8 (H) para Resolvido
                 'values': [[pessoa['resolvido']]]
             })
-        
-        # Atualiza as células em massa com uma única requisição
+
+
         sheet_processos.batch_update(updates)
 
         top_level_window.lift()
@@ -72,7 +74,42 @@ def salvar_alteracoes_sheet(dados, top_level_window):
         messagebox.showerror("Erro", f"Ocorreu um erro ao salvar as alterações: {e}")
         top_level_window.lift()
 
+def filtrar_processos_resolvidos(dados):
+    df = pd.DataFrame(dados)  # Converte a lista de dicionários em DataFrame
+
+    if "resolvido" in df.columns:  # Verifica se a coluna existe
+        df["resolvido"] = df["resolvido"].astype(str).str.lower() == "true"
+        # Filtrando as linhas onde "resolvido" é True
+        df_filtrado = df[~df["resolvido"]]  # Exclui as linhas onde "resolvido" é True
+    else:
+        df_filtrado = pd.DataFrame()  # Retorna um DataFrame vazio se a coluna não existir
+    
+    # Obtém os nomes das linhas que precisam ser removidas (onde "resolvido" é True)
+    nomes_para_remover = df[df["resolvido"]]["nome"].tolist()
+
+    # Remover as linhas da planilha com base no nome
+    remover_linhas_por_nome(nomes_para_remover)
+    
+    # Verifica se existe algum processo resolvido
+    processos_resolvidos_existem = not df[df["resolvido"]].empty
+
+    return df_filtrado, processos_resolvidos_existem
+
+def remover_linhas_por_nome(nomes):
+    # Aqui você deve usar a API do Google Sheets para excluir as linhas
+    # Supondo que você tenha uma função para acessar a planilha com `sheet_processos`
+    
+    for nome in nomes:
+        # A função `find` pode ser usada para procurar pelo nome da linha na planilha
+        cell = sheet_processos.find(nome)
+        
+        if cell:
+            # Deletando a linha onde o nome foi encontrado
+            sheet_processos.delete_rows(cell.row)  # Deleta a linha inteira com base no número da linha
+
+
 def filtrar_nome_processos(dados, tipo, scrollable_frame):
+
 
     for widget in scrollable_frame.winfo_children():
         widget.destroy() 
@@ -81,7 +118,7 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame):
         dados_filtrados = dados  # Exibe todos os nomes
     else:
         dados_filtrados = [pessoa for pessoa in dados if pessoa["tipo"] == tipo]
-
+    
     for i, pessoa in enumerate(dados_filtrados):
         nome_entry = ctk.CTkEntry(scrollable_frame, width=320, font=("Arial", 14))
         nome_entry.insert(0, pessoa["nome"])

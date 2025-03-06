@@ -1,7 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_processos
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
-from funcoes import bottoes_processos, filtrar_nome_processos, salvar_alteracoes_sheet
+from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
 from tkinter import messagebox
@@ -46,43 +46,58 @@ class Check_list(ctk.CTkToplevel):
 
         self.parent.alterar_tamanho("1240x700")
 
-        botoes_frame = ctk.CTkFrame(self)#
-        botoes_frame.pack(pady=10, padx=20, fill="x")
+        self.botoes_frame = ctk.CTkFrame(self)#
+        self.botoes_frame.pack(pady=10, padx=20, fill="x")
 
-        scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=500)#
-        scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=500)#
+        self.scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
 
         self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
+
+        # Armazena o filtro atual
+        self.filtro_atual = "TODOS" 
 
         acoes_frame = ctk.CTkFrame(self)
         acoes_frame.pack(pady=10, padx=20, fill="x")
 
-        bottoes_processos(botoes_frame, self.dados, scrollable_frame)
-        filtrar_nome_processos(self.dados, "TODOS", scrollable_frame)
+        self.atualizar_interface()
 
-        confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=lambda: salvar_alteracoes_sheet(self.dados, self))
-        confirm_button.pack(side="left", padx=10, pady=10, expand=True, fill="x")
-
-        # Botão de Atualizar Dados
-        atualizar_button = ctk.CTkButton(acoes_frame, text="Atualizar Dados", command=lambda: self.atualizar_dados(botoes_frame, scrollable_frame))
-        atualizar_button.pack(side="left", padx=10, pady=10, expand=True, fill="x")
-
-
+        confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=self.confirmar_botao)
+        confirm_button.pack(pady=20)
 
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
     
-    def atualizar_dados(self, botoes_frame, scrollable_frame):
-        # Recarregar dados da planilha
-        self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
-        
-        # Atualiza os elementos na interface com os novos dados
-        bottoes_processos(botoes_frame, self.dados, scrollable_frame)
-        filtrar_nome_processos(self.dados, "TODOS", scrollable_frame)
-        messagebox.showinfo("Atualização", "Os dados foram atualizados com sucesso!")
-    
     def fechar_janela(self):
         self.withdraw()
+
+    def confirmar_botao(self):
+        # Salvar alterações
+        salvar_alteracoes_sheet(self.dados, self)
+
+        # Filtrar os dados resolvidos
+        df_filtrado, processos_resolvidos_existem = filtrar_processos_resolvidos(self.dados)
+
+        if processos_resolvidos_existem:
+            self.atualizar_interface()
+
+        # Atualizar a interface após salvar alterações e remover processos resolvidos
         
+
+    def atualizar_interface(self):
+        # Limpar o conteúdo do scrollable_frame
+        for widget in self.scrollable_frame.winfo_children():
+            widget.destroy()
+
+        # Atualizar os dados
+        self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
+
+        # Recriar os widgets de exibição com os dados atualizados
+        bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame)
+
+
+        
+
+    
 class Carregar(ctk.CTkFrame):
     def __init__(self, parent, menu, app):
         super().__init__(parent)
