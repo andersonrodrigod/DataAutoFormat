@@ -1,7 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_processos
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
-from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos
+from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos, executar_filtro
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
 from tkinter import messagebox
@@ -53,6 +53,7 @@ class Check_list(ctk.CTkToplevel):
         self.scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
 
         self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
+        
 
         # Armazena o filtro atual
         self.filtro_atual = "TODOS" 
@@ -61,6 +62,7 @@ class Check_list(ctk.CTkToplevel):
         acoes_frame.pack(pady=10, padx=20, fill="x")
 
         self.atualizar_interface()
+
 
         confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=self.confirmar_botao)
         confirm_button.pack(pady=20)
@@ -81,7 +83,7 @@ class Check_list(ctk.CTkToplevel):
             self.atualizar_interface()
 
         # Atualizar a interface após salvar alterações e remover processos resolvidos
-        
+        self.atualizar_interface()
 
     def atualizar_interface(self):
         # Limpar o conteúdo do scrollable_frame
@@ -93,6 +95,9 @@ class Check_list(ctk.CTkToplevel):
 
         # Recriar os widgets de exibição com os dados atualizados
         bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame)
+
+        
+
 
 
         

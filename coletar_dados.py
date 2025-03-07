@@ -8,7 +8,7 @@ from cordenadas import carregar_cordenada
 from palavras import todos_codigos, block_padrao, palavras_info_assistente, mapeamento_palavras_info_assistente
 from funcoes import encontrar_palavra, obter_palavra
 from datetime import datetime
-from planilhas import sheet_processos, sheet_coletar_dados
+from planilhas import sheet_processos, sheet_coletar_dados, carregar_dados_sheet_processos
 from pytz import timezone
 
 
@@ -33,28 +33,39 @@ def info_assistent():
 def info_medico():
     return pyperclip.paste()
 
+def garantir_copia():
+    """Verifica se há algo na área de transferência, se não houver, tenta copiar novamente."""
+    while not pyperclip.paste():
+        print("Área de transferência vazia. Tentando copiar novamente...")
+        copy()  # Chama novamente a função de cópia
+        time.sleep(0.3)
+
+def copy_vazio():
+    pyperclip.copy("")
+
 def copy():
     py.hotkey("ctrl", "c")
+    garantir_copia()
 
 def copy_tab():
-    time.sleep(0.5)
     py.hotkey("ctrl", "c")
     time.sleep(0.5)
     py.press("tab")
+    time.sleep(0.5)
 
 def tab_copy():
     py.press("tab")
     time.sleep(0.5)
     py.hotkey("ctrl", "c")
-    time.sleep(0.5)
+    garantir_copia()
 
 def shift_tab():
     py.hotkey("shift", "tab")
 
 def copy_click(x, y):
     py.click(x, y)
-    time.sleep(1)
     py.hotkey("ctrl", "c")
+    garantir_copia()
 
 def copy_tab_proc():
     time.sleep(0.5)
@@ -202,20 +213,42 @@ def save_info_assistente(caminho, cordenadas, caminho_coletar):
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente
 
+    copy_vazio()  
     copy()
 
     codigo = cod()
+    copy_vazio()
 
-    dados = carregar_dados(caminho)
+    dados = carregar_dados_sheet_processos()
 
     df = pd.DataFrame(dados)
 
     if not df.empty and codigo in df["codigo"].values:
-        py.press("down")
-        print("Codigo já está no banco de dados")
+         # Encontrar a linha do código na planilha
+        index = dados[dados["codigo"] == codigo].index[0]
+        tipo_atual = dados.at[index, "tipo"]
+
+        print(tipo_atual)
+        # Verifica se a palavra_processo é igual ao tipo existente
+        copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        info_assistente = info_assistent()
+
+        palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
+        palavra_processo = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
+
+        print(palavra_processo)
+
+        if tipo_atual != palavra_processo:
+            sheet_processos.update_cell(index + 2, 3, palavra_processo)
+            print("Código já está no banco de dados, tipo atualizado.")
+        else:
+            py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+            py.press("down")
+            print("Código já está no banco de dados e tipo já está correto.")
     else:
         copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         info_assistente = info_assistent()
+        copy_vazio()
 
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
         palavra_encontrada = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
@@ -251,9 +284,9 @@ def save_info_assistente(caminho, cordenadas, caminho_coletar):
             [nome, codigo, palavra_processo, data, hora, False, False, False]
         ]
 
-        dados.append(usuario)
+        #dados.append(usuario)
         sheet_processos.append_rows(usuario_sheet)
-        salvar_processo(caminho, dados)
+        #salvar_processo(caminho, dados)
 
         if palavra_processo == "SEM OBSERVACAO":
             save_data(caminho_coletar, cordenadas)

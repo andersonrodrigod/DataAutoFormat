@@ -28,47 +28,86 @@ def ajustar_nome_codigo(usuarios):
 
     return "\n".join(resultados)
     
+dados_filtrados_global = []
+
 def bottoes_processos(frame, dados, scrollable_frame):
     botoes = botoes_filtro
     for i, texto in enumerate(botoes):
         botao = ctk.CTkButton(
             frame,
             text=texto,
-            command=lambda t=texto:  filtrar_nome_processos(dados, t, scrollable_frame)
+            command=lambda t=texto:  executar_filtro(dados, t, scrollable_frame)
         )
         botao.grid(row=0, column=i, padx=5, pady=5)
+        
 
+def executar_filtro(dados, texto, scrollable_frame):
+    
+    
+    # Aqui chamamos a função filtrar_nome_processos com o filtro e dados
+    dados_filtrados = filtrar_nome_processos(dados, texto, scrollable_frame)
+
+    return dados_filtrados
+
+
+    
+
+alteracoes_checkboxes = {}
+
+print(alteracoes_checkboxes)
 
 def on_checkbox_click(index, tipo, checkbox_var, dados):
+    """
+    Função que é chamada quando um checkbox é alterado.
+    Atualiza o dado local e marca a alteração no dicionário `alteracoes_checkboxes`.
+    """
     dados[index][tipo] = checkbox_var.get()  # Atualiza o dado local
-    #print(f"Checkbox '{tipo}' da linha {index} clicado: {checkbox_var.get()}")
+    # Registra a alteração no dicionário
+    alteracoes_checkboxes[dados[index]["nome"]] = dados[index]
 
 def salvar_alteracoes_sheet(dados, top_level_window):
+    """
+    Função que salva as alterações no Google Sheets, enviando em batch update apenas os dados alterados.
+    """
     try:
+        # Filtra os dados alterados (apenas as pessoas que foram modificadas)
+        dados_alterados = [pessoa for pessoa in dados if pessoa["nome"] in alteracoes_checkboxes]
+
+        # Verifica se há dados para atualizar
+        if not dados_alterados:
+            messagebox.showinfo("Nenhuma alteração", "Não houve alterações para salvar.")
+            return
 
         updates = []
-        
-        # Prepara as atualizações em um formato adequado para batch_update
+
+        # Prepara as atualizações para os dados alterados
         for i, pessoa in enumerate(dados, start=2):  # Começa em 2 para não sobrescrever o cabeçalho
-            updates.append({
-                'range': f'F{i}',  # Coluna 6 (F) para Visto
-                'values': [[pessoa['visto']]]
-            })
-            updates.append({
-                'range': f'G{i}',  # Coluna 7 (G) para Verificar
-                'values': [[pessoa['verificar']]]
-            })
-            updates.append({
-                'range': f'H{i}',  # Coluna 8 (H) para Resolvido
-                'values': [[pessoa['resolvido']]]
-            })
+            if pessoa["nome"] in alteracoes_checkboxes:
+                updates.append({
+                    'range': f'F{i}',  # Coluna 6 (F) para Visto
+                    'values': [[pessoa['visto']]]
+                })
+                updates.append({
+                    'range': f'G{i}',  # Coluna 7 (G) para Verificar
+                    'values': [[pessoa['verificar']]]
+                })
+                updates.append({
+                    'range': f'H{i}',  # Coluna 8 (H) para Resolvido
+                    'values': [[pessoa['resolvido']]]
+                })
 
+        # Atualiza a planilha com as modificações
+        if updates:
+            sheet_processos.batch_update(updates)
 
-        sheet_processos.batch_update(updates)
+        # Limpa o dicionário de alterações
+        alteracoes_checkboxes.clear()
 
+        # Feedback para o usuário
         top_level_window.lift()
         messagebox.showinfo("Sucesso", "Alterações salvas com sucesso!")
         top_level_window.lift()
+
     except Exception as e:
         top_level_window.lift()
         messagebox.showerror("Erro", f"Ocorreu um erro ao salvar as alterações: {e}")
@@ -148,10 +187,10 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame):
             variable=resolvido_var,
             command=lambda idx=i, var=resolvido_var: on_checkbox_click(idx, "resolvido", var, dados_filtrados))
         resolvido_checkbox.grid(row=i, column=3, padx=10, pady=5)
-
+    
+    return tipo
 
    
-
 
 
 
