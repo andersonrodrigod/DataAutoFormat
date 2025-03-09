@@ -120,17 +120,15 @@ def filtrar_processos_resolvidos(dados):
         df["resolvido"] = df["resolvido"].astype(str).str.lower() == "true"
         # Filtrando as linhas onde "resolvido" é True
         df_filtrado = df[~df["resolvido"]]  # Exclui as linhas onde "resolvido" é True
-    else:
-        df_filtrado = pd.DataFrame()  # Retorna um DataFrame vazio se a coluna não existir
-    
-    # Obtém os nomes das linhas que precisam ser removidas (onde "resolvido" é True)
-    nomes_para_remover = df[df["resolvido"]]["nome"].tolist()
 
-    # Remover as linhas da planilha com base no nome
-    remover_linhas_por_nome(nomes_para_remover)
-    
-    # Verifica se existe algum processo resolvido
-    processos_resolvidos_existem = not df[df["resolvido"]].empty
+        if "nome" in df.columns:
+            nomes_para_remover = df[df["resolvido"]]["nome"].tolist()
+            remover_linhas_por_nome(nomes_para_remover)
+
+        processos_resolvidos_existem = not df[df["resolvido"]].empty
+    else:
+        df_filtrado = df  # Mantém o DataFrame original sem filtro
+        processos_resolvidos_existem = False  # Nenhum processo foi resolvido
 
     return df_filtrado, processos_resolvidos_existem
 

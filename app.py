@@ -62,10 +62,12 @@ class Check_list(ctk.CTkToplevel):
         acoes_frame.pack(pady=10, padx=20, fill="x")
 
         self.atualizar_interface()
-
-
+        
         confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=self.confirmar_botao)
-        confirm_button.pack(pady=20)
+        confirm_button.pack(side="left", padx=10, pady=20)
+
+        atualizar_button = ctk.CTkButton(acoes_frame, text="Atualizar", command=self.atualizar_interface)
+        atualizar_button.pack(side="left", padx=10, pady=20)
 
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
     

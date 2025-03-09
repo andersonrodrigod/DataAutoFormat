@@ -213,7 +213,6 @@ def save_info_assistente(caminho, cordenadas, caminho_coletar):
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente
 
-    copy_vazio()  
     copy()
 
     codigo = cod()
@@ -232,19 +231,22 @@ def save_info_assistente(caminho, cordenadas, caminho_coletar):
         # Verifica se a palavra_processo é igual ao tipo existente
         copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         info_assistente = info_assistent()
-
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
         palavra_processo = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
 
         print(palavra_processo)
 
-        if tipo_atual != palavra_processo:
-            sheet_processos.update_cell(index + 2, 3, palavra_processo)
-            print("Código já está no banco de dados, tipo atualizado.")
-        else:
+        if palavra_processo == tipo_atual:
             py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+            time.sleep(0.5)
             py.press("down")
-            print("Código já está no banco de dados e tipo já está correto.")
+            print("Código já está no banco de dados e tipo é o mesmo, apenas clicando.")
+        else:
+            sheet_processos.update_cell(index + 2, 3, palavra_processo)  # Atualiza a célula correspondente
+            py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+            time.sleep(0.5)
+            py.press("down")
+            print("Código já está no banco de dados, tipo atualizado.")
     else:
         copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         info_assistente = info_assistent()
