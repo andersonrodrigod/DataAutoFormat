@@ -45,7 +45,6 @@ def copy_vazio():
 
 def copy():
     py.hotkey("ctrl", "c")
-    garantir_copia()
 
 def copy_tab():
     py.hotkey("ctrl", "c")
@@ -214,6 +213,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente
 
     copy()
+    garantir_copia()
 
     codigo = cod()
     copy_vazio()
@@ -230,12 +230,14 @@ def save_info_assistente(cordenadas, caminho_coletar):
         print(tipo_atual)
         # Verifica se a palavra_processo é igual ao tipo existente
         copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        garantir_copia()
         info_assistente = info_assistent()
+        copy_vazio()
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
         palavra_processo = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
 
         if palavra_processo == tipo_atual:
-            py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+            py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)       
             time.sleep(0.5)
             py.press("down")
             print("Código já está no banco de dados e tipo é o mesmo, apenas clicando.")
@@ -247,6 +249,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
             print("Código já está no banco de dados, tipo atualizado.")
     else:
         copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        garantir_copia()
         info_assistente = info_assistent()
         copy_vazio()
 
@@ -259,7 +262,9 @@ def save_info_assistente(cordenadas, caminho_coletar):
         time.sleep(0.5)
 
         tab_copy()
+        garantir_copia()
         nome = name()
+        copy_vazio()
 
         shift_tab()
 
