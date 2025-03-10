@@ -1,7 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, criar_arquivo_processos
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
-from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos, executar_filtro
+from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
 from tkinter import messagebox
@@ -97,13 +97,6 @@ class Check_list(ctk.CTkToplevel):
 
         # Recriar os widgets de exibição com os dados atualizados
         bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame)
-
-        
-
-
-
-        
-
     
 class Carregar(ctk.CTkFrame):
     def __init__(self, parent, menu, app):
@@ -135,7 +128,6 @@ class Carregar(ctk.CTkFrame):
             criar_arquivo_cordenadas(caminho_pasta)
             criar_arquivo_erro(caminho_pasta)
             criar_arquivo_coletar_padrao(caminho_pasta)
-            criar_arquivo_processos(caminho_pasta)
             self.grid_forget()
             self.app.alterar_tamanho("1000x700")
 
@@ -326,8 +318,6 @@ class Formatar_texto(ctk.CTkFrame):
             self.textarea_texto.insert('0.0', "Nenhum dado encontrado")
     
     def organizar_exibir_processos(self):
-        #caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
-        #df_caminho = ler_arquivo(caminho_arquivo)
         df_sheet_processos = carregar_dados_sheet_processos()
 
         if df_sheet_processos.empty:
@@ -382,13 +372,12 @@ class Formatar_texto(ctk.CTkFrame):
 
     def coletar_info_assistente(self, quantidade):
         cordenada = f'{self.parent.caminho_pasta}/cordenadas.json'
-        caminho_filtrar_processo = f'{self.parent.caminho_pasta}/processos.json'
 
         try:
             time.sleep(2)
             caminho_coletar = self.parent.caminho
             for i in range(quantidade):
-                dados = save_info_assistente(caminho_filtrar_processo, cordenada, caminho_coletar)
+                dados = save_info_assistente(cordenada, caminho_coletar)
             
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")

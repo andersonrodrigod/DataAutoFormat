@@ -203,7 +203,7 @@ def salvar_processo(caminho, dados):
 
     print(f'Dado adicionado com sucesso!')
 
-def save_info_assistente(caminho, cordenadas, caminho_coletar):
+def save_info_assistente(cordenadas, caminho_coletar):
 
     processando_cordenadas = carregar_cordenada(cordenadas)
 
@@ -233,8 +233,6 @@ def save_info_assistente(caminho, cordenadas, caminho_coletar):
         info_assistente = info_assistent()
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
         palavra_processo = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
-
-        print(palavra_processo)
 
         if palavra_processo == tipo_atual:
             py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
@@ -270,17 +268,6 @@ def save_info_assistente(caminho, cordenadas, caminho_coletar):
 
         data = agora.strftime("%Y-%m-%d")
         hora = agora.strftime("%H:%M")
-
-        usuario = {
-            "nome": nome,
-            "codigo": codigo,
-            "tipo": palavra_processo,
-            "data": data,
-            "hora": hora,
-            "visto": False,
-            "verificar": False,
-            "resolvido": False
-        }
 
         usuario_sheet = [
             [nome, codigo, palavra_processo, data, hora, False, False, False]
