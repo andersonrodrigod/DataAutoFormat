@@ -90,7 +90,28 @@ def carregar_arquivo_json(caminho_arquivo=None):
         return None
     
 
+def atualizar_telas(caminho, janela_1, janela_2):
+    try:
+        with open(caminho, "r", encoding="utf-8") as file:
+            dados = json.load(file)
+
+        dados[0]["tela_amop"] = janela_1
+        dados[0]["tela_t22a3"] = janela_2
+
+
+        with open(caminho, "w", encoding="utf-8") as file:
+            json.dump(dados, file, indent=4, ensure_ascii=False)
+            
+        print("dados salvos com sucesso")
     
+    except Exception as e:
+        print(f"Erro ao Salvar os dados json {e}")
+
+
+
+
+
+
 
 
 

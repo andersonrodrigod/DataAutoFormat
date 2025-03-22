@@ -4,6 +4,7 @@ from tkinter import messagebox
 import tkinter as tk
 from planilhas import sheet_processos
 import pandas as pd
+import pywinctl
 
 def encontrar_palavra(palavras, info):
     for palavra in palavras:
@@ -49,12 +50,7 @@ def executar_filtro(dados, texto, scrollable_frame):
 
     return dados_filtrados
 
-
-    
-
 alteracoes_checkboxes = {}
-
-print(alteracoes_checkboxes)
 
 def on_checkbox_click(index, tipo, checkbox_var, dados):
     """
@@ -147,7 +143,6 @@ def remover_linhas_por_nome(nomes):
 
 def filtrar_nome_processos(dados, tipo, scrollable_frame):
 
-
     for widget in scrollable_frame.winfo_children():
         widget.destroy() 
 
@@ -192,6 +187,16 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame):
 
 
 
+def obter_telas():
+    nome = "janela"
+
+    janelas = []
+
+    for janela in pywinctl.getAllWindows():
+        if nome.lower() in janela.title.lower():
+            janelas.append(f'{janela.title}')
+
+    return "\n\n".join(janelas) if janelas else "Nenhuma janela encontrada."
 
 
 

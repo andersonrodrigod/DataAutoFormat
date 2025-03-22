@@ -1,7 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, atualizar_telas
 from coletar_dados import save_data, save_dados_padrao, save_info_assistente
-from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos
+from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos, obter_telas
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
 from tkinter import messagebox
@@ -22,9 +22,10 @@ class App(ctk.CTk):
         self.grid_columnconfigure((0, 1, 2), weight=1, uniform="cols")
         self.grid_rowconfigure(0, weight=1)
 
+        self.definir_telas = Definir_tela(self)
         self.check_list = Check_list(self)
         self.registrar_cordenada = Registrar_cordenada(self)
-        self.formatar_texto = Formatar_texto(self, self.check_list, self) 
+        self.formatar_texto = Formatar_texto(self, self.check_list, self.definir_telas, self) 
         self.menu = Menu(self, self.formatar_texto, self.registrar_cordenada) 
         self.carregar = Carregar(self, self.menu, self)
         #self.registrar_cordenada.grid(row=0, column=0, columnspan=3, sticky="nsew")
@@ -35,6 +36,47 @@ class App(ctk.CTk):
 
     def alterar_tamanho(self, novo_tamanho):
         self.geometry(novo_tamanho)
+
+
+class Definir_tela(ctk.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.parent = parent
+
+        self.parent.alterar_tamanho("800x600")
+
+        self.label_janela1 = ctk.CTkLabel(self, text="Janela 1")
+        self.label_janela1.pack(pady=10, padx=20)
+
+        self.entry_janela1 = ctk.CTkEntry(self, width=400)
+        self.entry_janela1.pack(pady=10, padx=20)
+
+        # Campo de entrada para Janela 2
+        self.label_janela2 = ctk.CTkLabel(self, text="Janela 2")
+        self.label_janela2.pack(pady=10, padx=20)
+
+        self.entry_janela2 = ctk.CTkEntry(self, width=400)
+        self.entry_janela2.pack(pady=10, padx=20)
+
+        # Botão Salvar
+        self.botao_salvar = ctk.CTkButton(self, text="Salvar", command=self.definir_janelas)
+        self.botao_salvar.pack(pady=20)
+
+        self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+    
+    def fechar_janela(self):
+        self.withdraw()
+
+    def definir_janelas(self):
+        nome_digitado_janela_1 = self.entry_janela1.get()
+        nome_digitado_janela_2 = self.entry_janela2.get()
+
+        cordenadas = f'{self.parent.caminho_pasta}/cordenadas.json'
+
+        atualizar_telas(cordenadas, nome_digitado_janela_1, nome_digitado_janela_2)
+
+
 
 class Check_list(ctk.CTkToplevel):
     def __init__(self, parent):#
@@ -197,11 +239,12 @@ class Registrar_cordenada(ctk.CTkFrame):
         botao2.grid(row=2, column=1, pady=(5, 600), padx=5, sticky="nsew")
 
 class Formatar_texto(ctk.CTkFrame):
-    def __init__(self, parent, check_list, app):
+    def __init__(self, parent, check_list, definir_telas, app):
         super().__init__(parent)
 
         self.parent = parent
         self.check_list = check_list
+        self.definir_telas = definir_telas
         self.app = app
 
         
@@ -262,6 +305,18 @@ class Formatar_texto(ctk.CTkFrame):
 
         self.btn_check_list = ctk.CTkButton(self.frame_coluna2, width=170, text="Check List", command=self.tela_check_list)
         self.btn_check_list.grid(row=3, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
+        self.btn_obter_janelas = ctk.CTkButton(self.frame_coluna2, width=170, text="Obter Janelas", command=self.mostrar_jenelas)
+        self.btn_obter_janelas.grid(row=4, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
+        self.btn_definir_telas = ctk.CTkButton(self.frame_coluna2, width=170, text="Definir telas", command=self.tela_definir_telas)
+        self.btn_definir_telas.grid(row=5, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
+    def mostrar_jenelas(self):
+        janelas = obter_telas()
+
+        self.textarea_texto.delete('0.0', "end")
+        self.textarea_texto.insert('0.0', janelas)
 
     def validar_entrada(self, nome_digitado, df_caminho, textarea, mensagem_vazia="Nenhum nome foi digitado.", mensagem_df_vazio="Nenhum dado encontrado."):
         """Verifica se o nome foi digitado e se o DataFrame está carregado corretamente."""
@@ -410,6 +465,11 @@ class Formatar_texto(ctk.CTkFrame):
         if not self.check_list:
             self.check_list = Check_list(self)
         self.check_list.deiconify()
+
+    def tela_definir_telas(self):
+        if not self.definir_telas:
+            self.definir_telas = Definir_tela(self)
+        self.definir_telas.deiconify()
         
 if __name__ == "__main__":
     app = App("DATAFORMAT", "1000x700")

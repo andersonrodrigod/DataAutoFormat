@@ -34,11 +34,22 @@ def info_medico():
     return pyperclip.paste()
 
 def garantir_copia():
-    """Verifica se há algo na área de transferência, se não houver, tenta copiar novamente."""
-    while not pyperclip.paste():
-        print("Área de transferência vazia. Tentando copiar novamente...")
+    """Verifica se há algo na área de transferência. Se não houver, tenta copiar novamente até 5 vezes.
+    Se falhar, pressiona Enter duas vezes e encerra a função.
+    """
+    tentativas = 0
+    while tentativas < 5:
+        if pyperclip.paste():
+            print("Texto copiado com sucesso!")
+            return  # Sai da função se a cópia for bem-sucedida
+        print(f"Tentativa {tentativas + 1}: Área de transferência vazia. Tentando copiar novamente...")
         copy()  # Chama novamente a função de cópia
         time.sleep(0.3)
+        tentativas += 1
+
+    print("Falha ao copiar. Pressionando Enter duas vezes...")
+    py.press('enter')
+    py.press('enter')
 
 def copy_vazio():
     pyperclip.copy("")
