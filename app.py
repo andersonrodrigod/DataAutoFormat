@@ -1,6 +1,6 @@
-from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados, atualizar_telas
-from coletar_dados import save_data, save_dados_padrao, save_info_assistente
+from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas
+from coletar_dados import save_data, save_info_assistente
 from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos, obter_telas
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
@@ -17,13 +17,16 @@ class App(ctk.CTk):
         self.df = None
         self.caminho = None
         self.caminho_pasta = None
+        
         #self.check_list = None 
         
         self.grid_columnconfigure((0, 1, 2), weight=1, uniform="cols")
         self.grid_rowconfigure(0, weight=1)
 
         self.definir_telas = Definir_tela(self)
+        self.definir_telas.withdraw()
         self.check_list = Check_list(self)
+        self.check_list.withdraw()
         self.registrar_cordenada = Registrar_cordenada(self)
         self.formatar_texto = Formatar_texto(self, self.check_list, self.definir_telas, self) 
         self.menu = Menu(self, self.formatar_texto, self.registrar_cordenada) 
@@ -75,8 +78,6 @@ class Definir_tela(ctk.CTkToplevel):
         cordenadas = f'{self.parent.caminho_pasta}/cordenadas.json'
 
         atualizar_telas(cordenadas, nome_digitado_janela_1, nome_digitado_janela_2)
-
-
 
 class Check_list(ctk.CTkToplevel):
     def __init__(self, parent):#
@@ -169,7 +170,6 @@ class Carregar(ctk.CTkFrame):
             self.app.caminho_pasta = caminho_pasta
             criar_arquivo_cordenadas(caminho_pasta)
             criar_arquivo_erro(caminho_pasta)
-            criar_arquivo_coletar_padrao(caminho_pasta)
             self.grid_forget()
             self.app.alterar_tamanho("1000x700")
 
@@ -284,21 +284,12 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_formatar_texto = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto", width=400, height=35, command=self.organizar_texto)
         self.btn_formatar_texto.grid(row=3, column=0, pady=(15, 0), padx=(10, 23), sticky="ew")
 
-        self.btn_formatar_texto_padrao = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto Padrão", width=400, height=35, command=self.organizar_texto_padrao)
-        self.btn_formatar_texto_padrao.grid(row=4, column=0, pady=(10, 0), padx=(10, 23), sticky="ew")
-
         self.btn_formatar_parecer = ctk.CTkButton(self.frame_coluna1, text="Formatar Parecer", width=400, height=35, command=self.organizar_parecer)
-        self.btn_formatar_parecer.grid(row=5, column=0, pady=(10, 10), padx=(10, 23), sticky="ew")
+        self.btn_formatar_parecer.grid(row=4, column=0, pady=(10, 10), padx=(10, 23), sticky="ew")
 
         # ==== Coluna 2 (com Frame para Botões) ====
         self.frame_coluna2 = ctk.CTkFrame(self)
         self.frame_coluna2.grid(row=0, column=2, padx=(5, 5), pady=10, sticky="nsew")
-
-        self.btn_coletar_padrão = ctk.CTkButton(self.frame_coluna2, text="Coletar Padrão", command=lambda: self.quantidade_coletar_dados("padrão"), width=170)
-        self.btn_coletar_padrão.grid(row=0, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
-
-        self.btn_exibir_coletar_padrao = ctk.CTkButton(self.frame_coluna2, text="Exibir Pacientes Padrão", command=self.organizar_nome_usuario, width=170)
-        self.btn_exibir_coletar_padrao.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
         self.btn_exibir_processos = ctk.CTkButton(self.frame_coluna2, text="Exibir Processos", command=self.organizar_exibir_processos, width=170)
         self.btn_exibir_processos.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")   
@@ -346,21 +337,6 @@ class Formatar_texto(ctk.CTkFrame):
         else:
             print("nenhum dado carregado")
 
-    def organizar_texto_padrao(self):
-        nome_digitado = self.input_nome.get()
-        caminho_arquivo = f'{self.parent.caminho_pasta}/dados_coletados_padrao.json'
-        df_caminho = ler_arquivo(caminho_arquivo)
-
-        if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
-            return
-
-        if df_caminho is not None:
-            resultado = processar_dado_padrao_por_nome(df_caminho, nome_digitado)
-            self.textarea_texto.delete('0.0', 'end')
-            self.textarea_texto.insert('0.0', f'{resultado}')
-        else:
-            print("nenhum dado carregado")
-
     def organizar_nome_usuario(self):
         caminho_arquivo = f"{self.parent.caminho_pasta}/dados_coletados_padrao.json"
         df_caminho = ler_arquivo(caminho_arquivo)
@@ -383,7 +359,6 @@ class Formatar_texto(ctk.CTkFrame):
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
             
-
     def quantidade_coletar_dados(self, tipo):
         dialog = ctk.CTkInputDialog(title="Número de Coletas", text="Digite o número de coletas")
         try:
@@ -398,8 +373,6 @@ class Formatar_texto(ctk.CTkFrame):
             
             if tipo == "dados": 
                 self.coletar_dados(quantidade)
-            elif tipo == "padrão":
-                self.coletar_dados_padrao(quantidade)
             elif tipo == "assistente":
                 self.coletar_info_assistente(quantidade)
 
@@ -413,15 +386,6 @@ class Formatar_texto(ctk.CTkFrame):
             for i in range(quantidade):
                 dados = save_data(caminho, cordenada)
 
-        except Exception as e:
-            print(f"Erro em coletar_dados: {e}")
-
-    def coletar_dados_padrao(self, quantidade):
-        cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
-        caminho_coletar_padrao = f"{self.parent.caminho_pasta}/dados_coletados_padrao.json"
-        try:
-            for i in range(quantidade):
-                dados = save_dados_padrao(caminho_coletar_padrao, cordenada)
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")
 
@@ -469,8 +433,8 @@ class Formatar_texto(ctk.CTkFrame):
     def tela_definir_telas(self):
         if not self.definir_telas:
             self.definir_telas = Definir_tela(self)
-        self.definir_telas.deiconify()
-        
+        self.definir_telas.deiconify() 
+
 if __name__ == "__main__":
     app = App("DATAFORMAT", "1000x700")
     app.mainloop()

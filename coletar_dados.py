@@ -173,35 +173,6 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         traceback.print_exc()
         raise
 
-def save_dados_padrao(caminho_coletar_padrao, cordernadas):
-    
-    processando_cordenadas = carregar_cordenada(cordernadas)
-
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
-
-    cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente 
-
-    cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
-
-    cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y = cordenada_codigo_procedimento
-
-    copy_tab_proc()
-    codigo_procedimento = cod_proc()
-    if codigo_procedimento in todos_codigos:
-        copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
-        info_assistente = info_assistent()
-        if not any(item in info_assistente for item in block_padrao):
-            py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-            time.sleep(0.5)
-            save_data(caminho_coletar_padrao, cordernadas)
-            py.click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
-            time.sleep(0.5)
-        else:
-            py.click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
-            py.press("down")
-    else:
-        py.press("down")
-
 def carregar_dados(caminho):
     with open(caminho, "r", encoding="utf-8") as f:
         dados = json.load(f)
@@ -296,4 +267,5 @@ def save_info_assistente(cordenadas, caminho_coletar):
         if palavra_processo == "SEM OBSERVACAO":
             save_data(caminho_coletar, cordenadas)
 
-    
+def save_info_contato(cordenadas):
+    processando_cordenadas = carregar_cordenada(cordenadas)

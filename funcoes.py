@@ -183,12 +183,8 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame):
     
     return tipo
 
-   
-
-
-
 def obter_telas():
-    nome = "janela"
+    nome = "DATA"
 
     janelas = []
 
@@ -199,7 +195,22 @@ def obter_telas():
     return "\n\n".join(janelas) if janelas else "Nenhuma janela encontrada."
 
 
+"""
+def obter_telas():
+    janelas = []
 
+    # Itera sobre todas as janelas abertas
+    for janela in pywinctl.getAllWindows():
+        # Remove espaços extras do título da janela
+        titulo = janela.title.strip()
+        
+        # Ignora janelas com títulos vazios ou irrelevantes
+        if titulo and titulo != "": 
+            janelas.append(titulo)
+
+    # Retorna as janelas abertas ou uma mensagem caso nenhuma janela tenha sido encontrada
+    return "\n".join(janelas) if janelas else "Nenhuma janela encontrada."
+"""
 
 
 

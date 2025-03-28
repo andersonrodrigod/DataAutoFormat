@@ -33,12 +33,6 @@ def criar_arquivo_erro(caminho_pasta):
         df.to_json("erro.json", orient="records", indent=4)
         print("arquivo criado com sucesso")
 
-def criar_arquivo_coletar_padrao(caminho_pasta):
-    if caminho_pasta and not os.path.exists(caminho_pasta + "/dados_coletados_padrao.json"):
-        df = pd.DataFrame()
-        df.to_json("dados_coletados_padrao.json", orient="records", indent=4)
-        print("arquivo criado com sucesso")
-
 def ler_arquivo(arquivo):
     return pd.read_json(arquivo)
 
