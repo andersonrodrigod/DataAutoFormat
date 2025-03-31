@@ -1,18 +1,15 @@
-import pywinctl
+import pygetwindow as gw
+import pyautogui
+import time
 
-def listar_janelas():
-    try:
-        # Obtém todas as janelas abertas
-        janelas = pywinctl.getAllWindows()
-        
-        if janelas:
-            print("Janelas abertas:")
-            for janela in janelas:
-                print(janela.title)
-        else:
-            print("Nenhuma janela aberta encontrada.")
-    except Exception as e:
-        print(f'Ocorreu um erro: {e}')
+def focar_janela(titulo):
+    janela = gw.getWindowsWithTitle(titulo)
+    
+    if janela:
+        janela[0].activate()  # Ativa a janela encontrada
+    else:
+        print(f"Janela com título '{titulo}' não encontrada.")
 
-# Teste para listar todas as janelas abertas
-listar_janelas()
+# Exemplo de uso
+time.sleep(2)  # Dá tempo para a janela ser aberta antes de ativar
+focar_janela("Bloco de Notas")  # Substitua pelo título da sua janela

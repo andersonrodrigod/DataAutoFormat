@@ -140,7 +140,6 @@ def remover_linhas_por_nome(nomes):
             # Deletando a linha onde o nome foi encontrado
             sheet_processos.delete_rows(cell.row)  # Deleta a linha inteira com base no número da linha
 
-
 def filtrar_nome_processos(dados, tipo, scrollable_frame):
 
     for widget in scrollable_frame.winfo_children():
@@ -211,6 +210,23 @@ def obter_telas():
     # Retorna as janelas abertas ou uma mensagem caso nenhuma janela tenha sido encontrada
     return "\n".join(janelas) if janelas else "Nenhuma janela encontrada."
 """
+
+
+def verificador_telas(caminho):
+    df = pd.read_json(caminho)
+    cordernadas = df[["tela_amop", "tela_t22a3"]]
+
+    
+
+    if (cordernadas == "").any().any():
+        execut = False
+        print("As telas não foram definidas")
+    else:
+        execut = True
+        print("execução foi um sucesso")
+
+    return execut
+
 
 
 

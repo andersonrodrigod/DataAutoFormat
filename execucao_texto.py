@@ -100,10 +100,6 @@ def exibir_processos(df):
     # Retorna o resultado final
     return resultado
 
-
-
-    
-
 def processar_dado_padrao_por_nome(df, nome):
     bf = filtrar_nome(df, nome) 
 
@@ -118,7 +114,13 @@ def processar_dado_padrao_por_nome(df, nome):
         texto_codigo_procedimento = definir_texto_procedimento(codigo_procedimento)
         return f"{texto_nome_formatado}{texto_procedimento_formatado}{texto_codigo_procedimento}{texto_obs()}"
     
+def exibir_info_medico(df, nome):
+    bf = filtrar_nome(df, nome)
 
+    texto_info_medico = str(bf["info_medico"].iloc[0])
+
+    if not bf.empty:
+        return texto_info_medico
 
         
 

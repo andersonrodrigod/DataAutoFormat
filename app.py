@@ -1,7 +1,7 @@
-from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos
+from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos, exibir_info_medico
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas
-from coletar_dados import save_data, save_info_assistente
-from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos, obter_telas
+from coletar_dados import save_data, save_info_assistente, save_data_dois
+from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos, obter_telas, verificador_telas
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
 from tkinter import messagebox
@@ -17,18 +17,26 @@ class App(ctk.CTk):
         self.df = None
         self.caminho = None
         self.caminho_pasta = None
+        self.nome = None
         
-        #self.check_list = None 
         
         self.grid_columnconfigure((0, 1, 2), weight=1, uniform="cols")
         self.grid_rowconfigure(0, weight=1)
 
-        self.definir_telas = Definir_tela(self)
-        self.definir_telas.withdraw()
         self.check_list = Check_list(self)
         self.check_list.withdraw()
+        self.definir_telas = Definir_tela(self)
+        self.definir_telas.withdraw()
+        self.editar_dados = Editar_dados(self)
+        self.editar_dados.withdraw()
+    
+
+        self.formatar_texto = Formatar_texto(self, self.check_list, self.definir_telas, self.editar_dados, self) 
+
+        self.editar_dados = Editar_dados(self)
+        self.editar_dados.withdraw()
+
         self.registrar_cordenada = Registrar_cordenada(self)
-        self.formatar_texto = Formatar_texto(self, self.check_list, self.definir_telas, self) 
         self.menu = Menu(self, self.formatar_texto, self.registrar_cordenada) 
         self.carregar = Carregar(self, self.menu, self)
         #self.registrar_cordenada.grid(row=0, column=0, columnspan=3, sticky="nsew")
@@ -40,6 +48,59 @@ class App(ctk.CTk):
     def alterar_tamanho(self, novo_tamanho):
         self.geometry(novo_tamanho)
 
+class Editar_dados(ctk.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.parent = parent
+
+        nome = self.parent.nome if self.parent.nome else ""
+ 
+        self.title("Editar Dados")
+        self.geometry("450x350") 
+        
+        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame.pack(pady=20, padx=20, fill="both", expand=True)
+        
+        self.label_nome = ctk.CTkLabel(self.main_frame, text="Nome:")
+        self.label_nome.pack(pady=(0, 5), anchor="w")
+        
+        self.entry_nome = ctk.CTkEntry(self.main_frame, width=400)
+        self.entry_nome.pack(pady=(0, 10))
+
+        self.label_texto = ctk.CTkLabel(self.main_frame, text="Informações:")
+        self.label_texto.pack(pady=(0, 5), anchor="w")
+        
+        self.textarea = ctk.CTkTextbox(self.main_frame, width=400, height=150)
+        self.textarea.pack(pady=(0, 15))
+
+        self.btn_editar = ctk.CTkButton(
+            self.main_frame, 
+            text="Editar",
+            command=self.editar_dados
+        )
+        self.btn_editar.pack()
+        
+        self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+
+    def editar_dados(self):
+        caminho_arquivo = self.parent.caminho  # Obtém o caminho do arquivo JSON
+        df = ler_arquivo(caminho_arquivo)  # Lê o JSON e transforma em DataFrame
+
+        nome = self.entry_nome.get()  # Obtém o nome
+        novo_texto = self.textarea.get("1.0", "end-1c")  # Obtém o novo valor
+
+        # Atualiza o campo "info_medico" para o nome correspondente
+        df.loc[df["nome"] == nome, "info_medico"] = novo_texto
+
+        # Salva de volta no JSON
+        df.to_json(caminho_arquivo, orient="records", indent=4, force_ascii=False)
+
+        print(f"Dados editados com sucesso - Nome: {nome}, Novo Texto: {novo_texto}")
+
+    def fechar_janela(self):
+        self.withdraw()
+
 
 class Definir_tela(ctk.CTkToplevel):
     def __init__(self, parent):
@@ -47,7 +108,7 @@ class Definir_tela(ctk.CTkToplevel):
 
         self.parent = parent
 
-        self.parent.alterar_tamanho("800x600")
+        self.parent.alterar_tamanho("800x600") # # não funciona em top level
 
         self.label_janela1 = ctk.CTkLabel(self, text="Janela 1")
         self.label_janela1.pack(pady=10, padx=20)
@@ -87,7 +148,7 @@ class Check_list(ctk.CTkToplevel):
 
         self.parent = parent
 
-        self.parent.alterar_tamanho("1240x700")
+        self.parent.alterar_tamanho("1240x700") # não funciona em top level
 
         self.botoes_frame = ctk.CTkFrame(self)#
         self.botoes_frame.pack(pady=10, padx=20, fill="x")
@@ -148,6 +209,8 @@ class Carregar(ctk.CTkFrame):
         self.menu = menu 
         self.app = app 
 
+        self.app.alterar_tamanho("1240x700")
+
         self.grid_columnconfigure(0, weight=1, minsize=330)
         self.grid_columnconfigure(1, weight=1, minsize=330)
         self.grid_columnconfigure(2, weight=1, minsize=330)
@@ -172,7 +235,7 @@ class Carregar(ctk.CTkFrame):
             criar_arquivo_erro(caminho_pasta)
             self.grid_forget()
             self.app.alterar_tamanho("1000x700")
-
+    
             self.menu.grid(row=0, column=0, columnspan=3, sticky="nsew")  
             return df,caminho, caminho_pasta
         else:
@@ -239,12 +302,13 @@ class Registrar_cordenada(ctk.CTkFrame):
         botao2.grid(row=2, column=1, pady=(5, 600), padx=5, sticky="nsew")
 
 class Formatar_texto(ctk.CTkFrame):
-    def __init__(self, parent, check_list, definir_telas, app):
+    def __init__(self, parent, check_list, definir_telas, editar_dados, app):
         super().__init__(parent)
 
         self.parent = parent
         self.check_list = check_list
         self.definir_telas = definir_telas
+        self.editar_dados = editar_dados
         self.app = app
 
         
@@ -265,6 +329,9 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_enviar_erro = ctk.CTkButton(self.frame_coluna0, text="Enviar Erro", command=self.enviar_erro, width=170)
         self.btn_enviar_erro.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
+        self.btn_coletar_dados_teste = ctk.CTkButton(self.frame_coluna0, text="Coletar Dados 2", command=self.coletar_dois, width=170)
+        self.btn_coletar_dados_teste.grid(row=3, column=0, pady=(5, 5), padx=(10, 10), sticky="w")        
+
         # ==== Coluna 1 (com Frame para Botões) ====
         self.frame_coluna1 = ctk.CTkFrame(self)
         self.frame_coluna1.grid(row=0, column=1, padx=(5, 5), pady=10, sticky="nsew")
@@ -284,8 +351,11 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_formatar_texto = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto", width=400, height=35, command=self.organizar_texto)
         self.btn_formatar_texto.grid(row=3, column=0, pady=(15, 0), padx=(10, 23), sticky="ew")
 
+        self.btn_editar_texto = ctk.CTkButton(self.frame_coluna1, text="Editar", width=400, height=35, command=self.tela_editar_dados)
+        self.btn_editar_texto.grid(row=4, column=0, pady=(10, 0), padx=(10, 23), sticky="ew")
+
         self.btn_formatar_parecer = ctk.CTkButton(self.frame_coluna1, text="Formatar Parecer", width=400, height=35, command=self.organizar_parecer)
-        self.btn_formatar_parecer.grid(row=4, column=0, pady=(10, 10), padx=(10, 23), sticky="ew")
+        self.btn_formatar_parecer.grid(row=5, column=0, pady=(10, 10), padx=(10, 23), sticky="ew")
 
         # ==== Coluna 2 (com Frame para Botões) ====
         self.frame_coluna2 = ctk.CTkFrame(self)
@@ -303,25 +373,121 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_definir_telas = ctk.CTkButton(self.frame_coluna2, width=170, text="Definir telas", command=self.tela_definir_telas)
         self.btn_definir_telas.grid(row=5, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
-    def mostrar_jenelas(self):
-        janelas = obter_telas()
+    
+    def tela_editar_dados(self):
+        self.app.nome = self.input_nome.get()
+        caminho_arquivo = ler_arquivo(self.parent.caminho)
 
-        self.textarea_texto.delete('0.0', "end")
-        self.textarea_texto.insert('0.0', janelas)
+        # Validação dos dados antes de continuar
+        if not self.validar_entrada_editar(self.app.nome, caminho_arquivo):
+            return  
 
-    def validar_entrada(self, nome_digitado, df_caminho, textarea, mensagem_vazia="Nenhum nome foi digitado.", mensagem_df_vazio="Nenhum dado encontrado."):
-        """Verifica se o nome foi digitado e se o DataFrame está carregado corretamente."""
-        if not nome_digitado:
-            mensagem = mensagem_vazia
-        elif df_caminho is None or df_caminho.empty:
-            mensagem = mensagem_df_vazio
+        # Obtém as informações do médico
+        info_medico = exibir_info_medico(caminho_arquivo, self.app.nome)
+
+        # Criar ou atualizar a janela de edição
+        if not self.editar_dados:
+            self.editar_dados = Editar_dados(self.app)
         else:
-            return True  # Indica que os dados são válidos
+            self.editar_dados.entry_nome.configure(state="normal")
+            self.editar_dados.entry_nome.delete(0, "end")  
+            self.editar_dados.entry_nome.insert(0, self.app.nome)  
+            self.editar_dados.textarea.delete("1.0", "end")  
+            self.editar_dados.textarea.insert("1.0", info_medico) 
+            self.editar_dados.entry_nome.configure(state="readonly")  
 
-        textarea.delete('0.0', 'end')
-        textarea.insert('0.0', mensagem)
-        return False  
-  
+        self.editar_dados.deiconify()
+
+    def coletar_dois(self):
+        cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
+        execut = verificador_telas(cordenada)
+        if execut == True:
+            self.quantidade_coletar_dados("dados 2")
+        else:
+            messagebox.showerror("Erro", "Por favor, Defina as talas antes de executar a coleta.")
+
+    def quantidade_coletar_dados(self, tipo):
+        cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
+        if tipo == "dados 2":
+            verificador_telas(cordenada)
+        dialog = ctk.CTkInputDialog(title="Número de Coletas", text="Digite o número de coletas")
+        try:
+            quantidade_str = dialog.get_input()
+            if quantidade_str is None or quantidade_str.strip() == "":
+                raise ValueError("Nenhum valor foi inserido")
+
+            quantidade = int(quantidade_str)
+
+            if quantidade <= 0:
+                raise ValueError("O número deve ser maior que zero")
+            
+            if tipo == "dados": 
+                self.coletar_dados(quantidade)
+            elif tipo == "dados 2":
+                self.coletar_dados_dois(quantidade)
+            elif tipo == "assistente":
+                self.coletar_info_assistente(quantidade)
+
+        except (ValueError, TypeError):
+            messagebox.showerror("Erro", "Por favor, insira um número inteiro válido.")
+
+    def coletar_dados(self, quantidade):
+        cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
+        resultado = verificador_telas(cordenada)
+        print(resultado)
+        try:
+            caminho = self.parent.caminho
+            for i in range(quantidade):
+                dados = save_data(caminho, cordenada)
+
+        except Exception as e:
+            print(f"Erro em coletar_dados: {e}")
+
+    def coletar_dados_dois(self, quantidade):
+        cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
+        try:
+            caminho = self.parent.caminho
+            for i in range(quantidade):
+                dados = save_data_dois(caminho, cordenada)
+
+        except Exception as e:
+            print(f"Erro em coletar_dados: {e}")
+
+    def coletar_info_assistente(self, quantidade):
+        cordenada = f'{self.parent.caminho_pasta}/cordenadas.json'
+
+        try:
+            time.sleep(2)
+            caminho_coletar = self.parent.caminho
+            for i in range(quantidade):
+                dados = save_info_assistente(cordenada, caminho_coletar)
+            
+        except Exception as e:
+            print(f"Erro em coletar_dados: {e}")
+
+    def enviar_erro(self):
+        df_caminho = ler_arquivo(self.parent.caminho)
+        pasta_caminho = f"{self.parent.caminho_pasta}/erro.json"
+        nome_digitado = self.input_nome.get()
+        try:
+            if nome_digitado:
+                df_nome = filtrar_nome(df_caminho, nome_digitado)
+                df_dados = df_nome.to_dict(orient="records")
+                salvar_dados(df_dados, pasta_caminho)
+                
+        except Exception as e:
+            print(f"Erro em coletar dados {e}")
+
+    def tela_check_list(self):
+        if not self.check_list:
+            self.check_list = Check_list(self)
+        self.check_list.deiconify()
+
+    def tela_definir_telas(self):
+        if not self.definir_telas:
+            self.definir_telas = Definir_tela(self)
+        self.definir_telas.deiconify() 
+
     def organizar_texto(self):
         nome_digitado = self.input_nome.get()
         df_caminho = ler_arquivo(self.parent.caminho)
@@ -329,7 +495,6 @@ class Formatar_texto(ctk.CTkFrame):
         if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
             return
     
-
         if df_caminho is not None:
             resultado = processar_dados_por_nome(df_caminho, nome_digitado)
             self.textarea_texto.delete('0.0', 'end')
@@ -358,48 +523,6 @@ class Formatar_texto(ctk.CTkFrame):
             resultado = exibir_processos(df_sheet_processos)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
-            
-    def quantidade_coletar_dados(self, tipo):
-        dialog = ctk.CTkInputDialog(title="Número de Coletas", text="Digite o número de coletas")
-        try:
-            quantidade_str = dialog.get_input()
-            if quantidade_str is None or quantidade_str.strip() == "":
-                raise ValueError("Nenhum valor foi inserido")
-
-            quantidade = int(quantidade_str)
-
-            if quantidade <= 0:
-                raise ValueError("O número deve ser maior que zero")
-            
-            if tipo == "dados": 
-                self.coletar_dados(quantidade)
-            elif tipo == "assistente":
-                self.coletar_info_assistente(quantidade)
-
-        except (ValueError, TypeError):
-            messagebox.showerror("Erro", "Por favor, insira um número inteiro válido.")
-
-    def coletar_dados(self, quantidade):
-        cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
-        try:
-            caminho = self.parent.caminho
-            for i in range(quantidade):
-                dados = save_data(caminho, cordenada)
-
-        except Exception as e:
-            print(f"Erro em coletar_dados: {e}")
-
-    def coletar_info_assistente(self, quantidade):
-        cordenada = f'{self.parent.caminho_pasta}/cordenadas.json'
-
-        try:
-            time.sleep(2)
-            caminho_coletar = self.parent.caminho
-            for i in range(quantidade):
-                dados = save_info_assistente(cordenada, caminho_coletar)
-            
-        except Exception as e:
-            print(f"Erro em coletar_dados: {e}")
 
     def organizar_parecer(self):
         nome_digitado = self.input_nome.get()
@@ -412,28 +535,45 @@ class Formatar_texto(ctk.CTkFrame):
         else:
             print("nenhum dado carregado")
 
-    def enviar_erro(self):
-        df_caminho = ler_arquivo(self.parent.caminho)
-        pasta_caminho = f"{self.parent.caminho_pasta}/erro.json"
-        nome_digitado = self.input_nome.get()
-        try:
-            if nome_digitado:
-                df_nome = filtrar_nome(df_caminho, nome_digitado)
-                df_dados = df_nome.to_dict(orient="records")
-                salvar_dados(df_dados, pasta_caminho)
-                
-        except Exception as e:
-            print(f"Erro em coletar dados {e}")
+    def mostrar_jenelas(self):
+        janelas = obter_telas()
 
-    def tela_check_list(self):
-        if not self.check_list:
-            self.check_list = Check_list(self)
-        self.check_list.deiconify()
+        self.textarea_texto.delete('0.0', "end")
+        self.textarea_texto.insert('0.0', janelas)
 
-    def tela_definir_telas(self):
-        if not self.definir_telas:
-            self.definir_telas = Definir_tela(self)
-        self.definir_telas.deiconify() 
+    def validar_entrada_editar(self, nome, df):
+    
+        if not nome:
+            messagebox.showwarning("Aviso", "Nenhum nome foi digitado.")
+            return False
+
+        if df is None or df.empty:
+            messagebox.showwarning("Aviso", "Nenhum dado encontrado no arquivo.")
+            return False
+
+        if "nome" not in df.columns:
+            messagebox.showwarning("Erro", "A coluna 'nome' não foi encontrada no arquivo.")
+            return False
+
+        if not (df["nome"] == nome).any():
+            messagebox.showwarning("Aviso", "Nome não encontrado no arquivo.")
+            return False
+
+        return True 
+
+    def validar_entrada(self, nome_digitado, df_caminho, textarea, mensagem_vazia="Nenhum nome foi digitado.", mensagem_df_vazio="Nenhum dado encontrado."):
+
+        if not nome_digitado:
+            mensagem = mensagem_vazia
+        elif df_caminho is None or df_caminho.empty:
+            mensagem = mensagem_df_vazio
+        else:
+            return True 
+
+        textarea.delete('0.0', 'end')
+        textarea.insert('0.0', mensagem)
+        return False  
+
 
 if __name__ == "__main__":
     app = App("DATAFORMAT", "1000x700")

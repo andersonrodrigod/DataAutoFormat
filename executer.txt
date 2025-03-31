@@ -4,5 +4,4 @@ pyinstaller --onefile --add-data "coletar_dados.py;." --add-data "cordenadas.py;
 
 resetar branch
 
-git reset --hard test
-git push origin master --force
+git reset --hard origin/master_sheet
