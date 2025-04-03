@@ -1,0 +1,3 @@
+https://chatgpt.com/share/67c3957c-7ea0-8011-85ab-0579187d5c6f
+
+seria melhor criar um copy click para somente os cliques em info_assistente e info_medico pois ao clicar nesses campos e vier o texto vazio ele continua normalmente e depois criar um forma de copy para os tabs e caso venha vazio devo encontrar uma forma apertar enter pra continuar o codigo ao mostrar aquele erro ou melhor aumentar 0.3 segundos em cada tab para evitar que o sistema bug

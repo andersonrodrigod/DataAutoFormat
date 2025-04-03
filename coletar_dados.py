@@ -120,7 +120,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
     processando_cordenadas = carregar_cordenada(cordenadas_caminho)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
     
@@ -139,7 +139,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         nome = name()
 
         for _ in range(3):
-            time.sleep(0.2)
+            time.sleep(0.3)
             py.press("tab")
 
         copy_tab()
@@ -188,7 +188,6 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         import traceback
         traceback.print_exc()
         raise
-
 
 def save_telefones(telefone_1x, telefone_1y, telefone_2x, telefone_2y, telefone_3x, telefone_3y, telefone_baixo_x, telefone_baixo_y):
 

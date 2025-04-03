@@ -147,13 +147,13 @@ def formatar_texto(nome, procedimento, solicitacao, questionamento, consulta_pla
         resultado.append(f'É sobre o procedimento que foi dado entrada *{procedimento}*\n\n')
 
     if solicitacao:
-        resultado.append(f'A auditoria está solicitando: *{solicitacao}* para dar continuidade a análise do procedimento.\n\n')
+        resultado.append(f'A análise está solicitando: *{solicitacao}* para dar continuidade a análise do procedimento.\n\n')
 
     if questionamento:
-        resultado.append(f'A auditoria questiona se: *{questionamento}?*\n\n')
+        resultado.append(f'A análise questiona se: *{questionamento}?*\n\n')
     
     if consulta_plano:
-        resultado.append(f'A auditoria questiona se: *{consulta_plano}?*\n\n')
+        resultado.append(f'A análise questiona se: *{consulta_plano}?*\n\n')
 
     if solicitacao:
         resultado.append("*Obs:* Gentileza enviar a foto legível (através deste whatsapp) A foto precisa ser da folha inteira e sem cortar nenhuma informação.\n\n")
@@ -221,19 +221,19 @@ def texto_obs():
     return f'\n\n*Obs:* Gentileza enviar a foto legível (através deste whatsapp) A foto precisa ser da folha inteira e sem cortar nenhuma informação.\n\n'
 
 def texto_angio_tc():
-    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *RESSONÂNCIA CARDIACA*\n- *CINTILO MIOCARDIO*\n- *TESTE ERGOMETRICO*\n- *ECOCARDIOGRAMA COM ESTRESSE FARMACOLOGICO*\n- *CATETERISMO*\n\nPoderia nos enviar por aqui os exames realizados?\n\nSeu endereço permanece o mesmo do sistema?'
+    return f'A análise está solicitando o resultado dos seguintes exames:\n\n- *RESSONÂNCIA CARDIACA*\n- *CINTILO MIOCARDIO*\n- *TESTE ERGOMETRICO*\n- *ECOCARDIOGRAMA COM ESTRESSE FARMACOLOGICO*\n- *CATETERISMO*\n\nPoderia nos enviar por aqui os exames realizados?\n\nSeu endereço permanece o mesmo do sistema?'
 
 def texto_otorrino():
-    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *NASOFIBROLARINGOSCOPIA (LAUDO E IMAGENS)*\n- *TOMOGRAFIA DA FACE (LAUDO E IMAGENS)*\n- *RAIO X CAVUM*\n\nPoderia nos enviar por aqui os exames realizados?'
+    return f'A análise está solicitando o resultado dos seguintes exames:\n\n- *NASOFIBROLARINGOSCOPIA (LAUDO E IMAGENS)*\n- *TOMOGRAFIA DA FACE (LAUDO E IMAGENS)*\n- *RAIO X CAVUM*\n\nPoderia nos enviar por aqui os exames realizados?'
 
 def texto_tratamento_ocular():
-    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *ACUIDADE VISUAL*\n- *TOMOGRAFIA DE COERENCIA OPTICA*\n\nPoderia nos enviar por aqui os exames realizados?'
+    return f'A análise está solicitando o resultado dos seguintes exames:\n\n- *ACUIDADE VISUAL*\n- *TOMOGRAFIA DE COERENCIA OPTICA*\n\nPoderia nos enviar por aqui os exames realizados?'
 
 def implante_anel():
-    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *PENTACAM*\n- *CERATOSCOPIA*\n\nPoderia nos enviar por aqui os exames realizados?'
+    return f'A análise está solicitando o resultado dos seguintes exames:\n\n- *PENTACAM*\n- *CERATOSCOPIA*\n\nPoderia nos enviar por aqui os exames realizados?'
 
 def ptose():
-    return f'A auditoria médica está solicitando o resultado dos seguintes exames:\n\n- *CAPIMETRIA*\n- *FOTO DOS OLHOS*\n\nPoderia nos enviar por aqui os exames realizados?'
+    return f'A análise está solicitando o resultado dos seguintes exames:\n\n- *CAPIMETRIA*\n- *FOTO DOS OLHOS*\n\nPoderia nos enviar por aqui os exames realizados?'
 
 
 def definir_texto_procedimento(procedimento):

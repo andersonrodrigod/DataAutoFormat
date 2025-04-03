@@ -1,12 +1,13 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos, exibir_info_medico
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas
-from coletar_dados import save_data, save_info_assistente, save_data_dois
+from coletar_dados import save_data, save_info_assistente, save_data_dois, copy_vazio
 from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos, obter_telas, verificador_telas
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
 import time
+import json
 
 class App(ctk.CTk):
     def __init__(self, title, size):
@@ -90,11 +91,14 @@ class Editar_dados(ctk.CTkToplevel):
         nome = self.entry_nome.get()  # Obtém o nome
         novo_texto = self.textarea.get("1.0", "end-1c")  # Obtém o novo valor
 
-        # Atualiza o campo "info_medico" para o nome correspondente
         df.loc[df["nome"] == nome, "info_medico"] = novo_texto
 
+        # Converte para lista de dicionários
+        dados = df.to_dict(orient="records")
+
         # Salva de volta no JSON
-        df.to_json(caminho_arquivo, orient="records", indent=4, force_ascii=False)
+        with open(caminho_arquivo, "w", encoding="utf-8") as f:
+            json.dump(dados, f, indent=4, ensure_ascii=False)
 
         print(f"Dados editados com sucesso - Nome: {nome}, Novo Texto: {novo_texto}")
 
@@ -437,6 +441,7 @@ class Formatar_texto(ctk.CTkFrame):
         print(resultado)
         try:
             caminho = self.parent.caminho
+            copy_vazio()
             for i in range(quantidade):
                 dados = save_data(caminho, cordenada)
 
@@ -458,6 +463,7 @@ class Formatar_texto(ctk.CTkFrame):
 
         try:
             time.sleep(2)
+            copy_vazio()
             caminho_coletar = self.parent.caminho
             for i in range(quantidade):
                 dados = save_info_assistente(cordenada, caminho_coletar)
