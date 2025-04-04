@@ -74,9 +74,8 @@ def copy():
 
 def copy_tab():
     py.hotkey("ctrl", "c")
-    time.sleep(0.5)
+    garantir_copia()
     py.press("tab")
-    time.sleep(0.5)
 
 def tab_copy():
     py.press("tab")
@@ -120,13 +119,15 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
     processando_cordenadas = carregar_cordenada(cordenadas_caminho)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, c_codigo_carteira_t, c_telefone_1, c_telefone_2, c_telefone_3, c_telefone_baixo, amop, t22a3 = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
     
     cordenada_info_medico_x, cordenada_info_medico_y = cordenada_info_medico
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente 
+
+    cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y = cordenada_codigo_procedimento
 
     try:
         dados_existentes, max_id = carregar_dados_existentes(caminho_arquivo)
@@ -138,11 +139,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         copy_tab()
         nome = name()
 
-        for _ in range(3):
-            time.sleep(0.3)
-            py.press("tab")
-
-        copy_tab()
+        copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
         codigo_procedimento = cod_proc()
 
         copy_tab()
@@ -356,7 +353,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
 
     processando_cordenadas = carregar_cordenada(cordenadas)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, c_codigo_carteira_t, c_telefone_1, c_telefone_2, c_telefone_3, c_telefone_baixo, amop, t22a3 = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
 
