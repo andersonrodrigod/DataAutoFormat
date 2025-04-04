@@ -53,9 +53,10 @@ def garantir_copia():
         time.sleep(0.3)
         tentativas += 1
 
-    print("Falha ao copiar. Pressionando Enter duas vezes...")
-    py.press('enter')
-    py.press('enter')
+    if not pyperclip.paste():
+        print("Falha ao copiar. Pressionando Enter duas vezes...")
+        py.press('enter')
+        py.press('enter')
 
 def focar_janela(nome_janela):
     janela = gw.getWindowsWithTitle(nome_janela)
@@ -119,7 +120,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
     processando_cordenadas = carregar_cordenada(cordenadas_caminho)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, c_codigo_carteira_t, c_telefone_1, c_telefone_2, c_telefone_3, c_telefone_baixo, amop, t22a3 = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
     
@@ -127,37 +128,53 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente 
 
-    cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y = cordenada_codigo_procedimento
-
     try:
         dados_existentes, max_id = carregar_dados_existentes(caminho_arquivo)
         id_count = max_id + 1
 
+
         copy_tab()
+
         codigo = cod()
+        copy_vazio()
 
         copy_tab()
-        nome = name()
 
-        copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
+        nome = name()
+        copy_vazio()
+
+        for _ in range(3):
+            time.sleep(0.2)
+            py.press("tab")
+
+        copy_tab()
+
         codigo_procedimento = cod_proc()
+        copy_vazio()
 
         copy_tab()
         nome_procedimento = name_proc()
+        copy_vazio()
 
         py.press("tab")
         copy_tab()
-        medico_solicitante = medico_requesting()
 
-        copy_tab()
+        medico_solicitante = medico_requesting()
+        copy_vazio()
+
+
         copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         info_assistente = info_assistent()
+        copy_vazio()
 
         copy_click(cordenada_info_medico_x, cordenada_info_medico_y)
         info_medic = info_medico()
+        copy_vazio()
 
         py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
         py.press("down")
+
+        copy_vazio()
 
         dados = {
             "id": id_count,
@@ -185,6 +202,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         import traceback
         traceback.print_exc()
         raise
+
 
 def save_telefones(telefone_1x, telefone_1y, telefone_2x, telefone_2y, telefone_3x, telefone_3y, telefone_baixo_x, telefone_baixo_y):
 
@@ -353,7 +371,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
 
     processando_cordenadas = carregar_cordenada(cordenadas)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, c_codigo_carteira_t, c_telefone_1, c_telefone_2, c_telefone_3, c_telefone_baixo, amop, t22a3 = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
 
@@ -432,5 +450,3 @@ def save_info_assistente(cordenadas, caminho_coletar):
         if palavra_processo == "SEM OBSERVACAO":
             save_data(caminho_coletar, cordenadas)
 
-def save_info_contato(cordenadas):
-    processando_cordenadas = carregar_cordenada(cordenadas)

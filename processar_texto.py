@@ -108,7 +108,10 @@ def formatar_solicitacao(texto, condicoes):
 
         resultado = re.search(padrao, texto)
 
-        if resultado:
+        if "DUT" in texto:
+            return texto_angio_tc()
+
+        elif resultado:
             if resultado.group(1):
                 return resultado.group(2).strip() if resultado.group(2) else None
             else:
