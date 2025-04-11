@@ -37,12 +37,18 @@ def info_medico():
 def telefone():
     return pyperclip.paste()
 
-
+def garantir_copia_info():
+    tentativas = 0
+    while tentativas < 3:
+        if pyperclip.paste():
+            print("Texto copiado com sucesso!")
+            return  # Sai da função se a cópia for bem-sucedida
+        print(f"Tentativa {tentativas + 1}: Área de transferência vazia. Tentando copiar novamente...")
+        copy()  # Chama novamente a função de cópia
+        time.sleep(0.3)
+        tentativas += 1
 
 def garantir_copia():
-    """Verifica se há algo na área de transferência. Se não houver, tenta copiar novamente até 5 vezes.
-    Se falhar, pressiona Enter duas vezes e encerra a função.
-    """
     tentativas = 0
     while tentativas < 7:
         if pyperclip.paste():
@@ -92,11 +98,10 @@ def copy_click(x, y):
     py.hotkey("ctrl", "c")
     garantir_copia()
 
-def copy_tab_proc():
-    time.sleep(0.5)
+def copy_click_info(x, y):
+    py.click(x, y)
     py.hotkey("ctrl", "c")
-    time.sleep(0.5)
-
+    garantir_copia_info()
 
 def carregar_dados_existentes(caminho_arquivo):
     if os.path.exists(caminho_arquivo):
@@ -120,13 +125,15 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
     processando_cordenadas = carregar_cordenada(cordenadas_caminho)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
     
     cordenada_info_medico_x, cordenada_info_medico_y = cordenada_info_medico
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente 
+
+    cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y = cordenada_codigo_procedimento
 
     try:
         dados_existentes, max_id = carregar_dados_existentes(caminho_arquivo)
@@ -138,36 +145,35 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         codigo = cod()
         copy_vazio()
 
-        copy_tab()
+        tab_copy()
 
         nome = name()
         copy_vazio()
 
-        for _ in range(3):
-            time.sleep(0.2)
-            py.press("tab")
-
-        copy_tab()
-
+        
+        copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
         codigo_procedimento = cod_proc()
         copy_vazio()
 
-        copy_tab()
+        tab_copy()
+
         nome_procedimento = name_proc()
         copy_vazio()
 
-        py.press("tab")
-        copy_tab()
+        for _ in range(2):
+            time.sleep(0.5)
+            py.press("tab")
 
+        copy()
+        garantir_copia()
         medico_solicitante = medico_requesting()
         copy_vazio()
 
-
-        copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        copy_click_info(cordenada_info_assistente_x, cordenada_info_assistente_y)
         info_assistente = info_assistent()
         copy_vazio()
 
-        copy_click(cordenada_info_medico_x, cordenada_info_medico_y)
+        copy_click_info(cordenada_info_medico_x, cordenada_info_medico_y)
         info_medic = info_medico()
         copy_vazio()
 
@@ -414,7 +420,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
             print("Código já está no banco de dados, tipo atualizado.")
     else:
         copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
-        garantir_copia()
+        garantir_copia_info()
         info_assistente = info_assistent()
         copy_vazio()
 
@@ -440,7 +446,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
         hora = agora.strftime("%H:%M")
 
         usuario_sheet = [
-            [nome, codigo, palavra_processo, data, hora, False, False, False]
+            [nome, codigo, palavra_processo, data, hora, False, False, False, False]
         ]
 
         #dados.append(usuario)

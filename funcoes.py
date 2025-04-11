@@ -4,7 +4,7 @@ from tkinter import messagebox
 import tkinter as tk
 from planilhas import sheet_processos
 import pandas as pd
-import pywinctl
+
 
 def encontrar_palavra(palavras, info):
     for palavra in palavras:
@@ -182,50 +182,9 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame):
     
     return tipo
 
-def obter_telas():
-    nome = "DATA"
-
-    janelas = []
-
-    for janela in pywinctl.getAllWindows():
-        if nome.lower() in janela.title.lower():
-            janelas.append(f'{janela.title}')
-
-    return "\n\n".join(janelas) if janelas else "Nenhuma janela encontrada."
 
 
-"""
-def obter_telas():
-    janelas = []
 
-    # Itera sobre todas as janelas abertas
-    for janela in pywinctl.getAllWindows():
-        # Remove espaços extras do título da janela
-        titulo = janela.title.strip()
-        
-        # Ignora janelas com títulos vazios ou irrelevantes
-        if titulo and titulo != "": 
-            janelas.append(titulo)
-
-    # Retorna as janelas abertas ou uma mensagem caso nenhuma janela tenha sido encontrada
-    return "\n".join(janelas) if janelas else "Nenhuma janela encontrada."
-"""
-
-
-def verificador_telas(caminho):
-    df = pd.read_json(caminho)
-    cordernadas = df[["tela_amop", "tela_t22a3"]]
-
-    
-
-    if (cordernadas == "").any().any():
-        execut = False
-        print("As telas não foram definidas")
-    else:
-        execut = True
-        print("execução foi um sucesso")
-
-    return execut
 
 
 

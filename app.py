@@ -1,7 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos, exibir_info_medico
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas, verificador_telas, obter_telas
 from coletar_dados import save_data, save_info_assistente, save_data_dois, copy_vazio
-from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos, obter_telas, verificador_telas
+from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos 
 from planilhas import carregar_dados_sheet_processos
 import customtkinter as ctk
 from tkinter import messagebox

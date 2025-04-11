@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox
 from palavras import cordenadas
 import os
 import json
+import pywinctl
 
 
 
@@ -100,6 +101,53 @@ def atualizar_telas(caminho, janela_1, janela_2):
     
     except Exception as e:
         print(f"Erro ao Salvar os dados json {e}")
+
+
+def obter_telas():
+    nome = "DATA"
+
+    janelas = []
+
+    for janela in pywinctl.getAllWindows():
+        if nome.lower() in janela.title.lower():
+            janelas.append(f'{janela.title}')
+
+    return "\n\n".join(janelas) if janelas else "Nenhuma janela encontrada."
+
+
+"""
+def obter_telas():
+    janelas = []
+
+    # Itera sobre todas as janelas abertas
+    for janela in pywinctl.getAllWindows():
+        # Remove espaços extras do título da janela
+        titulo = janela.title.strip()
+        
+        # Ignora janelas com títulos vazios ou irrelevantes
+        if titulo and titulo != "": 
+            janelas.append(titulo)
+
+    # Retorna as janelas abertas ou uma mensagem caso nenhuma janela tenha sido encontrada
+    return "\n".join(janelas) if janelas else "Nenhuma janela encontrada."
+"""
+
+
+
+def verificador_telas(caminho):
+    df = pd.read_json(caminho)
+    cordernadas = df[["tela_amop", "tela_t22a3"]]
+
+    
+
+    if (cordernadas == "").any().any():
+        execut = False
+        print("As telas não foram definidas")
+    else:
+        execut = True
+        print("execução foi um sucesso")
+
+    return execut
 
 
 

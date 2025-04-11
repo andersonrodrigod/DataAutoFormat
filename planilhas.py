@@ -22,7 +22,10 @@ sheet_coletar_dados = client.open_by_key(SHEET_ID_COLETAR_DADOS).sheet1
 
 
 
+    
+
+
 def carregar_dados_sheet_processos():
-    return pd.DataFrame(sheet_processos.get_all_values()[1:], columns=["nome", "codigo", "tipo", "data", "hora", "visto", "verificar", "resolvido", "visto_data_hora", "resolvido_data_hora"])
+    return pd.DataFrame(sheet_processos.get_all_values()[1:], columns=["nome", "codigo", "tipo", "data", "hora", "visto", "verificar", "resolvido", "removido" "visto_data_hora", "resolvido_data_hora"])
 
 
