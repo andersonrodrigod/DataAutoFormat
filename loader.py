@@ -54,8 +54,17 @@ def salvar_dados(dados, caminho_arquivo):
 def filtrar_nome(df, nome):
     return df[df["nome"] == nome].drop_duplicates(subset="nome", keep="first")
 
+def filtrar_codigo(df,codigo):
+    return df[df["codigo"] == codigo]
+
 def filtrar_nome_no_drop(df, nome):
     return df[df["nome"] == nome]
+
+def filtrar_por_nome_ou_codigo(df, valor):
+    if valor.isdigit():  # Se o valor for numérico (código)
+        return df[df["codigo"] == valor]
+    else:  # Se não for numérico, assume-se que é o nome
+        return df[df["nome"] == valor]
 
 def carregar_arquivo_json(caminho_arquivo=None):
     messagebox.showinfo("ATENÇÃO", "Selecione o arquivo JSON dados_coletados")

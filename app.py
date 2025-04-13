@@ -3,6 +3,7 @@ from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas,
 from coletar_dados import save_data, save_info_assistente, save_data_dois, copy_vazio
 from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos 
 from planilhas import carregar_dados_sheet_processos
+from firebase import carregar_dados_processo, carregar_dados_paciente
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -105,7 +106,6 @@ class Editar_dados(ctk.CTkToplevel):
     def fechar_janela(self):
         self.withdraw()
 
-
 class Definir_tela(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
@@ -201,7 +201,7 @@ class Check_list(ctk.CTkToplevel):
             widget.destroy()
 
         # Atualizar os dados
-        self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
+        self.dados = carregar_dados_processo().to_dict(orient="records")
 
         # Recriar os widgets de exibição com os dados atualizados
         bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame)
@@ -496,13 +496,14 @@ class Formatar_texto(ctk.CTkFrame):
 
     def organizar_texto(self):
         nome_digitado = self.input_nome.get()
-        df_caminho = ler_arquivo(self.parent.caminho)
+        #df_caminho = ler_arquivo(self.parent.caminho)
+        df_caminho = carregar_dados_paciente(nome_digitado)
 
         if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
             return
     
         if df_caminho is not None:
-            resultado = processar_dados_por_nome(df_caminho, nome_digitado)
+            resultado = processar_dados_por_nome(df_caminho)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
@@ -532,10 +533,11 @@ class Formatar_texto(ctk.CTkFrame):
 
     def organizar_parecer(self):
         nome_digitado = self.input_nome.get()
+        #df_caminho = ler_arquivo(self.parent.caminho)
+        df_caminho = carregar_dados_paciente(nome_digitado)
 
-        df_caminho = ler_arquivo(self.parent.caminho)
         if df_caminho is not None:
-            resultado = processar_parecer_nome(df_caminho, nome_digitado)
+            resultado = processar_parecer_nome(df_caminho)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:

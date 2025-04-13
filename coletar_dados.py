@@ -11,6 +11,8 @@ from funcoes import encontrar_palavra, obter_palavra
 from datetime import datetime
 from planilhas import sheet_processos, sheet_coletar_dados, carregar_dados_sheet_processos
 from pytz import timezone
+from firebase import enviar_dados_processo, atualizar_campo_processo, carregar_dados_processo, atualizar_varios_campos, carregar_dados_paciente, enviar_dados_pacientes
+from loader import  filtrar_codigo
 
 
 def cod():
@@ -139,50 +141,60 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         dados_existentes, max_id = carregar_dados_existentes(caminho_arquivo)
         id_count = max_id + 1
 
+        
 
-        copy_tab()
+        #copy_tab()
 
-        codigo = cod()
-        copy_vazio()
+        codigo = "3010I505478001" #cod()
+        #copy_vazio()
 
-        tab_copy()
+        #tab_copy()
 
-        nome = name()
-        copy_vazio()
+        nome = "JEFFERSON RODRIGUES DOS SANTOS" # name()
+        #copy_vazio()
 
         
-        copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
-        codigo_procedimento = cod_proc()
-        copy_vazio()
+        #copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
+        codigo_procedimento = "48558574" # cod_proc()
+        #copy_vazio()
 
-        tab_copy()
+        df_paciente = carregar_dados_paciente(nome)
 
-        nome_procedimento = name_proc()
-        copy_vazio()
+        if not df_paciente.empty:
+            if (df_paciente["codigo_procedimento"] == codigo_procedimento).any():
+                print("Esse procedimento já existe")
+                # py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+                # py.press("down")
+                return None
+        
+        #tab_copy()
 
-        for _ in range(2):
+        nome_procedimento = "HERNIORRAFIA INGUINAL"  #name_proc()
+        #copy_vazio()
+
+        """for _ in range(2):
             time.sleep(0.5)
-            py.press("tab")
+            py.press("tab")"""
 
-        copy()
-        garantir_copia()
-        medico_solicitante = medico_requesting()
-        copy_vazio()
+        #copy()
+        #garantir_copia()
+        medico_solicitante = "MEDICO TRANSCRIÇÃO" # medico_requesting()
+        #copy_vazio()
 
-        copy_click_info(cordenada_info_assistente_x, cordenada_info_assistente_y)
-        info_assistente = info_assistent()
-        copy_vazio()
+        #copy_click_info(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        info_assistente = "11/04 FEITO CTT. RODRIGO = - 12/04 PARECER SOLICITADO. RODRIGO ="  #info_assistent()
+        #copy_vazio()
 
-        copy_click_info(cordenada_info_medico_x, cordenada_info_medico_y)
-        info_medic = info_medico()
-        copy_vazio()
+        #copy_click_info(cordenada_info_medico_x, cordenada_info_medico_y)
+        info_medic = "ANEXAR RX PE+US PE" # info_medico()
+        #copy_vazio()
 
-        py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-        py.press("down")
+        #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+        #py.press("down")
 
-        copy_vazio()
+        #copy_vazio()
 
-        dados = {
+        dados_pacientes = {
             "id": id_count,
             "codigo": codigo,
             "nome": nome,
@@ -193,15 +205,17 @@ def save_data(caminho_arquivo, cordenadas_caminho):
             "medico_solicitante": medico_solicitante
         }
 
+        enviar_dados_pacientes(dados_pacientes)
+
         dados_sheet = [
             [codigo, nome, codigo_procedimento, nome_procedimento, info_assistente, info_medic, medico_solicitante]
         ]
 
-        dados_existentes.append(dados)
+        dados_existentes.append(dados_pacientes)
         sheet_coletar_dados.append_rows(dados_sheet)
         salvar_dados(dados_existentes, caminho_arquivo)
 
-        return dados
+        return dados_pacientes
 
     except Exception as e:
         print(f"Erro em save_data: {e}")
@@ -383,61 +397,76 @@ def save_info_assistente(cordenadas, caminho_coletar):
 
     cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente
 
-    copy()
-    garantir_copia()
+    #copy()
+    #garantir_copia()
 
-    codigo = cod()
-    copy_vazio()
+    codigo = "3010I589877001"  #cod()
+    #copy_vazio()
 
-    dados = carregar_dados_sheet_processos()
+    dados = carregar_dados_processo()
 
     df = pd.DataFrame(dados)
 
-    if not df.empty and codigo in df["codigo"].values:
-         # Encontrar a linha do código na planilha
-        index = dados[dados["codigo"] == codigo].index[0]
-        tipo_atual = dados.at[index, "tipo"]
 
-        print(tipo_atual)
+    if not df.empty and codigo in df["codigo"].values:
+        # Encontrar a linha do código na planilha
+        bf = filtrar_codigo(df, codigo)
+        tipo_atual = bf["tipo"].iloc[0]
+        removido_atual = bf["removido"].iloc[0]
+
         # Verifica se a palavra_processo é igual ao tipo existente
-        copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
-        garantir_copia()
-        info_assistente = info_assistent()
-        copy_vazio()
+        #copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        #garantir_copia()
+        info_assistente = "bla bla bla TELEGRAMA" #info_assistent()
+        #copy_vazio()
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
         palavra_processo = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
 
         if palavra_processo == tipo_atual:
-            py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)       
-            time.sleep(0.5)
-            py.press("down")
+            if removido_atual == True:
+                atualizar_campo_processo(codigo, "removido", False)
+                print("O processo  voltou ao campo removido marcado como False")
+
+            #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)       
+            #time.sleep(0.5)
+            #py.press("down")
             print("Código já está no banco de dados e tipo é o mesmo, apenas clicando.")
         else:
-            sheet_processos.update_cell(index + 2, 3, palavra_processo)  # Atualiza a célula correspondente
-            py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-            time.sleep(0.5)
-            py.press("down")
+            atualizacoes = {}
+
+            if removido_atual == True:
+                atualizacoes["removido"] = False
+
+            atualizacoes["tipo"] = palavra_processo
+
+            atualizar_varios_campos(codigo, atualizacoes)
+
+            #sheet_processos.update_cell(index + 2, 3, palavra_processo)  # Atualiza a célula correspondente
+            #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+            #time.sleep(0.5)
+            #py.press("down")
             print("Código já está no banco de dados, tipo atualizado.")
     else:
-        copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
-        garantir_copia_info()
-        info_assistente = info_assistent()
-        copy_vazio()
+
+        #copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        #garantir_copia_info()
+        info_assistente = "FEITO CTT"  #info_assistent()
+        #copy_vazio()
 
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
         palavra_encontrada = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
 
         palavra_processo = palavra_encontrada
 
-        py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-        time.sleep(0.5)
+        #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+        #time.sleep(0.5)
 
-        tab_copy()
-        garantir_copia()
-        nome = name()
-        copy_vazio()
+        #tab_copy()
+        #garantir_copia()
+        nome = "ANDERSON RODRIGO RODRIGUES DOS SANTOS"  #name()
+        #copy_vazio()
 
-        shift_tab()
+        #shift_tab()
 
         fuso_horario = timezone("America/Sao_Paulo")
         agora = datetime.now(fuso_horario)
@@ -445,9 +474,25 @@ def save_info_assistente(cordenadas, caminho_coletar):
         data = agora.strftime("%Y-%m-%d")
         hora = agora.strftime("%H:%M")
 
+        processo = {
+            "codigo": codigo,
+            "nome": nome,
+            "tipo": palavra_processo,
+            "data": data,
+            "hora": hora,
+            "visto": False,
+            "verificar": False,
+            "resolvido": False,
+            "removido": False,
+            "visto_data_hora": "",
+            "resolvido_data_hora": ""
+        }
+
         usuario_sheet = [
             [nome, codigo, palavra_processo, data, hora, False, False, False, False]
         ]
+
+        enviar_dados_processo(processo)
 
         #dados.append(usuario)
         sheet_processos.append_rows(usuario_sheet)
