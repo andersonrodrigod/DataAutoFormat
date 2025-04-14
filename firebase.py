@@ -16,6 +16,8 @@ def enviar_dados_pacientes(dados_paciente):
     ref = db.reference(f"dados_pacientes/{dados_paciente["nome"]}")
     ref.push(dados_paciente)
 
+# Existe duas funções de carregar pacientes um é pra todos a outra individual
+
 def carregar_dados_pacientes():
     ref = db.reference("dados_pacientes")
     dados = ref.get()
@@ -74,3 +76,4 @@ def atualizar_varios_campos(codigo, campos: dict):
     caminho = f"processos/{codigo}"
     ref = db.reference(caminho)
     ref.update(campos)
+    print(f"[Firebase] Atualizado {codigo}: {campos}")

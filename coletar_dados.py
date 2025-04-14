@@ -400,7 +400,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
     #copy()
     #garantir_copia()
 
-    codigo = "3010I589877001"  #cod()
+    codigo = "3010I419857151"  #cod()
     #copy_vazio()
 
     dados = carregar_dados_processo()
@@ -417,7 +417,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
         # Verifica se a palavra_processo é igual ao tipo existente
         #copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         #garantir_copia()
-        info_assistente = "bla bla bla TELEGRAMA" #info_assistent()
+        info_assistente = "bla bla bla PARECER" #info_assistent()
         #copy_vazio()
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
         palavra_processo = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
@@ -447,10 +447,9 @@ def save_info_assistente(cordenadas, caminho_coletar):
             #py.press("down")
             print("Código já está no banco de dados, tipo atualizado.")
     else:
-
         #copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         #garantir_copia_info()
-        info_assistente = "FEITO CTT"  #info_assistent()
+        info_assistente = "TELEGRAMA"  #info_assistent()
         #copy_vazio()
 
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
@@ -463,7 +462,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
 
         #tab_copy()
         #garantir_copia()
-        nome = "ANDERSON RODRIGO RODRIGUES DOS SANTOS"  #name()
+        nome = "LIDUINA RODRIGUES DOS SANTOS"  #name()
         #copy_vazio()
 
         #shift_tab()

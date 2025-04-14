@@ -49,7 +49,6 @@ def processar_dados_por_nome(df):
     
 def processar_parecer_nome(df):
 
-
     if df.empty:
         return "NOME SELECIONADO NÃO FOI COLETADO, COLETE TODOS OS PROCEDIMENTOS PARA FORMATAR TEXTO DO PARECER"
 
@@ -78,7 +77,6 @@ def exibir_usuarios_padrao(df):
         return "\n".join(resultados)
     else:
         return "num valor padrão foi varrido"        
-
 
 def exibir_processos(df):
 

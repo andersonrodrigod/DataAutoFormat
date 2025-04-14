@@ -1,9 +1,9 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos, exibir_info_medico
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas, verificador_telas, obter_telas
 from coletar_dados import save_data, save_info_assistente, save_data_dois, copy_vazio
-from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos 
+from funcoes import bottoes_processos, salvar_alteracoes_processos, filtrar_nome_processos 
 from planilhas import carregar_dados_sheet_processos
-from firebase import carregar_dados_processo, carregar_dados_paciente
+from firebase import carregar_dados_processo, carregar_dados_paciente, carregar_dados_pacientes
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -26,7 +26,7 @@ class App(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
 
         self.check_list = Check_list(self)
-        self.check_list.withdraw()
+
         self.definir_telas = Definir_tela(self)
         self.definir_telas.withdraw()
         self.editar_dados = Editar_dados(self)
@@ -152,25 +152,49 @@ class Check_list(ctk.CTkToplevel):
 
         self.parent = parent
 
-        self.parent.alterar_tamanho("1240x700") # não funciona em top level
-
         self.botoes_frame = ctk.CTkFrame(self)#
-        self.botoes_frame.pack(pady=10, padx=20, fill="x")
+        self.botoes_frame.pack(pady=5, padx=20, fill="x")
 
-        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=500)#
-        self.scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
-
-        self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
+        self.busca_frame = ctk.CTkFrame(self)
+        self.busca_frame.pack(pady=1, padx=20, fill="x")
+ 
+        # Input de busca
+        self.busca_entry = ctk.CTkEntry(self.busca_frame, width=250)
+        self.busca_entry.pack(side="left", padx=5, pady=5)
         
+        # Botões de busca
+        self.buscar_medico_btn = ctk.CTkButton(
+            self.busca_frame, 
+            text="Buscar Info Médico",
+            #command=self.buscar_info_medico
+        )
+        self.buscar_medico_btn.pack(side="left", padx=5, pady=5)
+        
+        self.buscar_assistente_btn = ctk.CTkButton(
+            self.busca_frame, 
+            text="Buscar Info Assistente",
+            command=self.buscar_info_assistente
+        )
+        
+        self.buscar_assistente_btn.pack(side="left", padx=5, pady=5)
 
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=600)#
+        self.scrollable_frame.pack(pady=5, padx=20, fill="both", expand=True)
+
+        self.dados = carregar_dados_processo().to_dict(orient="records")
+        
         # Armazena o filtro atual
         self.filtro_atual = "TODOS" 
+
+        print(self.filtro_atual)
 
         acoes_frame = ctk.CTkFrame(self)
         acoes_frame.pack(pady=10, padx=20, fill="x")
 
+        self.alteracoes_checkboxes = {}
+
         self.atualizar_interface()
-        
+
         confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=self.confirmar_botao)
         confirm_button.pack(side="left", padx=10, pady=20)
 
@@ -178,21 +202,21 @@ class Check_list(ctk.CTkToplevel):
         atualizar_button.pack(side="left", padx=10, pady=20)
 
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+
+    def buscar_info_assistente(self):
+        nome_digitado = self.busca_entry.get()
+        self.filtro_atual = "buscar_info_assistente"
+        self.dados = carregar_dados_pacientes().to_dict(orient="records")
+        filtrar_nome_processos(self.dados, self.filtro_atual, self.scrollable_frame, self.alteracoes_checkboxes, nome_digitado)
+      
     
     def fechar_janela(self):
         self.withdraw()
 
     def confirmar_botao(self):
-        # Salvar alterações
-        salvar_alteracoes_sheet(self.dados, self)
 
-        # Filtrar os dados resolvidos
-        df_filtrado, processos_resolvidos_existem = filtrar_processos_resolvidos(self.dados)
-
-        if processos_resolvidos_existem:
-            self.atualizar_interface()
-
-        # Atualizar a interface após salvar alterações e remover processos resolvidos
+        salvar_alteracoes_processos(self.dados, self, self.alteracoes_checkboxes)
+ 
         self.atualizar_interface()
 
     def atualizar_interface(self):
@@ -204,8 +228,14 @@ class Check_list(ctk.CTkToplevel):
         self.dados = carregar_dados_processo().to_dict(orient="records")
 
         # Recriar os widgets de exibição com os dados atualizados
-        bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame)
+        bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame, self.alteracoes_checkboxes, self.filtro_atual, self.set_filtro)
     
+    def set_filtro(self, novo_filtro):
+        self.filtro_atual = novo_filtro
+        print("Novo filtro:", self.filtro_atual)
+        filtrar_nome_processos(self.dados, novo_filtro, self.scrollable_frame, self.alteracoes_checkboxes) 
+        print(self.filtro_atual)
+
 class Carregar(ctk.CTkFrame):
     def __init__(self, parent, menu, app):
         super().__init__(parent)
@@ -535,6 +565,9 @@ class Formatar_texto(ctk.CTkFrame):
         nome_digitado = self.input_nome.get()
         #df_caminho = ler_arquivo(self.parent.caminho)
         df_caminho = carregar_dados_paciente(nome_digitado)
+
+        if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
+            return
 
         if df_caminho is not None:
             resultado = processar_parecer_nome(df_caminho)
