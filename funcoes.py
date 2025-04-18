@@ -73,7 +73,7 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes,
     if tipo == "TODOS":
         dados_filtrados = [pessoa for pessoa in dados if not pessoa.get("removido", True)]
     elif tipo == "buscar_info_assistente":
-        dados_filtrados = [pessoa for pessoa in dados if pessoa["info_assistente"] == nome_digitado and not pessoa.get("removido", True)]
+        dados_filtrados = [pessoa for pessoa in dados if pessoa["info_assistente"] == nome_digitado]
     else:
         dados_filtrados = [pessoa for pessoa in dados if pessoa["tipo"] == tipo and not pessoa.get("removido", True)]
     

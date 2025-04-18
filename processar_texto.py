@@ -141,7 +141,7 @@ def formatar_questionamento(texto, questionamento_texto, condicoes):
 
     return None
 
-def formatar_texto(nome, procedimento, solicitacao, questionamento, consulta_plano, endereco):
+def formatar_texto(nome, procedimento, solicitacao, questionamento, consulta_plano):
     resultado = []
     if nome:
         resultado.append(f'Olá tudo bom? aqui é do *HAPVIDA NOTREDAME* falo com *{nome}*?\n\n') 
@@ -160,9 +160,6 @@ def formatar_texto(nome, procedimento, solicitacao, questionamento, consulta_pla
 
     if solicitacao:
         resultado.append("*Obs:* Gentileza enviar a foto legível (através deste whatsapp) A foto precisa ser da folha inteira e sem cortar nenhuma informação.\n\n")
-
-    if endereco:
-        resultado.append(endereco)
 
     if resultado:
         return "".join(resultado)

@@ -123,6 +123,9 @@ def salvar_dados(dados_existentes, caminho):
     with open(caminho, "w", encoding="utf-8") as f:
         json.dump(dados_existentes, f, indent=4, ensure_ascii=False)
 
+
+#CRIAR CONDICIONAL ONDE ELE SÓ COLOCA SE RECONHECER QUE O CODIGO DA CARTEIRA TEM DETERMINADOS CARACTERES
+
 def save_data(caminho_arquivo, cordenadas_caminho):
 
     processando_cordenadas = carregar_cordenada(cordenadas_caminho)
@@ -150,7 +153,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
         #tab_copy()
 
-        nome = "JEFFERSON RODRIGUES DOS SANTOS" # name()
+        nome = "ANDERSON RODRIGO RODRIGUES DOS SANTOS" # name()
         #copy_vazio()
 
         
@@ -195,7 +198,6 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         #copy_vazio()
 
         dados_pacientes = {
-            "id": id_count,
             "codigo": codigo,
             "nome": nome,
             "codigo_procedimento": codigo_procedimento,
@@ -386,6 +388,10 @@ def carregar_dados(caminho):
     with open(caminho, "r", encoding="utf-8") as f:
         dados = json.load(f)
         return dados 
+
+
+
+#CRIAR CONDICIONAL ONDE ELE SÓ COLOCA SE RECONHECER QUE O CODIGO DA CARTEIRA TEM DETERMINADOS CARACTERES
 
 def save_info_assistente(cordenadas, caminho_coletar):
 

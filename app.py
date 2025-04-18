@@ -1,9 +1,9 @@
-from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos, exibir_info_medico
+from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas, verificador_telas, obter_telas
 from coletar_dados import save_data, save_info_assistente, save_data_dois, copy_vazio
 from funcoes import bottoes_processos, salvar_alteracoes_processos, filtrar_nome_processos 
 from planilhas import carregar_dados_sheet_processos
-from firebase import carregar_dados_processo, carregar_dados_paciente, carregar_dados_pacientes
+from firebase import carregar_dados_processo, carregar_dados_pacientes, atualizar_info_medico, buscar_paciente_por_nome, buscar_info_paciente
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -86,21 +86,28 @@ class Editar_dados(ctk.CTkToplevel):
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
 
     def editar_dados(self):
-        caminho_arquivo = self.parent.caminho  # Obtém o caminho do arquivo JSON
-        df = ler_arquivo(caminho_arquivo)  # Lê o JSON e transforma em DataFrame
-
         nome = self.entry_nome.get()  # Obtém o nome
-        novo_texto = self.textarea.get("1.0", "end-1c")  # Obtém o novo valor
+        dados_paciente = buscar_paciente_por_nome(nome)
 
-        df.loc[df["nome"] == nome, "info_medico"] = novo_texto
+        if not dados_paciente:
+            print("Paciente não encontrado.")
+            return
+        
+        codigo, nome_paciente, codigo_proc, nome_proc, info_medico, medico_solicitante = buscar_info_paciente(dados_paciente)
 
-        # Converte para lista de dicionários
-        dados = df.to_dict(orient="records")
 
-        # Salva de volta no JSON
-        with open(caminho_arquivo, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=4, ensure_ascii=False)
+        if not info_medico:
+            print("Nenhuma informação de médico encontrada.")
+            return
+        
+        self.textarea.delete("1.0", "end")
 
+        self.textarea.insert("1.0", info_medico)
+
+        print("Texto na área de edição:", self.textarea.get("1.0", "end-1c"))
+
+        novo_texto = self.textarea.get("1.0", "end-1c") 
+        atualizar_info_medico(nome, novo_texto)
         print(f"Dados editados com sucesso - Nome: {nome}, Novo Texto: {novo_texto}")
 
     def fechar_janela(self):
@@ -410,14 +417,16 @@ class Formatar_texto(ctk.CTkFrame):
     
     def tela_editar_dados(self):
         self.app.nome = self.input_nome.get()
-        caminho_arquivo = ler_arquivo(self.parent.caminho)
 
-        # Validação dos dados antes de continuar
-        if not self.validar_entrada_editar(self.app.nome, caminho_arquivo):
-            return  
+        dados_paciente = buscar_paciente_por_nome(self.app.nome)
 
-        # Obtém as informações do médico
-        info_medico = exibir_info_medico(caminho_arquivo, self.app.nome)
+        if not dados_paciente:
+            print("Paciente não encontrado.")
+            self.textarea_texto.delete('0.0', 'end')
+            self.textarea_texto.insert('0.0', 'Nome não encontrado em banco de dados')
+            return
+        
+        codigo, nome_paciente, codigo_proc, nome_proc, info_medico, medico_solicitante = buscar_info_paciente(dados_paciente)
 
         # Criar ou atualizar a janela de edição
         if not self.editar_dados:
@@ -527,13 +536,13 @@ class Formatar_texto(ctk.CTkFrame):
     def organizar_texto(self):
         nome_digitado = self.input_nome.get()
         #df_caminho = ler_arquivo(self.parent.caminho)
-        df_caminho = carregar_dados_paciente(nome_digitado)
+        #df_caminho = carregar_dados_paciente(nome_digitado)
 
-        if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
-            return
+        #if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
+            #return
     
-        if df_caminho is not None:
-            resultado = processar_dados_por_nome(df_caminho)
+        if nome_digitado is not None:
+            resultado = processar_dados_por_nome(nome_digitado)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
@@ -564,13 +573,9 @@ class Formatar_texto(ctk.CTkFrame):
     def organizar_parecer(self):
         nome_digitado = self.input_nome.get()
         #df_caminho = ler_arquivo(self.parent.caminho)
-        df_caminho = carregar_dados_paciente(nome_digitado)
 
-        if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
-            return
-
-        if df_caminho is not None:
-            resultado = processar_parecer_nome(df_caminho)
+        if nome_digitado is not None:
+            resultado = processar_parecer_nome(nome_digitado)
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
