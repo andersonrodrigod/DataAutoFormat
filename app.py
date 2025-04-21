@@ -3,7 +3,7 @@ from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas,
 from coletar_dados import save_data, save_info_assistente, save_data_dois, copy_vazio
 from funcoes import bottoes_processos, salvar_alteracoes_processos, filtrar_nome_processos 
 from planilhas import carregar_dados_sheet_processos
-from firebase import carregar_dados_processo, carregar_dados_pacientes, atualizar_info_medico, buscar_paciente_por_nome, buscar_info_paciente
+from firebase_funcoes import carregar_dados_processo, carregar_dados_pacientes, atualizar_info_medico, buscar_paciente_por_nome, buscar_info_paciente, buscar_info_medico_assistente
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -173,7 +173,7 @@ class Check_list(ctk.CTkToplevel):
         self.buscar_medico_btn = ctk.CTkButton(
             self.busca_frame, 
             text="Buscar Info Médico",
-            #command=self.buscar_info_medico
+            command=self.buscar_info_medico
         )
         self.buscar_medico_btn.pack(side="left", padx=5, pady=5)
         
@@ -193,8 +193,6 @@ class Check_list(ctk.CTkToplevel):
         # Armazena o filtro atual
         self.filtro_atual = "TODOS" 
 
-        print(self.filtro_atual)
-
         acoes_frame = ctk.CTkFrame(self)
         acoes_frame.pack(pady=10, padx=20, fill="x")
 
@@ -211,11 +209,28 @@ class Check_list(ctk.CTkToplevel):
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
 
     def buscar_info_assistente(self):
-        nome_digitado = self.busca_entry.get()
-        self.filtro_atual = "buscar_info_assistente"
-        self.dados = carregar_dados_pacientes().to_dict(orient="records")
-        filtrar_nome_processos(self.dados, self.filtro_atual, self.scrollable_frame, self.alteracoes_checkboxes, nome_digitado)
-      
+        nome_digitado = self.busca_entry.get().upper()
+        campo = "info_assistente" 
+        self.filtro_atual = campo
+        self.termo_busca = nome_digitado
+        codigos = buscar_info_medico_assistente(nome_digitado, campo) 
+        
+        for widget in self.scrollable_frame.winfo_children():
+            widget.destroy()
+
+        filtrar_nome_processos(self.dados, campo, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
+
+    def buscar_info_medico(self):
+        nome_digitado = self.busca_entry.get().upper()
+        campo = "info_medico" 
+        self.filtro_atual = campo
+        self.termo_busca = nome_digitado
+        codigos = buscar_info_medico_assistente(nome_digitado, campo) 
+  
+        for widget in self.scrollable_frame.winfo_children():
+            widget.destroy()
+
+        filtrar_nome_processos(self.dados, campo, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)  
     
     def fechar_janela(self):
         self.withdraw()
@@ -225,6 +240,12 @@ class Check_list(ctk.CTkToplevel):
         salvar_alteracoes_processos(self.dados, self, self.alteracoes_checkboxes)
  
         self.atualizar_interface()
+
+        if self.filtro_atual in ["info_assistente", "info_medico"]:
+            codigos = buscar_info_medico_assistente(self.termo_busca, self.filtro_atual)
+            filtrar_nome_processos(self.dados, self.filtro_atual, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
+        else:
+            self.set_filtro(self.filtro_atual)
 
     def atualizar_interface(self):
         # Limpar o conteúdo do scrollable_frame

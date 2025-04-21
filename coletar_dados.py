@@ -11,7 +11,7 @@ from funcoes import encontrar_palavra, obter_palavra
 from datetime import datetime
 from planilhas import sheet_processos, sheet_coletar_dados, carregar_dados_sheet_processos
 from pytz import timezone
-from firebase import enviar_dados_processo, atualizar_campo_processo, carregar_dados_processo, atualizar_varios_campos, carregar_dados_paciente, enviar_dados_pacientes
+from firebase_funcoes import enviar_dados_processo, atualizar_campo_processo, carregar_dados_processo, atualizar_varios_campos, carregar_dados_paciente, enviar_dados_pacientes
 from loader import  filtrar_codigo
 
 
@@ -109,15 +109,7 @@ def carregar_dados_existentes(caminho_arquivo):
     if os.path.exists(caminho_arquivo):
         with open(caminho_arquivo, "r", encoding="utf-8") as f:
             dados_existentes = json.load(f)
-            max_id = 0
-            if dados_existentes:
-                for item in dados_existentes:
-                    if item["id"] > max_id:
-                        max_id = item["id"]
-    else:
-        dados_existentes = []
-        max_id = 0
-    return dados_existentes, max_id
+    return dados_existentes
 
 def salvar_dados(dados_existentes, caminho):
     with open(caminho, "w", encoding="utf-8") as f:
@@ -141,14 +133,13 @@ def save_data(caminho_arquivo, cordenadas_caminho):
     cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y = cordenada_codigo_procedimento
 
     try:
-        dados_existentes, max_id = carregar_dados_existentes(caminho_arquivo)
-        id_count = max_id + 1
-
+        dados_existentes = carregar_dados_existentes(caminho_arquivo)
+        
         
 
         #copy_tab()
 
-        codigo = "3010I505478001" #cod()
+        codigo = "3010I505478045" #cod()
         #copy_vazio()
 
         #tab_copy()
@@ -158,7 +149,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
         
         #copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
-        codigo_procedimento = "48558574" # cod_proc()
+        codigo_procedimento = "47558547" # cod_proc()
         #copy_vazio()
 
         df_paciente = carregar_dados_paciente(nome)
@@ -185,17 +176,19 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         #copy_vazio()
 
         #copy_click_info(cordenada_info_assistente_x, cordenada_info_assistente_y)
-        info_assistente = "11/04 FEITO CTT. RODRIGO = - 12/04 PARECER SOLICITADO. RODRIGO ="  #info_assistent()
+        info_assistente = "11/04 FEITO CTT. RODRIGO = - 12/04 TELEGRAMA SOLICITADO. RODRIGO ="  #info_assistent()
         #copy_vazio()
 
         #copy_click_info(cordenada_info_medico_x, cordenada_info_medico_y)
-        info_medic = "ANEXAR RX PE+US PE" # info_medico()
+        info_medic = "ANEXAR RM DA MAMA E BIOPSIA DE MAMA" # info_medico()
         #copy_vazio()
 
         #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
         #py.press("down")
 
         #copy_vazio()
+
+
 
         dados_pacientes = {
             "codigo": codigo,
@@ -406,7 +399,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
     #copy()
     #garantir_copia()
 
-    codigo = "3010I419857151"  #cod()
+    codigo = "3010I505478045"  #cod()
     #copy_vazio()
 
     dados = carregar_dados_processo()
@@ -423,7 +416,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
         # Verifica se a palavra_processo é igual ao tipo existente
         #copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         #garantir_copia()
-        info_assistente = "bla bla bla PARECER" #info_assistent()
+        info_assistente = "11/04 FEITO CTT. RODRIGO = - 12/04 TELEGRAMA SOLICITADO. RODRIGO =." #info_assistent()
         #copy_vazio()
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
         palavra_processo = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
@@ -455,7 +448,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
     else:
         #copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
         #garantir_copia_info()
-        info_assistente = "TELEGRAMA"  #info_assistent()
+        info_assistente = "PARECER"  #info_assistent()
         #copy_vazio()
 
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
@@ -468,7 +461,7 @@ def save_info_assistente(cordenadas, caminho_coletar):
 
         #tab_copy()
         #garantir_copia()
-        nome = "LIDUINA RODRIGUES DOS SANTOS"  #name()
+        nome = "ANDERSON RODRIGO RODRIGUES DOS SANTOS"  #name()
         #copy_vazio()
 
         #shift_tab()

@@ -4,7 +4,7 @@ from tkinter import messagebox
 import tkinter as tk
 from planilhas import sheet_processos
 import pandas as pd
-from firebase import atualizar_varios_campos
+from firebase_funcoes import atualizar_varios_campos
 
 
 def encontrar_palavra(palavras, info):
@@ -65,15 +65,17 @@ alteracoes_checkboxes = {}
   
 
 
-def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes, nome_digitado=None):
+def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes, codigos_filtrados=None):
 
     for widget in scrollable_frame.winfo_children():
         widget.destroy() 
 
     if tipo == "TODOS":
         dados_filtrados = [pessoa for pessoa in dados if not pessoa.get("removido", True)]
-    elif tipo == "buscar_info_assistente":
-        dados_filtrados = [pessoa for pessoa in dados if pessoa["info_assistente"] == nome_digitado]
+    elif tipo == "info_assistente" and codigos_filtrados:
+         dados_filtrados = [pessoa for pessoa in dados if pessoa["codigo"] in codigos_filtrados and not pessoa.get("removido", True)]
+    elif tipo == "info_medico" and codigos_filtrados:
+         dados_filtrados = [pessoa for pessoa in dados if pessoa["codigo"] in codigos_filtrados and not pessoa.get("removido", True)]
     else:
         dados_filtrados = [pessoa for pessoa in dados if pessoa["tipo"] == tipo and not pessoa.get("removido", True)]
     

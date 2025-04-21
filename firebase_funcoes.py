@@ -1,7 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, db
 import pandas as pd
-
+import json
 # Caminho da chave
 cred = credentials.Certificate("credenciais_firebase.json")
 
@@ -65,6 +65,7 @@ def enviar_dados_processo(processo):
 def carregar_dados_pacientes():
     ref = db.reference("dados_pacientes")
     dados = ref.get()
+    print(json.dumps(dados, indent=2, ensure_ascii=False))
 
     if not dados:
         return pd.DataFrame()
@@ -77,6 +78,64 @@ def carregar_dados_pacientes():
     df = pd.json_normalize(lista_dados)
 
     return df
+
+
+
+def carregar_dados_processo():
+    ref = db.reference("processos")
+    dados = ref.get()
+
+    if not dados:
+        return pd.DataFrame()
+    
+    lista_dados = [
+        item for item in dados.values()
+            if not item.get("resolvido", False)
+    ]
+
+    return pd.DataFrame(lista_dados)
+
+def listar_pacientes():
+    ref = db.reference("dados_pacientes")
+    dados = ref.get()
+
+    return dados
+
+def buscar_info_medico_assistente(nome_digitado, campo):
+
+    dados = listar_pacientes()
+
+    pacientes_encontrados = [] 
+
+    for codigo, paciente in dados.items():
+        procedimentos = paciente.get('procedimentos', [])
+        
+        for procedimento in procedimentos:
+            if procedimento:
+                info_campo = procedimento.get(campo)
+                if nome_digitado in info_campo:
+                   pacientes_encontrados.append(codigo)
+                   break       
+
+    return pacientes_encontrados    
+
+
+                
+"""resultado = listar_pacientes()
+
+nome_digitado = "TELEGRAMA"
+campo = "info_assistente"
+
+codigos = buscar_info_medico_assistente(nome_digitado, campo)
+
+df_resultado = filtrar_processo_por_codigo(codigos)
+
+print(df_resultado)
+
+"""
+
+
+
 
 def carregar_dados_paciente(codigo):
     caminho = f"dados_pacientes/{codigo}"
@@ -125,13 +184,10 @@ def buscar_info_paciente(dados_paciente):
     return codigo, nome_paciente, codigo_procedimento, nome_procedimento, info_medico, medico_solicitante
 
 
-nome = "ANDERSON RODRIGO RODRIGUES DOS"
-
-info = buscar_paciente_por_nome(nome)
-
-resultado =  buscar_info_paciente(info)
+"""resultado = buscar_palavra_info_assistente()
 
 print(resultado)
+"""
 
 def buscar_paciente_parecer(dados_paciente):
     nome_paciente = dados_paciente.get("nome", "Nome não encontrado")
@@ -150,19 +206,7 @@ def buscar_paciente_parecer(dados_paciente):
     return codigo, nome_paciente, info_medico, codigo_nome_procedimentos
     
 
-def carregar_dados_processo():
-    ref = db.reference("processos")
-    dados = ref.get()
 
-    if not dados:
-        return pd.DataFrame()
-    
-    lista_dados = [
-        item for item in dados.values()
-            if not item.get("resolvido", False)
-    ]
-
-    return pd.DataFrame(lista_dados)
 
 
 def atualizar_campo_processo(codigo, campo, valor):
