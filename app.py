@@ -1,9 +1,9 @@
-from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, exibir_processos
+from execucao_texto import processar_dados_por_nome, exibir_usuarios_padrao, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas, verificador_telas, obter_telas
 from coletar_dados import save_data, save_info_assistente, save_data_dois, copy_vazio
 from funcoes import bottoes_processos, salvar_alteracoes_processos, filtrar_nome_processos 
 from planilhas import carregar_dados_sheet_processos
-from firebase_funcoes import carregar_dados_processo, carregar_dados_pacientes, atualizar_info_medico, buscar_paciente_por_nome, buscar_info_paciente, buscar_info_medico_assistente
+from firebase_funcoes import carregar_dados_processo, atualizar_info_medico, buscar_paciente_por_nome, buscar_info_paciente, buscar_info_medico_assistente
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -51,12 +51,12 @@ class App(ctk.CTk):
         self.geometry(novo_tamanho)
 
 class Editar_dados(ctk.CTkToplevel):
-    def __init__(self, parent):
+    def __init__(self, parent, nome=""):
         super().__init__(parent)
 
         self.parent = parent
 
-        nome = self.parent.nome if self.parent.nome else ""
+        self.nome = self.parent.nome if self.parent.nome else ""
  
         self.title("Editar Dados")
         self.geometry("450x350") 
@@ -82,19 +82,19 @@ class Editar_dados(ctk.CTkToplevel):
             command=self.editar_dados
         )
         self.btn_editar.pack()
+
+        if self.nome:
+            self.carregar_dados_editar()
         
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
 
-    def editar_dados(self):
-        nome = self.entry_nome.get()  # Obtém o nome
-        dados_paciente = buscar_paciente_por_nome(nome)
+    def carregar_dados_editar(self):
+        
+        self.entry_nome.insert(0, self.nome)
 
-        if not dados_paciente:
-            print("Paciente não encontrado.")
-            return
+        dados_paciente = buscar_paciente_por_nome(self.nome)
         
         codigo, nome_paciente, codigo_proc, nome_proc, info_medico, medico_solicitante = buscar_info_paciente(dados_paciente)
-
 
         if not info_medico:
             print("Nenhuma informação de médico encontrada.")
@@ -102,13 +102,13 @@ class Editar_dados(ctk.CTkToplevel):
         
         self.textarea.delete("1.0", "end")
 
-        self.textarea.insert("1.0", info_medico)
-
-        print("Texto na área de edição:", self.textarea.get("1.0", "end-1c"))
-
+    def editar_dados(self):
+        self.nome = self.entry_nome.get()
         novo_texto = self.textarea.get("1.0", "end-1c") 
-        atualizar_info_medico(nome, novo_texto)
-        print(f"Dados editados com sucesso - Nome: {nome}, Novo Texto: {novo_texto}")
+
+        atualizar_info_medico(self.nome, novo_texto)
+        print(f"Dados editados com sucesso - Nome: {self.nome}, Novo Texto: {novo_texto}")
+
 
     def fechar_janela(self):
         self.withdraw()
@@ -155,8 +155,6 @@ class Check_list(ctk.CTkToplevel):
     def __init__(self, parent):#
         super().__init__(parent)
         
-        #self.app = app
-
         self.parent = parent
 
         self.botoes_frame = ctk.CTkFrame(self)#
@@ -165,11 +163,9 @@ class Check_list(ctk.CTkToplevel):
         self.busca_frame = ctk.CTkFrame(self)
         self.busca_frame.pack(pady=1, padx=20, fill="x")
  
-        # Input de busca
         self.busca_entry = ctk.CTkEntry(self.busca_frame, width=250)
         self.busca_entry.pack(side="left", padx=5, pady=5)
         
-        # Botões de busca
         self.buscar_medico_btn = ctk.CTkButton(
             self.busca_frame, 
             text="Buscar Info Médico",
@@ -190,7 +186,6 @@ class Check_list(ctk.CTkToplevel):
 
         self.dados = carregar_dados_processo().to_dict(orient="records")
         
-        # Armazena o filtro atual
         self.filtro_atual = "TODOS" 
 
         acoes_frame = ctk.CTkFrame(self)
@@ -206,7 +201,16 @@ class Check_list(ctk.CTkToplevel):
         atualizar_button = ctk.CTkButton(acoes_frame, text="Atualizar", command=self.atualizar_interface)
         atualizar_button.pack(side="left", padx=10, pady=20)
 
+        atualizar_button = ctk.CTkButton(acoes_frame, text="Excluir Resolvidos")
+        atualizar_button.pack(side="left", padx=10, pady=20)
+
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+
+    def fechar_janela(self):
+        self.withdraw()
+
+    def excluir_resolvidos(self):
+        print("excluido")
 
     def buscar_info_assistente(self):
         nome_digitado = self.busca_entry.get().upper()
@@ -232,9 +236,6 @@ class Check_list(ctk.CTkToplevel):
 
         filtrar_nome_processos(self.dados, campo, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)  
     
-    def fechar_janela(self):
-        self.withdraw()
-
     def confirmar_botao(self):
 
         salvar_alteracoes_processos(self.dados, self, self.alteracoes_checkboxes)
@@ -439,6 +440,11 @@ class Formatar_texto(ctk.CTkFrame):
     def tela_editar_dados(self):
         self.app.nome = self.input_nome.get()
 
+        if not self.app.nome:
+            self.textarea_texto.delete('0.0', 'end')
+            self.textarea_texto.insert('0.0', 'Digite um nome antes de editar.')
+            return
+
         dados_paciente = buscar_paciente_por_nome(self.app.nome)
 
         if not dados_paciente:
@@ -556,18 +562,18 @@ class Formatar_texto(ctk.CTkFrame):
 
     def organizar_texto(self):
         nome_digitado = self.input_nome.get()
-        #df_caminho = ler_arquivo(self.parent.caminho)
-        #df_caminho = carregar_dados_paciente(nome_digitado)
 
-        #if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
-            #return
+        if not self.validar_entrada(nome_digitado,  self.textarea_texto):   
+            return
+        
+        resultado = processar_dados_por_nome(nome_digitado)
+
+        self.textarea_texto.delete('0.0', 'end')
     
-        if nome_digitado is not None:
-            resultado = processar_dados_por_nome(nome_digitado)
-            self.textarea_texto.delete('0.0', 'end')
-            self.textarea_texto.insert('0.0', f'{resultado}')
+        if not resultado:
+            self.textarea_texto.insert('0.0', "Nenhum dado encontrado.")
         else:
-            print("nenhum dado carregado")
+            self.textarea_texto.insert('0.0', f'{resultado}')
 
     def organizar_nome_usuario(self):
         caminho_arquivo = f"{self.parent.caminho_pasta}/dados_coletados_padrao.json"
@@ -593,14 +599,16 @@ class Formatar_texto(ctk.CTkFrame):
 
     def organizar_parecer(self):
         nome_digitado = self.input_nome.get()
-        #df_caminho = ler_arquivo(self.parent.caminho)
 
-        if nome_digitado is not None:
-            resultado = processar_parecer_nome(nome_digitado)
-            self.textarea_texto.delete('0.0', 'end')
-            self.textarea_texto.insert('0.0', f'{resultado}')
+        if not self.validar_entrada(nome_digitado, self.textarea_texto):
+            return
+        
+        resultado = processar_dados_por_nome(nome_digitado)
+
+        if not resultado:
+            self.textarea_texto.insert('0.0', "Nenhum dado encontrado.")
         else:
-            print("nenhum dado carregado")
+            self.textarea_texto.insert('0.0', f'{resultado}')
 
     def mostrar_jenelas(self):
         janelas = obter_telas()
@@ -608,32 +616,10 @@ class Formatar_texto(ctk.CTkFrame):
         self.textarea_texto.delete('0.0', "end")
         self.textarea_texto.insert('0.0', janelas)
 
-    def validar_entrada_editar(self, nome, df):
-    
-        if not nome:
-            messagebox.showwarning("Aviso", "Nenhum nome foi digitado.")
-            return False
-
-        if df is None or df.empty:
-            messagebox.showwarning("Aviso", "Nenhum dado encontrado no arquivo.")
-            return False
-
-        if "nome" not in df.columns:
-            messagebox.showwarning("Erro", "A coluna 'nome' não foi encontrada no arquivo.")
-            return False
-
-        if not (df["nome"] == nome).any():
-            messagebox.showwarning("Aviso", "Nome não encontrado no arquivo.")
-            return False
-
-        return True 
-
-    def validar_entrada(self, nome_digitado, df_caminho, textarea, mensagem_vazia="Nenhum nome foi digitado.", mensagem_df_vazio="Nenhum dado encontrado."):
+    def validar_entrada(self, nome_digitado, textarea, mensagem_vazia="Nenhum nome foi digitado."):
 
         if not nome_digitado:
             mensagem = mensagem_vazia
-        elif df_caminho is None or df_caminho.empty:
-            mensagem = mensagem_df_vazio
         else:
             return True 
 

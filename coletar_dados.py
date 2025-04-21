@@ -149,7 +149,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
         
         #copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
-        codigo_procedimento = "47558547" # cod_proc()
+        codigo_procedimento = "47558544" # cod_proc()
         #copy_vazio()
 
         df_paciente = carregar_dados_paciente(nome)
@@ -163,7 +163,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         
         #tab_copy()
 
-        nome_procedimento = "HERNIORRAFIA INGUINAL"  #name_proc()
+        nome_procedimento = "COLECISTECTOMIA TOTAL"  #name_proc()
         #copy_vazio()
 
         """for _ in range(2):

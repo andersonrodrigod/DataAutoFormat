@@ -27,7 +27,7 @@ def obter_novo_id(codigo):
     return contador_atual
 
 
-
+# ENVIA OS DADOS DA FUNÇÃO COLETAR_DADOS PARA O BANCO DE DADOS
 def enviar_dados_pacientes(dados_paciente):
     codigo = dados_paciente["codigo"]
     nome = dados_paciente["nome"]
@@ -60,9 +60,8 @@ def enviar_dados_processo(processo):
     ref = db.reference(f"processos/{processo['codigo']}")
     ref.set(processo)
 
-# Existe duas funções de carregar pacientes um é pra todos a outra individual
-
-def carregar_dados_pacientes():
+#ESSA FUNÇÃO DEVE SER APAGADA
+"""def carregar_dados_pacientes():
     ref = db.reference("dados_pacientes")
     dados = ref.get()
     print(json.dumps(dados, indent=2, ensure_ascii=False))
@@ -77,10 +76,9 @@ def carregar_dados_pacientes():
 
     df = pd.json_normalize(lista_dados)
 
-    return df
+    return df"""
 
-
-
+# CARREGA OS DADOS EM UM DATA FRAME PARA SER UTILIZADO NO CHEKLIST COM NOME E CHECKBOXES COM EXCEÇÃO DO RESOLVIDOS
 def carregar_dados_processo():
     ref = db.reference("processos")
     dados = ref.get()
@@ -95,12 +93,14 @@ def carregar_dados_processo():
 
     return pd.DataFrame(lista_dados)
 
+# CARREGA DADOS_PACIENTE SEM SER UM DATAFRAME
 def listar_pacientes():
     ref = db.reference("dados_pacientes")
     dados = ref.get()
 
     return dados
 
+# PROCURA NOME DIGITADO NO DADOS_PACIENTE E RETORNA O CODIGO SE ACHAR OS NOMES
 def buscar_info_medico_assistente(nome_digitado, campo):
 
     dados = listar_pacientes()
@@ -120,23 +120,7 @@ def buscar_info_medico_assistente(nome_digitado, campo):
     return pacientes_encontrados    
 
 
-                
-"""resultado = listar_pacientes()
-
-nome_digitado = "TELEGRAMA"
-campo = "info_assistente"
-
-codigos = buscar_info_medico_assistente(nome_digitado, campo)
-
-df_resultado = filtrar_processo_por_codigo(codigos)
-
-print(df_resultado)
-
-"""
-
-
-
-
+# CARREGA DADOS_PACIENTES EM UM DATAFRAME
 def carregar_dados_paciente(codigo):
     caminho = f"dados_pacientes/{codigo}"
     ref = db.reference(caminho)
@@ -149,6 +133,7 @@ def carregar_dados_paciente(codigo):
 
     return df
 
+# BUSCA PACIENTE POR NOME PELO INDICE E RETORNA O CODIGO DO DADO CHAVE ASSIM COMO NO INPUT FORMATAR TEXTO QUE SÓ PESQUISA PELO NOME
 def buscar_paciente_por_nome(nome):
     ref_indices = db.reference("indices_nome")
     codigo = ref_indices.child(nome).get()
@@ -161,44 +146,48 @@ def buscar_paciente_por_nome(nome):
 
     return dados_paciente
 
-# CRIAR CONDICIONAIS ONDE BARRA O PROCESSO SE NAO VIER O DADO
-
+# CRIAR CONDICIONAIS ONDE BARRA O PROCESSO SE NAO VIER O DADO / PROCURA O CODIGO DO PACIENTE PELO INDICE(NOME/CODIGO) QUE RETORNOU NA FUNÇÃO buscar_paciente_por_nome TRANSFORMA A CHAVE PROCEDIEMNTOS EM UM DATA FRAME E RETORNA OS DADOS PARA FORMATAR TEXTO 
 def buscar_info_paciente(dados_paciente):
     if not dados_paciente:
-        return None, None, None, None, None
+        return None, None, None, None, None, None
 
     nome_paciente = dados_paciente.get("nome", "Nome não encontrado")
+    procedimentos_raw = dados_paciente.get("procedimentos", [])
 
-    procedimentos = [proc for proc in dados_paciente["procedimentos"].values() if proc]
-    df_procedimentos = pd.DataFrame(procedimentos)
+    if isinstance(procedimentos_raw, dict):
+        procedimentos = [proc for proc in procedimentos_raw.values() if proc]
+    else:
+        procedimentos = [proc for proc in procedimentos_raw if proc]
 
-    if df_procedimentos.empty:
-        return None, None, None, None, None
+    if not procedimentos:
+        return None, None, None, None, None, None
+    
+    procedimento = procedimentos[0]
 
-    codigo = df_procedimentos["codigo"].iloc[0]
-    info_medico = df_procedimentos["info_medico"].iloc[0]
-    codigo_procedimento = df_procedimentos["codigo_procedimento"].iloc[0]
-    nome_procedimento = df_procedimentos["nome_procedimento"].iloc[0]
-    medico_solicitante = df_procedimentos["medico_solicitante"].iloc[0]
+    codigo = procedimento.get("codigo", "Código não encontrado")
+    info_medico = procedimento.get("info_medico", "Informação médica não encontrada")
+    codigo_procedimento = procedimento.get("codigo_procedimento", "Código de procedimento não encontrado")
+    nome_procedimento = procedimento.get("nome_procedimento", "Nome de procedimento não encontrado")
+    medico_solicitante = procedimento.get("medico_solicitante", "Médico solicitante não encontrado")
 
     return codigo, nome_paciente, codigo_procedimento, nome_procedimento, info_medico, medico_solicitante
 
-
-"""resultado = buscar_palavra_info_assistente()
-
-print(resultado)
-"""
-
+# BUSCA PACIENTE POR NOME E FORMATAR TEXTO PARECER
 def buscar_paciente_parecer(dados_paciente):
     nome_paciente = dados_paciente.get("nome", "Nome não encontrado")
+    procedimentos_raw = dados_paciente.get("procedimentos", [])
 
-    procedimentos = [proc for proc in dados_paciente.get("procedimentos").values() if proc]
-    df_procedimentos = pd.DataFrame(procedimentos)
 
-    if df_procedimentos.empty:
+    if isinstance(procedimentos_raw, dict):
+        procedimentos = [proc for proc in dados_paciente.get("procedimentos").values() if proc]
+    else:
+        procedimentos = [proc for proc in procedimentos_raw if proc]
+
+    if not procedimentos:
         return None, None, None, None
-    
 
+    df_procedimentos = pd.DataFrame(procedimentos)
+    
     codigo = df_procedimentos["codigo"].iloc[0]
     info_medico = df_procedimentos["info_medico"].iloc[0]
     codigo_nome_procedimentos = df_procedimentos[["codigo_procedimento", "nome_procedimento"]].values.tolist()
@@ -206,22 +195,21 @@ def buscar_paciente_parecer(dados_paciente):
     return codigo, nome_paciente, info_medico, codigo_nome_procedimentos
     
 
-
-
-
+# ATUALIZA A INFORMAÇÃO DO CAMPO ESTÁ SENDO UTILIZADA NO CASO PARA ATUALIZAR O CAMPO DE REMOVIDO DE TRUE PARA FALSE CASO SE AUTOMAÇÃO ENCONTRAR UM DADO EM TRUE ELE RETORNA PARA FALSE
 def atualizar_campo_processo(codigo, campo, valor):
     caminho = f"processos/{codigo}"
     ref = db.reference(caminho)
     print(caminho)
     ref.update({campo: valor})
 
+# ATUALIZA A INFORMAÇÃO DOS CAMPOS ESTÁ SENDO UTILIZADA NO CASO PARA ATUALIZAR QUANDO SÃO DOIS CAMPOS POR EXEMPLO REMOVIDO E O DADO PROCESSO ELE ATUALIZA COM NOVAS INFORMAÇÕES
 def atualizar_varios_campos(codigo, campos: dict):
     caminho = f"processos/{codigo}"
     ref = db.reference(caminho)
     ref.update(campos)
     print(f"[Firebase] Atualizado {codigo}: {campos}")
 
-
+# ATUALIZA A NOVA INFORMAÇÃO DO ESDITAR DADO DO INFO_MEDICO
 def atualizar_info_medico(nome, novo_valor):
     dados_paciente = buscar_paciente_por_nome(nome)
 
@@ -235,18 +223,25 @@ def atualizar_info_medico(nome, novo_valor):
     print("dados_paciente:", dados_paciente)
     print("info_medico:", info_medico)
 
-    if not info_medico:
-        print("Nenhum procedimento encontrado.")
-        return
-    
+ 
     procedimentos = dados_paciente.get("procedimentos", {})
     id_proc = None
-    for id_, proc in procedimentos.items():
-        if proc.get("codigo_procedimento") == codigo_proc:
-            id_proc = id_
-            break
 
-    if not id_proc:
+    if isinstance(procedimentos, dict):
+        for id_, proc in procedimentos.items():
+            if proc and proc.get("codigo_procedimento") == codigo_proc:
+                id_proc = id_
+                break
+    elif isinstance(procedimentos, list):
+        for id_, proc in enumerate(procedimentos):
+            if proc and proc.get("codigo_procedimento") == codigo_proc:
+                id_proc = id_
+                break
+    else:
+        print("Formato de procedimentos não reconhecido.")
+        return 
+
+    if id_proc is None:
         print("Procedimento com esse código não encontrado.")
         return
 
