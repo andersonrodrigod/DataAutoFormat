@@ -1,9 +1,7 @@
-from collections import OrderedDict
-from loader import filtrar_nome, filtrar_nome_no_drop
+from loader import filtrar_nome
 from palavras import substituicoes, regras_substituicao, delete_texto, questiona_texto, frases_delete, block_questionamento, questionamento_texto, tipos_observacao
-from processar_texto import substituir_texto, remover_caracteres, deletar_texto, deletar_info_medico, deletar_frases, processar_data, remover_datas, formatar_solicitacao, formatar_questionamento, consulta, endereco, formatar_texto, formatar_texto_parecer, texto_nome, texto_procedimento, definir_texto_procedimento, texto_obs
-from funcoes import ajustar_nome_codigo
-from firebase_funcoes import buscar_info_paciente, buscar_paciente_por_nome, buscar_paciente_parecer, carregar_dados_processo
+from processar_texto import substituir_texto, remover_caracteres, deletar_texto, deletar_info_medico, deletar_frases, processar_data, remover_datas, formatar_solicitacao, formatar_questionamento, consulta, formatar_texto, formatar_texto_parecer, texto_nome, texto_procedimento, definir_texto_procedimento, texto_obs
+from firebase_funcoes import buscar_info_paciente, buscar_paciente_por_nome, buscar_paciente_parecer
 
 
 

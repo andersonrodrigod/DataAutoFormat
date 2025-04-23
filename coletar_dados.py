@@ -6,19 +6,18 @@ import json
 import pandas as pd
 import pygetwindow as gw
 from cordenadas import carregar_cordenada
-from palavras import todos_codigos, block_padrao, palavras_info_assistente, mapeamento_palavras_info_assistente
+from palavras import palavras_info_assistente, mapeamento_palavras_info_assistente
 from funcoes import encontrar_palavra, obter_palavra
 from datetime import datetime
-from planilhas import sheet_processos, sheet_coletar_dados, carregar_dados_sheet_processos
 from pytz import timezone
-from firebase_funcoes import enviar_dados_processo, atualizar_campo_processo, carregar_dados_processo, atualizar_varios_campos, carregar_dados_paciente, enviar_dados_pacientes
+from firebase_funcoes import enviar_dados_processo, atualizar_campo_processo, carregar_dados_processo, atualizar_varios_campos, enviar_dados_pacientes, buscar_processo_lixeira, deletar_processo_lixeira, buscar_paciente_lixeira, deletar_paciente_lixeira, enviar_paciente_da_lixeira, buscar_paciente_dados, verificar_procedimento_existe
 from loader import  filtrar_codigo
 
 
 def cod():
     return pyperclip.paste()
 
-def name():
+def name():     
     return pyperclip.paste()
 
 def cod_proc():
@@ -65,6 +64,7 @@ def garantir_copia():
         print("Falha ao copiar. Pressionando Enter duas vezes...")
         py.press('enter')
         py.press('enter')
+    raise RuntimeError("Falha ao copiar o texto após 7 tentativas.")
 
 def focar_janela(nome_janela):
     janela = gw.getWindowsWithTitle(nome_janela)
@@ -135,8 +135,6 @@ def save_data(caminho_arquivo, cordenadas_caminho):
     try:
         dados_existentes = carregar_dados_existentes(caminho_arquivo)
         
-        
-
         #copy_tab()
 
         codigo = "3010I505478045" #cod()
@@ -149,21 +147,22 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
         
         #copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
-        codigo_procedimento = "47558544" # cod_proc()
+        codigo_procedimento = "42558541"  #cod_proc()
         #copy_vazio()
 
-        df_paciente = carregar_dados_paciente(nome)
+        dados_paciente = buscar_paciente_dados(codigo)
+        procedimento_exist = verificar_procedimento_existe(dados_paciente, codigo_procedimento)
 
-        if not df_paciente.empty:
-            if (df_paciente["codigo_procedimento"] == codigo_procedimento).any():
-                print("Esse procedimento já existe")
-                # py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-                # py.press("down")
-                return None
+
+        if procedimento_exist is not None:
+            copy_vazio()
+            #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+            #py.press("down")
+            return None
         
         #tab_copy()
 
-        nome_procedimento = "COLECISTECTOMIA TOTAL"  #name_proc()
+        nome_procedimento = "LAPAROSCOPIA TOTAL"  #name_proc()
         #copy_vazio()
 
         """for _ in range(2):
@@ -202,12 +201,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
         enviar_dados_pacientes(dados_pacientes)
 
-        dados_sheet = [
-            [codigo, nome, codigo_procedimento, nome_procedimento, info_assistente, info_medic, medico_solicitante]
-        ]
-
         dados_existentes.append(dados_pacientes)
-        sheet_coletar_dados.append_rows(dados_sheet)
         salvar_dados(dados_existentes, caminho_arquivo)
 
         return dados_pacientes
@@ -360,12 +354,8 @@ def save_data_dois(caminho_arquivo, cordenadas_caminho):
             "medico_solicitante": medico_solicitante,
         }
 
-        dados_sheet = [
-            [codigo, nome, codigo_procedimento, nome_procedimento, info_assistente, info_medic, medico_solicitante]
-        ]
 
         dados_existentes.append(dados)
-        sheet_coletar_dados.append_rows(dados_sheet)
         salvar_dados(dados_existentes, caminho_arquivo)
 
         return dados
@@ -440,62 +430,73 @@ def save_info_assistente(cordenadas, caminho_coletar):
 
             atualizar_varios_campos(codigo, atualizacoes)
 
-            #sheet_processos.update_cell(index + 2, 3, palavra_processo)  # Atualiza a célula correspondente
             #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
             #time.sleep(0.5)
             #py.press("down")
             print("Código já está no banco de dados, tipo atualizado.")
-    else:
-        #copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
-        #garantir_copia_info()
-        info_assistente = "PARECER"  #info_assistent()
-        #copy_vazio()
 
-        palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
-        palavra_encontrada = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
+    elif True:
+        processo_lixeira = buscar_processo_lixeira(codigo)
+        paciente_lixeira = buscar_paciente_lixeira(codigo)
+        
 
-        palavra_processo = palavra_encontrada
+        if processo_lixeira:
+            # Tira ele da lixeira e volta pro banco principal
+            processo_lixeira["removido"] = False
+            processo_lixeira["visto"] = False
+            processo_lixeira["verificar"] = False
+            processo_lixeira["resolvido"] = False
 
-        #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
-        #time.sleep(0.5)
+            enviar_dados_processo(processo_lixeira)
+            
+            deletar_processo_lixeira(codigo)         
+        if paciente_lixeira:
+            enviar_paciente_da_lixeira(codigo)
+            deletar_paciente_lixeira(codigo)
+        else:
+            #copy_click(cordenada_info_assistente_x, cordenada_info_assistente_y)
+            #garantir_copia_info()
+            info_assistente = "PARECER"  #info_assistent()
+            #copy_vazio()
 
-        #tab_copy()
-        #garantir_copia()
-        nome = "ANDERSON RODRIGO RODRIGUES DOS SANTOS"  #name()
-        #copy_vazio()
+            palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
+            palavra_encontrada = obter_palavra(palavra_encontrada, mapeamento_palavras_info_assistente)
 
-        #shift_tab()
+            palavra_processo = palavra_encontrada
 
-        fuso_horario = timezone("America/Sao_Paulo")
-        agora = datetime.now(fuso_horario)
+            #py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+            #time.sleep(0.5)
 
-        data = agora.strftime("%Y-%m-%d")
-        hora = agora.strftime("%H:%M")
+            #tab_copy()
+            #garantir_copia()
+            nome = "ANDERSON RODRIGO RODRIGUES DOS SANTOS"  #name()
+            #copy_vazio()
 
-        processo = {
-            "codigo": codigo,
-            "nome": nome,
-            "tipo": palavra_processo,
-            "data": data,
-            "hora": hora,
-            "visto": False,
-            "verificar": False,
-            "resolvido": False,
-            "removido": False,
-            "visto_data_hora": "",
-            "resolvido_data_hora": ""
-        }
+            #shift_tab()
 
-        usuario_sheet = [
-            [nome, codigo, palavra_processo, data, hora, False, False, False, False]
-        ]
+            fuso_horario = timezone("America/Sao_Paulo")
+            agora = datetime.now(fuso_horario)
 
-        enviar_dados_processo(processo)
+            data = agora.strftime("%Y-%m-%d")
+            hora = agora.strftime("%H:%M")
 
-        #dados.append(usuario)
-        sheet_processos.append_rows(usuario_sheet)
-        #salvar_processo(caminho, dados)
+            processo = {
+                "codigo": codigo,
+                "nome": nome,
+                "tipo": palavra_processo,
+                "data": data,
+                "hora": hora,
+                "visto": False,
+                "verificar": False,
+                "resolvido": False,
+                "removido": False,
+                "visto_data_hora": [],
+                "resolvido_data_hora": []
+            }
 
-        if palavra_processo == "SEM OBSERVACAO":
-            save_data(caminho_coletar, cordenadas)
+
+            enviar_dados_processo(processo)
+
+            if palavra_processo == "SEM OBSERVACAO":
+                save_data(caminho_coletar, cordenadas)
 

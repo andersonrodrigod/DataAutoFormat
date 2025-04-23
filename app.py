@@ -1,14 +1,12 @@
-from execucao_texto import processar_dados_por_nome, exibir_usuarios_padrao, exibir_processos
+from execucao_texto import processar_dados_por_nome, exibir_usuarios_padrao, processar_parecer_nome, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, atualizar_telas, verificador_telas, obter_telas
 from coletar_dados import save_data, save_info_assistente, save_data_dois, copy_vazio
 from funcoes import bottoes_processos, salvar_alteracoes_processos, filtrar_nome_processos 
-from planilhas import carregar_dados_sheet_processos
-from firebase_funcoes import carregar_dados_processo, atualizar_info_medico, buscar_paciente_por_nome, buscar_info_paciente, buscar_info_medico_assistente
+from firebase_funcoes import carregar_dados_processo, atualizar_info_medico, buscar_paciente_por_nome, buscar_info_paciente, buscar_info_medico_assistente, excluir_processos_removidos, mover_pacientes_para_lixeira
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
 import time
-import json
 
 class App(ctk.CTk):
     def __init__(self, title, size):
@@ -201,8 +199,8 @@ class Check_list(ctk.CTkToplevel):
         atualizar_button = ctk.CTkButton(acoes_frame, text="Atualizar", command=self.atualizar_interface)
         atualizar_button.pack(side="left", padx=10, pady=20)
 
-        atualizar_button = ctk.CTkButton(acoes_frame, text="Excluir Resolvidos")
-        atualizar_button.pack(side="left", padx=10, pady=20)
+        atualizar_button = ctk.CTkButton(acoes_frame, text="Excluir Resolvidos", command=self.excluir_resolvidos)
+        atualizar_button.pack(side="right", padx=10, pady=20)
 
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
 
@@ -210,7 +208,9 @@ class Check_list(ctk.CTkToplevel):
         self.withdraw()
 
     def excluir_resolvidos(self):
-        print("excluido")
+
+        excluir_processos_removidos()
+        mover_pacientes_para_lixeira()
 
     def buscar_info_assistente(self):
         nome_digitado = self.busca_entry.get().upper()
@@ -424,7 +424,7 @@ class Formatar_texto(ctk.CTkFrame):
         self.frame_coluna2 = ctk.CTkFrame(self)
         self.frame_coluna2.grid(row=0, column=2, padx=(5, 5), pady=10, sticky="nsew")
 
-        self.btn_exibir_processos = ctk.CTkButton(self.frame_coluna2, text="Exibir Processos", command=self.organizar_exibir_processos, width=170)
+        self.btn_exibir_processos = ctk.CTkButton(self.frame_coluna2, text="Exibir Processos", width=170)
         self.btn_exibir_processos.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")   
 
         self.btn_check_list = ctk.CTkButton(self.frame_coluna2, width=170, text="Check List", command=self.tela_check_list)
@@ -586,7 +586,7 @@ class Formatar_texto(ctk.CTkFrame):
         else:
             self.textarea_texto.insert('0.0', "Nenhum dado encontrado")
     
-    def organizar_exibir_processos(self):
+    """def organizar_exibir_processos(self):
         df_sheet_processos = carregar_dados_sheet_processos()
 
         if df_sheet_processos.empty:
@@ -595,7 +595,7 @@ class Formatar_texto(ctk.CTkFrame):
         else:
             resultado = exibir_processos(df_sheet_processos)
             self.textarea_texto.delete('0.0', 'end')
-            self.textarea_texto.insert('0.0', f'{resultado}')
+            self.textarea_texto.insert('0.0', f'{resultado}')"""
 
     def organizar_parecer(self):
         nome_digitado = self.input_nome.get()
@@ -603,7 +603,9 @@ class Formatar_texto(ctk.CTkFrame):
         if not self.validar_entrada(nome_digitado, self.textarea_texto):
             return
         
-        resultado = processar_dados_por_nome(nome_digitado)
+        resultado = processar_parecer_nome(nome_digitado)
+
+        self.textarea_texto.delete('0.0', 'end')
 
         if not resultado:
             self.textarea_texto.insert('0.0', "Nenhum dado encontrado.")

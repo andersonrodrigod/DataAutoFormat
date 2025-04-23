@@ -2,9 +2,9 @@ from palavras import botoes_filtro
 import customtkinter as ctk
 from tkinter import messagebox
 import tkinter as tk
-from planilhas import sheet_processos
-import pandas as pd
 from firebase_funcoes import atualizar_varios_campos
+from datetime import datetime
+
 
 
 def encontrar_palavra(palavras, info):
@@ -30,9 +30,6 @@ def ajustar_nome_codigo(usuarios):
 
     return "\n".join(resultados)
     
-
-
-
 def bottoes_processos(frame, dados, scrollable_frame, alteracoes_checkboxes, filtro, callback_set_filtro):
     botoes = botoes_filtro
     for i, texto in enumerate(botoes):
@@ -46,12 +43,18 @@ def bottoes_processos(frame, dados, scrollable_frame, alteracoes_checkboxes, fil
     filtrar_nome_processos(dados, filtro, scrollable_frame, alteracoes_checkboxes)
         
 def on_checkbox_click(index, tipo, checkbox_var, dados, alteracoes_checkboxes):
-    """
-    Função que é chamada quando um checkbox é alterado.
-    Atualiza o dado local e marca a alteração no dicionário `alteracoes_checkboxes`.
-    """
+
     pessoa = dados[index]
-    pessoa[tipo] = checkbox_var.get()
+    novo_valor = checkbox_var.get()
+    pessoa[tipo] = novo_valor
+
+    
+    # Verifica se a chave 'visto_data_hora' existe, se não, inicializa como lista vazia
+    if tipo == "visto" and novo_valor:
+        pessoa["visto_data_hora"].append(datetime.now().strftime("%d/%m/%Y %H:%M"))
+
+    if tipo == "resolvido" and novo_valor:
+        pessoa["resolvido_data_hora"].append(datetime.now().strftime("%d/%m/%Y %H:%M"))
 
     alteracoes_checkboxes[pessoa["codigo"]] = pessoa
 
@@ -60,10 +63,6 @@ def on_checkbox_click(index, tipo, checkbox_var, dados, alteracoes_checkboxes):
 
 
 alteracoes_checkboxes = {} 
-
-
-  
-
 
 def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes, codigos_filtrados=None):
 
@@ -80,6 +79,8 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes,
         dados_filtrados = [pessoa for pessoa in dados if pessoa["tipo"] == tipo and not pessoa.get("removido", True)]
     
     for i, pessoa in enumerate(dados_filtrados):
+        pessoa.setdefault("visto_data_hora", [])
+        pessoa.setdefault("resolvido_data_hora", [])
         nome_entry = ctk.CTkEntry(scrollable_frame, width=320, font=("Arial", 14))
         nome_entry.insert(0, pessoa["nome"])
         nome_entry.configure(state="readonly")  # Torna o campo somente leitura
@@ -110,22 +111,7 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes,
         resolvido_checkbox.grid(row=i, column=3, padx=10, pady=5)
     
 
-def remover_linhas_por_nome(nomes):
-    # Aqui você deve usar a API do Google Sheets para excluir as linhas
-    # Supondo que você tenha uma função para acessar a planilha com `sheet_processos`
-    
-    for nome in nomes:
-        # A função `find` pode ser usada para procurar pelo nome da linha na planilha
-        cell = sheet_processos.find(nome)
-        
-        if cell:
-            # Deletando a linha onde o nome foi encontrado
-            sheet_processos.delete_rows(cell.row)  # Deleta a linha inteira com base no número da linha
-
 def salvar_alteracoes_processos(dados, top_level_window, alteracoes_checkboxes):
-    """
-    Função que salva as alterações no Google Sheets, enviando em batch update apenas os dados alterados.
-    """
     try:
         # Filtra os dados alterados (apenas as pessoas que foram modificadas)
         dados_alterados = [pessoa for pessoa in dados if pessoa["codigo"] in alteracoes_checkboxes]
@@ -146,12 +132,18 @@ def salvar_alteracoes_processos(dados, top_level_window, alteracoes_checkboxes):
 
             if pessoa["resolvido"]:
                 campos["removido"] = True
+                campos["visto"] = False
+                campos["verificar"] = False
+                campos["resolvido"] = False
             else:
                 campos["removido"] = False
 
+            if pessoa["visto_data_hora"]:
+                campos["visto_data_hora"] = pessoa["visto_data_hora"]
+            if pessoa["resolvido_data_hora"]:
+                campos["resolvido_data_hora"] = pessoa["resolvido_data_hora"]
+
             atualizar_varios_campos(codigo, campos)
-
-
 
         # Limpa o dicionário de alterações
         alteracoes_checkboxes.clear()
@@ -166,21 +158,3 @@ def salvar_alteracoes_processos(dados, top_level_window, alteracoes_checkboxes):
         messagebox.showerror("Erro", f"Ocorreu um erro ao salvar as alterações: {e}")
         top_level_window.lift()
 
-def filtrar_processos_resolvidos(dados):
-    df = pd.DataFrame(dados)  # Converte a lista de dicionários em DataFrame
-
-    if "resolvido" in df.columns:  # Verifica se a coluna existe
-        df["resolvido"] = df["resolvido"].astype(str).str.lower() == "true"
-        # Filtrando as linhas onde "resolvido" é True
-        df_filtrado = df[~df["resolvido"]]  # Exclui as linhas onde "resolvido" é True
-
-        if "nome" in df.columns:
-            nomes_para_remover = df[df["resolvido"]]["nome"].tolist()
-            remover_linhas_por_nome(nomes_para_remover)
-
-        processos_resolvidos_existem = not df[df["resolvido"]].empty
-    else:
-        df_filtrado = df  # Mantém o DataFrame original sem filtro
-        processos_resolvidos_existem = False  # Nenhum processo foi resolvido
-
-    return df_filtrado, processos_resolvidos_existem
