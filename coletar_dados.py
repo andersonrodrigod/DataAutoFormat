@@ -5,7 +5,8 @@ import time
 import json
 import pandas as pd
 from cordenadas import carregar_cordenada
-from palavras import todos_codigos, block_padrao, palavras_info_assistente, palavras_info_medico 
+from palavras import todos_codigos, block_padrao, palavras_info_assistente, palavras_info_medico
+
 
 def cod():
     return pyperclip.paste()
