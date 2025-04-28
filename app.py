@@ -18,6 +18,7 @@ class App(ctk.CTk):
         self.caminho = None
         self.caminho_pasta = None
         self.check_list = None 
+        self.nome = None
         
         self.grid_columnconfigure((0, 1, 2), weight=1, uniform="cols")
         self.grid_rowconfigure(0, weight=1)
@@ -43,7 +44,6 @@ class Check_list(ctk.CTkToplevel):
         super().__init__(parent)
         
         self.parent = parent
-
 
         self.botoes_frame = ctk.CTkFrame(self)#
         self.botoes_frame.pack(pady=5, padx=20, fill="x")
@@ -129,20 +129,10 @@ class Check_list(ctk.CTkToplevel):
 
         filtrar_nome_processos(self.dados, campo, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
 
-
-
     def excluir_resolvidos(self):
         print("excluir resolvidos")
         #excluir_processos_removidos()
         #mover_pacientes_para_lixeira()
-
-    def carregar_dados_usuarios(self):
-        caminho_arquivo_dados = self.parent.caminho
-
-        df = ler_arquivo(caminho_arquivo_dados)
-
-        return df
-    
 
     def confirmar_botao(self):
         caminho_arquivo_processo = f'{self.parent.caminho_pasta}/processos.json'
@@ -158,19 +148,15 @@ class Check_list(ctk.CTkToplevel):
         else:
             self.set_filtro(self.filtro_atual)
 
-    def atualizar_interface(self):
-        
-        # Limpar o conteúdo do scrollable_frame
+    def atualizar_interface(self): 
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
-
 
         self.dados = self.carregar_dados_processos()
 
         bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame, self.alteracoes_checkboxes, self.filtro_atual, self.set_filtro)
 
-    def carregar_dados_processos(self):
-        
+    def carregar_dados_processos(self):  
         caminho_arquivo = f"{self.parent.caminho_pasta}/processos.json"
         df = ler_arquivo(caminho_arquivo)
 
