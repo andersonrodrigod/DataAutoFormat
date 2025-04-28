@@ -1,6 +1,6 @@
 import re
 from palavras import regras_substituicao, substituicoes, palavras_parecer, parecer_block, categorias
-from loader import filtrar_nome_no_drop, filtrar_nome
+
 
 
 def processar_data(texto):

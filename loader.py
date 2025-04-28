@@ -33,14 +33,20 @@ def criar_arquivo_erro(caminho_pasta):
         df.to_json("erro.json", orient="records", indent=4)
         print("arquivo criado com sucesso")
 
-def criar_arquivo_coletar_padrao(caminho_pasta):
-    if caminho_pasta and not os.path.exists(caminho_pasta + "/dados_coletados_padrao.json"):
+def criar_arquivo_processos(caminho_pasta):
+    if caminho_pasta and not os.path.exists(caminho_pasta + "/processos.json"):
         df = pd.DataFrame()
-        df.to_json("dados_coletados_padrao.json", orient="records", indent=4)
+        df.to_json("processos.json", orient="records", indent=4)
         print("arquivo criado com sucesso")
 
 def ler_arquivo(arquivo):
     return pd.read_json(arquivo)
+
+def carregar_dados_existentes(caminho_arquivo):
+    if os.path.exists(caminho_arquivo):
+        with open(caminho_arquivo, "r", encoding="utf-8") as f:
+            dados_existentes = json.load(f)
+        return dados_existentes
 
 def salvar_dados(dados, caminho_arquivo):
     if os.path.exists(caminho_arquivo):
@@ -55,6 +61,20 @@ def salvar_dados(dados, caminho_arquivo):
         json.dump(existing_data, f, ensure_ascii=False, indent=4)
 
     messagebox.showinfo("Sucesso", "Erro enviado com sucesso")
+
+def editar_dados(codigo, atualizacoes, caminho_arquivo):
+    dados = carregar_dados_existentes(caminho_arquivo)
+
+    for usuario in dados:
+        if usuario.get("codigo") == codigo:
+            for chave, novo_valor in atualizacoes.items():
+                if isinstance(usuario.get(chave), list):
+                    usuario[chave].append(novo_valor)
+                else:
+                    usuario[chave] = novo_valor
+            break
+    with open(caminho_arquivo, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=4, ensure_ascii=False)
 
 def filtrar_nome(df, nome):
     return df[df["nome"] == nome].drop_duplicates(subset="nome", keep="first")

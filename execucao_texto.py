@@ -2,7 +2,7 @@ from collections import OrderedDict
 from loader import filtrar_nome, filtrar_nome_no_drop
 from palavras import substituicoes, regras_substituicao, delete_texto, questiona_texto, frases_delete, block_questionamento, questionamento_texto, tipos_observacao
 from processar_texto import substituir_texto, remover_caracteres, deletar_texto, deletar_info_medico, deletar_frases, processar_data, remover_datas, formatar_solicitacao, formatar_questionamento, consulta, endereco, formatar_texto, formatar_texto_parecer, texto_nome, texto_procedimento, definir_texto_procedimento, texto_obs
-from funcoes import ajustar_nome_codigo
+#from funcoes import ajustar_nome_codigo
 import pandas as pd
 import numpy as np
 
@@ -46,7 +46,6 @@ def processar_dados_por_nome(df, nome):
         
     return enviar_texto
     
-
 def processar_parecer_nome(df, nome):
     bf_drop = filtrar_nome(df, nome)
 
@@ -62,24 +61,6 @@ def processar_parecer_nome(df, nome):
 
     return resultado
     
-def exibir_usuarios_padrao(df):
-
-    if not df.empty:
-        usuario_nome = df[["nome", "codigo"]].drop_duplicates(subset="nome", keep="first")
-        usuario_nome = usuario_nome.to_numpy()
-
-        resultados = []
-
-        for nome, codigo in usuario_nome:
-            resultado = f"{codigo} - {nome}"
-            resultados.append(resultado)
-        
-        
-        return "\n".join(resultados)
-    else:
-        return "num valor padrão foi varrido"        
-
-
 def exibir_processos(df):
     resultado = ""
 
@@ -102,21 +83,7 @@ def exibir_processos(df):
 
 
 
-    
 
-def processar_dado_padrao_por_nome(df, nome):
-    bf = filtrar_nome(df, nome) 
-
-    nome_procedimento = bf["nome_procedimento"].iloc[0]
-    codigo_procedimento = str(bf["codigo_procedimento"].iloc[0])
-
-    print(type(codigo_procedimento))
-
-    if not bf.empty:
-        texto_nome_formatado = texto_nome(nome)
-        texto_procedimento_formatado = texto_procedimento(nome_procedimento)
-        texto_codigo_procedimento = definir_texto_procedimento(codigo_procedimento)
-        return f"{texto_nome_formatado}{texto_procedimento_formatado}{texto_codigo_procedimento}{texto_obs()}"
     
 
 

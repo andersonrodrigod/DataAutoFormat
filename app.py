@@ -1,12 +1,12 @@
-from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_usuarios_padrao, processar_dado_padrao_por_nome, exibir_processos
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_coletar_padrao, criar_arquivo_novo_dados
-from coletar_dados import save_data, save_dados_padrao, save_info_assistente
-from funcoes import bottoes_processos, salvar_alteracoes_sheet, filtrar_processos_resolvidos
-from planilhas import carregar_dados_sheet_processos
+from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_processos
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, criar_arquivo_processos
+from coletar_dados import save_data, save_info_assistente, copy_vazio
+from funcoes import filtrar_nome_processos, bottoes_processos, buscar_info_medico_assistente, salvar_alteracoes_processos
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
 import time
+import pandas as pd
 
 class App(ctk.CTk):
     def __init__(self, title, size):
@@ -17,12 +17,14 @@ class App(ctk.CTk):
         self.df = None
         self.caminho = None
         self.caminho_pasta = None
-        #self.check_list = None 
+        self.check_list = None 
         
         self.grid_columnconfigure((0, 1, 2), weight=1, uniform="cols")
         self.grid_rowconfigure(0, weight=1)
 
         self.check_list = Check_list(self)
+        self.check_list.withdraw()
+        
         self.registrar_cordenada = Registrar_cordenada(self)
         self.formatar_texto = Formatar_texto(self, self.check_list, self) 
         self.menu = Menu(self, self.formatar_texto, self.registrar_cordenada) 
@@ -40,28 +42,48 @@ class Check_list(ctk.CTkToplevel):
     def __init__(self, parent):#
         super().__init__(parent)
         
-        #self.app = app
-
         self.parent = parent
 
-        self.parent.alterar_tamanho("1240x700")
 
         self.botoes_frame = ctk.CTkFrame(self)#
-        self.botoes_frame.pack(pady=10, padx=20, fill="x")
+        self.botoes_frame.pack(pady=5, padx=20, fill="x")
 
-        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=500)#
-        self.scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
+        self.busca_frame = ctk.CTkFrame(self)
+        self.busca_frame.pack(pady=1, padx=20, fill="x")
+ 
+        self.busca_entry = ctk.CTkEntry(self.busca_frame, width=250)
+        self.busca_entry.pack(side="left", padx=5, pady=5)
 
-        self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
+        self.buscar_medico_btn = ctk.CTkButton(
+            self.busca_frame, 
+            text="Buscar Info Médico",
+            command=self.buscar_info_medico
+        )
+        self.buscar_medico_btn.pack(side="left", padx=5, pady=5)
         
+        self.buscar_assistente_btn = ctk.CTkButton(
+            self.busca_frame, 
+            text="Buscar Info Assistente",
+            command=self.buscar_info_assistente
+        )
 
-        # Armazena o filtro atual
+        self.buscar_assistente_btn.pack(side="left", padx=5, pady=5)
+
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=600)#
+        self.scrollable_frame.pack(pady=5, padx=20, fill="both", expand=True)        
+
+        if self.parent.caminho:
+            self.dados = self.carregar_dados_processos()
+        
         self.filtro_atual = "TODOS" 
 
         acoes_frame = ctk.CTkFrame(self)
         acoes_frame.pack(pady=10, padx=20, fill="x")
 
-        self.atualizar_interface()
+        self.alteracoes_checkboxes = {}
+
+        if self.parent.caminho:
+            self.atualizar_interface()
         
         confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=self.confirmar_botao)
         confirm_button.pack(side="left", padx=10, pady=20)
@@ -69,34 +91,100 @@ class Check_list(ctk.CTkToplevel):
         atualizar_button = ctk.CTkButton(acoes_frame, text="Atualizar", command=self.atualizar_interface)
         atualizar_button.pack(side="left", padx=10, pady=20)
 
+        atualizar_button = ctk.CTkButton(acoes_frame, text="Excluir Resolvidos", command=self.excluir_resolvidos)
+        atualizar_button.pack(side="right", padx=10, pady=20)
+
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
     
     def fechar_janela(self):
         self.withdraw()
 
+    def buscar_info_medico(self):
+        self.caminho_arquivo = self.parent.caminho
+        nome_digitado = self.busca_entry.get().upper()
+        campo = "info_medico" 
+        self.filtro_atual = campo
+        self.termo_busca = nome_digitado
+        codigos = buscar_info_medico_assistente(self.caminho_arquivo, campo, nome_digitado)
+        print("Códigos filtrados:", codigos)
+
+        for widget in self.scrollable_frame.winfo_children():
+            widget.destroy()
+            
+        filtrar_nome_processos(self.dados, campo, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
+
+
+    def buscar_info_assistente(self):
+        self.caminho_arquivo = self.parent.caminho
+        nome_digitado = self.busca_entry.get().upper()
+        campo = "info_assistente" 
+        self.filtro_atual = campo
+        self.termo_busca = nome_digitado
+
+        codigos = buscar_info_medico_assistente(self.caminho_arquivo, campo, nome_digitado)   
+        print("Códigos filtrados:", codigos)
+
+        for widget in self.scrollable_frame.winfo_children():
+            widget.destroy()
+
+        filtrar_nome_processos(self.dados, campo, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
+
+
+
+    def excluir_resolvidos(self):
+        print("excluir resolvidos")
+        #excluir_processos_removidos()
+        #mover_pacientes_para_lixeira()
+
+    def carregar_dados_usuarios(self):
+        caminho_arquivo_dados = self.parent.caminho
+
+        df = ler_arquivo(caminho_arquivo_dados)
+
+        return df
+    
+
     def confirmar_botao(self):
-        # Salvar alterações
-        salvar_alteracoes_sheet(self.dados, self)
+        caminho_arquivo_processo = f'{self.parent.caminho_pasta}/processos.json'
+        salvar_alteracoes_processos(caminho_arquivo_processo, self, self.alteracoes_checkboxes)
 
-        # Filtrar os dados resolvidos
-        df_filtrado, processos_resolvidos_existem = filtrar_processos_resolvidos(self.dados)
-
-        if processos_resolvidos_existem:
-            self.atualizar_interface()
-
-        # Atualizar a interface após salvar alterações e remover processos resolvidos
         self.atualizar_interface()
 
+        self.alteracoes_checkboxes = {}
+
+        if self.filtro_atual in ["info_assistente", "info_medico"]:
+            codigos = buscar_info_medico_assistente(self.caminho_arquivo, self.filtro_atual, self.termo_busca)
+            filtrar_nome_processos(self.dados, self.filtro_atual, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
+        else:
+            self.set_filtro(self.filtro_atual)
+
     def atualizar_interface(self):
+        
         # Limpar o conteúdo do scrollable_frame
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
 
-        # Atualizar os dados
-        self.dados = carregar_dados_sheet_processos().to_dict(orient="records")
 
-        # Recriar os widgets de exibição com os dados atualizados
-        bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame)
+        self.dados = self.carregar_dados_processos()
+
+        bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame, self.alteracoes_checkboxes, self.filtro_atual, self.set_filtro)
+
+    def carregar_dados_processos(self):
+        
+        caminho_arquivo = f"{self.parent.caminho_pasta}/processos.json"
+        df = ler_arquivo(caminho_arquivo)
+
+        dados_usuarios = df.to_dict(orient="records")
+
+        return dados_usuarios
+    
+    def set_filtro(self, novo_filtro):
+        self.filtro_atual = novo_filtro
+        print("Novo filtro:", self.filtro_atual)
+        filtrar_nome_processos(self.dados, novo_filtro, self.scrollable_frame, self.alteracoes_checkboxes) 
+        print(self.filtro_atual)
+
+
     
 class Carregar(ctk.CTkFrame):
     def __init__(self, parent, menu, app):
@@ -127,7 +215,7 @@ class Carregar(ctk.CTkFrame):
             self.app.caminho_pasta = caminho_pasta
             criar_arquivo_cordenadas(caminho_pasta)
             criar_arquivo_erro(caminho_pasta)
-            criar_arquivo_coletar_padrao(caminho_pasta)
+            criar_arquivo_processos(caminho_pasta)
             self.grid_forget()
             self.app.alterar_tamanho("1000x700")
 
@@ -241,9 +329,6 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_formatar_texto = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto", width=400, height=35, command=self.organizar_texto)
         self.btn_formatar_texto.grid(row=3, column=0, pady=(15, 0), padx=(10, 23), sticky="ew")
 
-        self.btn_formatar_texto_padrao = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto Padrão", width=400, height=35, command=self.organizar_texto_padrao)
-        self.btn_formatar_texto_padrao.grid(row=4, column=0, pady=(10, 0), padx=(10, 23), sticky="ew")
-
         self.btn_formatar_parecer = ctk.CTkButton(self.frame_coluna1, text="Formatar Parecer", width=400, height=35, command=self.organizar_parecer)
         self.btn_formatar_parecer.grid(row=5, column=0, pady=(10, 10), padx=(10, 23), sticky="ew")
 
@@ -251,17 +336,17 @@ class Formatar_texto(ctk.CTkFrame):
         self.frame_coluna2 = ctk.CTkFrame(self)
         self.frame_coluna2.grid(row=0, column=2, padx=(5, 5), pady=10, sticky="nsew")
 
-        self.btn_coletar_padrão = ctk.CTkButton(self.frame_coluna2, text="Coletar Padrão", command=lambda: self.quantidade_coletar_dados("padrão"), width=170)
-        self.btn_coletar_padrão.grid(row=0, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
-
-        self.btn_exibir_coletar_padrao = ctk.CTkButton(self.frame_coluna2, text="Exibir Pacientes Padrão", command=self.organizar_nome_usuario, width=170)
-        self.btn_exibir_coletar_padrao.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
-
         self.btn_exibir_processos = ctk.CTkButton(self.frame_coluna2, text="Exibir Processos", command=self.organizar_exibir_processos, width=170)
-        self.btn_exibir_processos.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")   
+        self.btn_exibir_processos.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")   
 
         self.btn_check_list = ctk.CTkButton(self.frame_coluna2, width=170, text="Check List", command=self.tela_check_list)
-        self.btn_check_list.grid(row=3, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+        self.btn_check_list.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
+    def tela_check_list(self):
+        if not self.check_list:
+            self.check_list = Check_list(self)
+        self.check_list.deiconify()
+        self.check_list.atualizar_interface()
 
     def validar_entrada(self, nome_digitado, df_caminho, textarea, mensagem_vazia="Nenhum nome foi digitado.", mensagem_df_vazio="Nenhum dado encontrado."):
         """Verifica se o nome foi digitado e se o DataFrame está carregado corretamente."""
@@ -290,43 +375,17 @@ class Formatar_texto(ctk.CTkFrame):
             self.textarea_texto.insert('0.0', f'{resultado}')
         else:
             print("nenhum dado carregado")
-
-    def organizar_texto_padrao(self):
-        nome_digitado = self.input_nome.get()
-        caminho_arquivo = f'{self.parent.caminho_pasta}/dados_coletados_padrao.json'
-        df_caminho = ler_arquivo(caminho_arquivo)
-
-        if not self.validar_entrada(nome_digitado, df_caminho, self.textarea_texto):
-            return
-
-        if df_caminho is not None:
-            resultado = processar_dado_padrao_por_nome(df_caminho, nome_digitado)
-            self.textarea_texto.delete('0.0', 'end')
-            self.textarea_texto.insert('0.0', f'{resultado}')
-        else:
-            print("nenhum dado carregado")
-
-    def organizar_nome_usuario(self):
-        caminho_arquivo = f"{self.parent.caminho_pasta}/dados_coletados_padrao.json"
-        df_caminho = ler_arquivo(caminho_arquivo)
-
-        if df_caminho is not None:
-            resultado = exibir_usuarios_padrao(df_caminho)
-            self.textarea_texto.delete('0.0', 'end')
-            self.textarea_texto.insert('0.0', f'{resultado}')
-        else:
-            self.textarea_texto.insert('0.0', "Nenhum dado encontrado")
     
     def organizar_exibir_processos(self):
-        df_sheet_processos = carregar_dados_sheet_processos()
+        #df_sheet_processos = carregar_dados_sheet_processos()
 
-        if df_sheet_processos.empty:
+        """if df_sheet_processos.empty:
             self.textarea_texto.delete('0.0', 'end')
             self.textarea_texto.insert('0.0', "nenhum dado encontrado")
         else:
             resultado = exibir_processos(df_sheet_processos)
             self.textarea_texto.delete('0.0', 'end')
-            self.textarea_texto.insert('0.0', f'{resultado}')
+            self.textarea_texto.insert('0.0', f'{resultado}')"""
             
 
     def quantidade_coletar_dados(self, tipo):
@@ -343,8 +402,6 @@ class Formatar_texto(ctk.CTkFrame):
             
             if tipo == "dados": 
                 self.coletar_dados(quantidade)
-            elif tipo == "padrão":
-                self.coletar_dados_padrao(quantidade)
             elif tipo == "assistente":
                 self.coletar_info_assistente(quantidade)
 
@@ -355,29 +412,20 @@ class Formatar_texto(ctk.CTkFrame):
         cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
         try:
             caminho = self.parent.caminho
+            copy_vazio()
             for i in range(quantidade):
                 dados = save_data(caminho, cordenada)
 
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")
 
-    def coletar_dados_padrao(self, quantidade):
-        cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
-        caminho_coletar_padrao = f"{self.parent.caminho_pasta}/dados_coletados_padrao.json"
-        try:
-            for i in range(quantidade):
-                dados = save_dados_padrao(caminho_coletar_padrao, cordenada)
-        except Exception as e:
-            print(f"Erro em coletar_dados: {e}")
-
     def coletar_info_assistente(self, quantidade):
         cordenada = f'{self.parent.caminho_pasta}/cordenadas.json'
-
+        caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
         try:
             time.sleep(2)
-            caminho_coletar = self.parent.caminho
             for i in range(quantidade):
-                dados = save_info_assistente(cordenada, caminho_coletar)
+                dados = save_info_assistente(caminho_arquivo, cordenada)
             
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")
@@ -406,10 +454,7 @@ class Formatar_texto(ctk.CTkFrame):
         except Exception as e:
             print(f"Erro em coletar dados {e}")
 
-    def tela_check_list(self):
-        if not self.check_list:
-            self.check_list = Check_list(self)
-        self.check_list.deiconify()
+
         
 if __name__ == "__main__":
     app = App("DATAFORMAT", "1000x700")
