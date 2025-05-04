@@ -1,7 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, criar_arquivo_processos
 from coletar_dados import save_data, save_info_assistente, copy_vazio
-from funcoes import filtrar_nome_processos, bottoes_processos, buscar_info_medico_assistente, salvar_alteracoes_processos
+from funcoes import filtrar_nome_processos, bottoes_processos, buscar_info_medico_assistente, salvar_alteracoes_processos, filtrar_dados, criar_linha_interface, interface_processos, salvar_alteracoes_processos_teste
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -45,6 +45,13 @@ class Check_list(ctk.CTkToplevel):
         
         self.parent = parent
 
+        if self.parent.caminho:
+            self.atualizar_interface()  
+        else:
+            print("caminho indefinido")
+
+        self.alteracoes_checkboxes = {}
+
         self.botoes_frame = ctk.CTkFrame(self)#
         self.botoes_frame.pack(pady=5, padx=20, fill="x")
 
@@ -66,38 +73,55 @@ class Check_list(ctk.CTkToplevel):
             text="Buscar Info Assistente",
             command=self.buscar_info_assistente
         )
-
         self.buscar_assistente_btn.pack(side="left", padx=5, pady=5)
 
         self.scrollable_frame = ctk.CTkScrollableFrame(self, width=1000, height=600)#
         self.scrollable_frame.pack(pady=5, padx=20, fill="both", expand=True)        
 
-        if self.parent.caminho:
-            self.dados = self.carregar_dados_processos()
-        
         self.filtro_atual = "TODOS" 
 
         acoes_frame = ctk.CTkFrame(self)
-        acoes_frame.pack(pady=10, padx=20, fill="x")
+        acoes_frame.pack(pady=10, padx=20, fill="x") 
+     
+        confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=self.confirmar_botao )
+        confirm_button.pack(side="left", padx=10, pady=20)   
 
-        self.alteracoes_checkboxes = {}
-
-        if self.parent.caminho:
-            self.atualizar_interface()
-        
-        confirm_button = ctk.CTkButton(acoes_frame, text="Confirmar", command=self.confirmar_botao)
-        confirm_button.pack(side="left", padx=10, pady=20)
-
-        atualizar_button = ctk.CTkButton(acoes_frame, text="Atualizar", command=self.atualizar_interface)
+        atualizar_button = ctk.CTkButton(acoes_frame, text="Atualizar", command=self.atualizar_interface) #
         atualizar_button.pack(side="left", padx=10, pady=20)
 
-        atualizar_button = ctk.CTkButton(acoes_frame, text="Excluir Resolvidos", command=self.excluir_resolvidos)
+        atualizar_button = ctk.CTkButton(acoes_frame, text="Excluir Resolvidos", ) #command=self.excluir_resolvidos
         atualizar_button.pack(side="right", padx=10, pady=20)
-
+      
         self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+
+        self.alteracoes_checkboxes.clear()
     
     def fechar_janela(self):
         self.withdraw()
+
+    def carregar_dados_processos(self):  
+        caminho_arquivo = f"{self.parent.caminho_pasta}/processos.json"
+        df = ler_arquivo(caminho_arquivo)
+
+        dados_usuarios = df.to_dict(orient="records")
+
+        return dados_usuarios
+    
+    def confirmar_botao(self):
+        caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
+        salvar_alteracoes_processos_teste(caminho_arquivo, self.alteracoes_checkboxes)
+
+        self.atualizar_interface()
+
+
+    def atualizar_interface(self):
+
+        self.dados = self.carregar_dados_processos()
+
+        try:
+            bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame, self.alteracoes_checkboxes, self.filtro_atual, self.set_filtro)
+        except Exception as e:
+            print(f"Erro ao atualizar interface: {e}")
 
     def buscar_info_medico(self):
         self.caminho_arquivo = self.parent.caminho
@@ -108,11 +132,7 @@ class Check_list(ctk.CTkToplevel):
         codigos = buscar_info_medico_assistente(self.caminho_arquivo, campo, nome_digitado)
         print("Códigos filtrados:", codigos)
 
-        for widget in self.scrollable_frame.winfo_children():
-            widget.destroy()
-            
-        filtrar_nome_processos(self.dados, campo, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
-
+        self.set_filtro(campo, codigos_filtrados=codigos)
 
     def buscar_info_assistente(self):
         self.caminho_arquivo = self.parent.caminho
@@ -124,54 +144,14 @@ class Check_list(ctk.CTkToplevel):
         codigos = buscar_info_medico_assistente(self.caminho_arquivo, campo, nome_digitado)   
         print("Códigos filtrados:", codigos)
 
-        for widget in self.scrollable_frame.winfo_children():
-            widget.destroy()
+        self.set_filtro(campo, codigos_filtrados=codigos)
 
-        filtrar_nome_processos(self.dados, campo, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
-
-    def excluir_resolvidos(self):
-        print("excluir resolvidos")
-        #excluir_processos_removidos()
-        #mover_pacientes_para_lixeira()
-
-    def confirmar_botao(self):
-        caminho_arquivo_processo = f'{self.parent.caminho_pasta}/processos.json'
-        salvar_alteracoes_processos(caminho_arquivo_processo, self, self.alteracoes_checkboxes)
-
-        self.atualizar_interface()
-
-        self.alteracoes_checkboxes = {}
-
-        if self.filtro_atual in ["info_assistente", "info_medico"]:
-            codigos = buscar_info_medico_assistente(self.caminho_arquivo, self.filtro_atual, self.termo_busca)
-            filtrar_nome_processos(self.dados, self.filtro_atual, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos)
-        else:
-            self.set_filtro(self.filtro_atual)
-
-    def atualizar_interface(self): 
-        for widget in self.scrollable_frame.winfo_children():
-            widget.destroy()
-
-        self.dados = self.carregar_dados_processos()
-
-        bottoes_processos(self.botoes_frame, self.dados, self.scrollable_frame, self.alteracoes_checkboxes, self.filtro_atual, self.set_filtro)
-
-    def carregar_dados_processos(self):  
-        caminho_arquivo = f"{self.parent.caminho_pasta}/processos.json"
-        df = ler_arquivo(caminho_arquivo)
-
-        dados_usuarios = df.to_dict(orient="records")
-
-        return dados_usuarios
-    
-    def set_filtro(self, novo_filtro):
+    def set_filtro(self, novo_filtro, codigos_filtrados=None):
         self.filtro_atual = novo_filtro
         print("Novo filtro:", self.filtro_atual)
-        filtrar_nome_processos(self.dados, novo_filtro, self.scrollable_frame, self.alteracoes_checkboxes) 
+        interface_processos(self.dados, novo_filtro, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos_filtrados)
         print(self.filtro_atual)
 
-
-    
 class Carregar(ctk.CTkFrame):
     def __init__(self, parent, menu, app):
         super().__init__(parent)
@@ -406,12 +386,13 @@ class Formatar_texto(ctk.CTkFrame):
             print(f"Erro em coletar_dados: {e}")
 
     def coletar_info_assistente(self, quantidade):
+        caminho_coletar_dados = self.parent.caminho
         cordenada = f'{self.parent.caminho_pasta}/cordenadas.json'
         caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
         try:
             time.sleep(2)
             for i in range(quantidade):
-                dados = save_info_assistente(caminho_arquivo, cordenada)
+                dados = save_info_assistente(caminho_arquivo, cordenada, caminho_coletar_dados)
             
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")

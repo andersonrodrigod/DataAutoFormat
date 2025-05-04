@@ -4,14 +4,14 @@ from tkinter import messagebox
 import tkinter as tk
 import pandas as pd
 from datetime import datetime
-from loader import ler_arquivo, editar_dados
+from loader import ler_arquivo, editar_dados, editar_dados_teste
+import json
 
 def encontrar_palavra(palavras, info):
     for palavra in palavras:
         if palavra in info:
             return palavra
     return "SEM OBSERVACAO"
-
 
 def obter_palavra(palavra, mapeamento_palavras):
     for chave, valor in mapeamento_palavras.items():
@@ -39,31 +39,86 @@ def bottoes_processos(frame, dados, scrollable_frame, alteracoes_checkboxes, fil
         )
         botao.grid(row=0, column=i, padx=5, pady=5)
 
-    filtrar_nome_processos(dados, filtro, scrollable_frame, alteracoes_checkboxes)   
+    interface_processos(dados, filtro, scrollable_frame, alteracoes_checkboxes, callback_set_filtro)   
 
 
-def on_checkbox_click(index, tipo, checkbox_var, dados, alteracoes_checkboxes):
-    pessoa = dados[index]
-    
-    novo_valor = checkbox_var.get()
-    
-    pessoa[tipo] = novo_valor
+def atualizar_data_hora(tipo, valor, pessoa):
+    agora = datetime.now().strftime("%d/%m/%Y %H:%M")
 
     if tipo == "visto":
-        if novo_valor:
-            pessoa["visto_data_hora"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+        if valor:
+            if isinstance(pessoa.get("visto_data_hora"), list):
+                pessoa["visto_data_hora"].append(agora)
+            else:
+                pessoa["visto_data_hora"] = [agora]
+            print(f"[INFO] visto_data_hora adicionada: {agora}")
         else:
-            pessoa.pop("visto_data_hora", None)
+            pessoa["visto_data_hora"] = []  # Ou use .pop(...) se quiser remover a chave
+            print("[INFO] visto_data_hora esvaziada")
 
     elif tipo == "resolvido":
-        if novo_valor:
-            pessoa["resolvido_data_hora"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+        if valor:
+            if isinstance(pessoa.get("resolvido_data_hora"), list):
+                pessoa["resolvido_data_hora"].append(agora)
+            else:
+                pessoa["resolvido_data_hora"] = [agora]
+            print(f"[INFO] resolvido_data_hora adicionada: {agora}")
         else:
-            pessoa.pop("resolvido_data_hora", None)
+            pessoa["resolvido_data_hora"] = []
+            print("[INFO] resolvido_data_hora esvaziada")
 
+
+def on_checkbox_click(codigo, tipo, checkbox_var, dados, alteracoes_checkboxes):
+    pessoa = next((p for p in dados if p["codigo"] == codigo), None)
+    
+    if pessoa:
+        novo_valor = checkbox_var.get()
+        pessoa[tipo] = novo_valor
+
+    atualizar_data_hora(tipo, novo_valor, pessoa)
     alteracoes_checkboxes[pessoa["codigo"]] = pessoa
-    #print(f"Alterações: {alteracoes_checkboxes}")
-    #print(f"Dados atualizados para {pessoa['nome']}: {pessoa}")
+    print(f"[{tipo.upper()}] Alterado para {novo_valor} | Código: {pessoa['codigo']}")
+    print(f"→ Dados atuais: {pessoa}")
+
+
+def salvar_alteracoes_processos_teste(arquivo, alteracoes_checkboxes):
+    print("\n[ETAPA 1] Verificando alterações...")
+
+    try:
+        dados_allterados = [alteracoes_checkboxes[codigo] for codigo in alteracoes_checkboxes]
+        print(f"alterações >>> {dados_allterados}")
+
+        if not alteracoes_checkboxes:
+            print("Nenhuma alteração detectada.")
+            return
+        
+        alteracoes_salvas = []
+
+        print("→ Alterações detectadas nos códigos:")
+        for pessoa in dados_allterados:
+            codigo = pessoa.get("codigo")
+            campos = {
+                "visto": pessoa.get("visto"),
+                "verificar": pessoa.get("verificar"),
+                "resolvido": pessoa.get("resolvido"),
+                "visto_data_hora": pessoa.get("visto_data_hora"),
+                "resolvido_data_hora": pessoa.get("resolvido_data_hora")
+            }
+
+            alteracoes_salvas.append({
+                "codigo": codigo,
+                "alteracoes": campos
+            })
+
+
+            
+        editar_dados_teste(alteracoes_salvas, arquivo)
+        
+        
+         
+    except AttributeError as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro ao salvar as alterações: {e}")
+
 
 
 def salvar_alteracoes_processos(arquivo, top_level_window, alteracoes_checkboxes):
@@ -73,7 +128,8 @@ def salvar_alteracoes_processos(arquivo, top_level_window, alteracoes_checkboxes
         if not dados_alterados:
             messagebox.showinfo("Nenhuma alteração", "Não houve alterações para salvar.")
             return
-
+        
+        
         for pessoa in dados_alterados:
             codigo = pessoa.get("codigo")
             campos = {
@@ -97,7 +153,9 @@ def salvar_alteracoes_processos(arquivo, top_level_window, alteracoes_checkboxes
             if pessoa.get("resolvido") == True and pessoa.get("resolvido_data_hora"):
                 campos["resolvido_data_hora"] = pessoa["resolvido_data_hora"]
 
-            #print(campos)
+            
+
+            print(campos)
          
             editar_dados(codigo, campos, arquivo)
 
@@ -110,9 +168,62 @@ def salvar_alteracoes_processos(arquivo, top_level_window, alteracoes_checkboxes
         messagebox.showerror("Erro", f"Ocorreu um erro ao salvar as alterações: {e}")
         top_level_window.lift()
 
+
+def filtrar_dados(dados, tipo, codigos_filtrados=None):
+    df = pd.DataFrame(dados)
+  
+    if tipo == "TODOS":
+        return df[df["removido"] == False].to_dict(orient="records")
+        
+    elif tipo in ["info_assistente", "info_medico"] and codigos_filtrados:
+        return df[(df["codigo"].isin(codigos_filtrados)) & (df["removido"] == False)].to_dict(orient="records")
+    else:
+        return df[(df["tipo"] == tipo) & (df["removido"] == False)].to_dict(orient="records")
+
+def criar_linha_interface(pessoa, scrollable_frame, linha, dados, alteracoes_checkboxes):
+    nome_entry = ctk.CTkEntry(scrollable_frame, width=320, font=("Arial", 14))
+    nome_entry.insert(0, pessoa["nome"])
+    nome_entry.configure(state="readonly")
+    nome_entry.grid(row=linha, column=0, padx=10, pady=5, sticky="w")
+
+    for idx, (campo, texto) in enumerate([("visto", "Visto"), ("verificar", "Verificar"), ("resolvido", "Resolvido")], start=1):
+        var = tk.BooleanVar(value=pessoa[campo])
+        checkbox = ctk.CTkCheckBox(
+            scrollable_frame,
+            text=texto,
+            variable=var,
+            command=lambda codigo=pessoa["codigo"], v=var, c=campo: on_checkbox_click(codigo, c, v, dados, alteracoes_checkboxes))
+        checkbox.grid(row=linha, column=idx, padx=10, pady=5)
+
+
+def interface_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes, codigos_filtrados=None):
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
+
+    dados_filtrados = filtrar_dados(dados, tipo, codigos_filtrados)
+
+    for i, pessoa in enumerate(dados_filtrados):
+        criar_linha_interface(pessoa, scrollable_frame, i, dados, alteracoes_checkboxes)
+
+    return tipo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes, codigos_filtrados=None):
-
-
     for widget in scrollable_frame.winfo_children():
         widget.destroy() 
 
@@ -126,6 +237,9 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes,
         dados_filtrados = df[(df["tipo"] == tipo) & (df["removido"] == False)]
 
     dados_filtrados = dados_filtrados.to_dict(orient="records")
+
+    print(f"Filtro aplicado: {tipo}")
+    print(f"Dados filtrados: {dados_filtrados}")
     
     for i, pessoa in enumerate(dados_filtrados):
         nome_entry = ctk.CTkEntry(scrollable_frame, width=320, font=("Arial", 14))
@@ -158,9 +272,6 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes,
         resolvido_checkbox.grid(row=i, column=3, padx=10, pady=5)
     
     return tipo
-
-
-
 
 def buscar_info_medico_assistente(caminho_arquivo, campo, nome_digitado):
     df = ler_arquivo(caminho_arquivo)

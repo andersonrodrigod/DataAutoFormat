@@ -35,12 +35,13 @@ def info_medico():
 
 def garantir_copia_info():
     tentativas = 0
-    while tentativas < 3:
+    while tentativas < 4:
         if pyperclip.paste():
             return
         copy()
         time.sleep(0.3)
         tentativas += 1
+    
 
 def garantir_copia():
     tentativas = 0
@@ -73,11 +74,13 @@ def shift_tab():
 
 def copy_click(x, y):
     py.click(x, y)
+    time.sleep(0.3)
     py.hotkey("ctrl", "c")
     garantir_copia()
 
 def copy_click_info(x, y):
     py.click(x, y)
+    time.sleep(0.3)
     py.hotkey("ctrl", "c")
     garantir_copia_info()
 
@@ -128,8 +131,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         df = pd.DataFrame(dados_existentes)
 
         
-
-        #opy()
+        #copy()
         codigo = "3010I748752004" #cod()
 
         #copy_vazio()
@@ -141,12 +143,13 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         #copy_vazio()
 
         #copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
-        codigo_procedimento = "43558512" #cod_proc()
+        codigo_procedimento = "43558513" #cod_proc()
 
-        if not df.empty and codigo in df["codigo"].values:
+        if not df.empty and "codigo" in df.columns and codigo in df["codigo"].values:
             codigo_in_dados = df[df["codigo"] == codigo]
             procedimento_in_dados = codigo_in_dados["codigo_procedimento"].values
             if codigo_procedimento in procedimento_in_dados:
+                print("código em banco de dados")
                 py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
                 py.press("down")
                 return
@@ -201,7 +204,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         traceback.print_exc()
         raise
 
-def save_info_assistente(caminho_arquivo, cordenadas):
+def save_info_assistente(caminho_arquivo, cordenadas, caminho_coletar_dados):
 
     processando_cordenadas = carregar_cordenada(cordenadas)
 
@@ -230,8 +233,7 @@ def save_info_assistente(caminho_arquivo, cordenadas):
 
     print(df)
 
-    if not df.empty and codigo in df["codigo"].values:
-
+    if not df.empty and "codigo" in df.columns and codigo in df["codigo"].values:
         codigo_in_processo = df[df["codigo"] == codigo]
         tipo_in_processo = codigo_in_processo["tipo"].values[0]
         removido_atual = codigo_in_processo["removido"].values[0]
@@ -272,7 +274,7 @@ def save_info_assistente(caminho_arquivo, cordenadas):
             #print("Código já está no banco de dados, tipo atualizado.")
     else:
         #copy_click_info(cordenada_info_assistente_x, cordenada_info_assistente_y)
-        info_assistente = "25/04 FEITO CTT" #info_assistent()
+        info_assistente = "" #info_assistent()
         #copy_vazio()
 
         palavra_encontrada = encontrar_palavra(palavras_info_assistente, info_assistente)
@@ -284,6 +286,7 @@ def save_info_assistente(caminho_arquivo, cordenadas):
         #time.sleep(0.5)
 
         #tab()
+        #copy()
         nome = "ANDERSON RODRIGO RODRIGUES DOS SANTOS" #name()
 
         #shift_tab()
@@ -311,6 +314,6 @@ def save_info_assistente(caminho_arquivo, cordenadas):
         salvar_dados(dados_existentes, caminho_arquivo)
 
         if palavra_processo == "SEM OBSERVACAO":
-            save_data(caminho_arquivo, cordenadas)
+            save_data(caminho_coletar_dados, cordenadas)
 
     
