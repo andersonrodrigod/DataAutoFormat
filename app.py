@@ -1,4 +1,4 @@
-from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_processos
+from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_info_medico, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, criar_arquivo_processos
 from coletar_dados import save_data, save_info_assistente, copy_vazio
 from funcoes import filtrar_nome_processos, bottoes_processos, buscar_info_medico_assistente, salvar_alteracoes_processos, filtrar_dados, criar_linha_interface, interface_processos, salvar_alteracoes_processos_teste
@@ -7,6 +7,7 @@ from tkinter import messagebox
 import mouseinfo
 import time
 import pandas as pd
+import json
 
 class App(ctk.CTk):
     def __init__(self, title, size):
@@ -25,9 +26,12 @@ class App(ctk.CTk):
 
         self.check_list = Check_list(self)
         self.check_list.withdraw()
+
+        self.editar_dados = Editar_dados(self)
+        self.editar_dados.withdraw()
         
         self.registrar_cordenada = Registrar_cordenada(self)
-        self.formatar_texto = Formatar_texto(self, self.check_list, self) 
+        self.formatar_texto = Formatar_texto(self, self.check_list, self.editar_dados, self) 
         self.menu = Menu(self, self.formatar_texto, self.registrar_cordenada) 
         self.carregar = Carregar(self, self.menu, self)
         #self.registrar_cordenada.grid(row=0, column=0, columnspan=3, sticky="nsew")
@@ -38,6 +42,69 @@ class App(ctk.CTk):
 
     def alterar_tamanho(self, novo_tamanho):
         self.geometry(novo_tamanho)
+
+class Editar_dados(ctk.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.parent = parent
+
+        nome = self.parent.nome if self.parent.nome else ""
+ 
+        self.title("Editar Dados")
+        self.geometry("450x350") 
+        
+        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame.pack(pady=20, padx=20, fill="both", expand=True)
+        
+        self.label_nome = ctk.CTkLabel(self.main_frame, text="Nome:")
+        self.label_nome.pack(pady=(0, 5), anchor="w")
+        
+        self.entry_nome = ctk.CTkEntry(self.main_frame, width=400)
+        self.entry_nome.pack(pady=(0, 10))
+
+        self.label_texto = ctk.CTkLabel(self.main_frame, text="Informações:")
+        self.label_texto.pack(pady=(0, 5), anchor="w")
+        
+        self.textarea = ctk.CTkTextbox(self.main_frame, width=400, height=150)
+        self.textarea.pack(pady=(0, 15))
+        self.textarea.bind("<KeyRelease>", self.forcar_maiusculas)
+        
+
+        self.btn_editar = ctk.CTkButton(
+            self.main_frame, 
+            text="Editar",
+            command=self.editar_dados
+        )
+        self.btn_editar.pack()
+        
+        self.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+
+    def editar_dados(self):
+        caminho_arquivo = self.parent.caminho  # Obtém o caminho do arquivo JSON
+        df = ler_arquivo(caminho_arquivo)  # Lê o JSON e transforma em DataFrame
+
+        nome = self.entry_nome.get()  # Obtém o nome
+        novo_texto = self.textarea.get("1.0", "end-1c")  # Obtém o novo valor
+
+        df.loc[df["nome"] == nome, "info_medico"] = novo_texto
+
+        # Converte para lista de dicionários
+        dados = df.to_dict(orient="records")
+
+        # Salva de volta no JSON
+        with open(caminho_arquivo, "w", encoding="utf-8") as f:
+            json.dump(dados, f, indent=4, ensure_ascii=False)
+
+        #print(f"Dados editados com sucesso - Nome: {nome}, Novo Texto: {novo_texto}")
+
+    def forcar_maiusculas(self, event):
+        texto = self.textarea.get("1.0", "end-1c")
+        self.textarea.delete("1.0", "end")
+        self.textarea.insert("1.0", texto.upper())
+
+    def fechar_janela(self):
+        self.withdraw()
 
 class Check_list(ctk.CTkToplevel):
     def __init__(self, parent):#
@@ -115,7 +182,6 @@ class Check_list(ctk.CTkToplevel):
 
 
     def atualizar_interface(self):
-
         self.dados = self.carregar_dados_processos()
 
         try:
@@ -130,9 +196,11 @@ class Check_list(ctk.CTkToplevel):
         self.filtro_atual = campo
         self.termo_busca = nome_digitado
         codigos = buscar_info_medico_assistente(self.caminho_arquivo, campo, nome_digitado)
-        print("Códigos filtrados:", codigos)
+        #print("Códigos filtrados:", codigos)
 
         self.set_filtro(campo, codigos_filtrados=codigos)
+
+        self.dados = self.carregar_dados_processos()
 
     def buscar_info_assistente(self):
         self.caminho_arquivo = self.parent.caminho
@@ -142,15 +210,18 @@ class Check_list(ctk.CTkToplevel):
         self.termo_busca = nome_digitado
 
         codigos = buscar_info_medico_assistente(self.caminho_arquivo, campo, nome_digitado)   
-        print("Códigos filtrados:", codigos)
+        #print("Códigos filtrados:", codigos)
 
         self.set_filtro(campo, codigos_filtrados=codigos)
 
+        self.dados = self.carregar_dados_processos()
+
     def set_filtro(self, novo_filtro, codigos_filtrados=None):
         self.filtro_atual = novo_filtro
-        print("Novo filtro:", self.filtro_atual)
+        #print("Novo filtro:", self.filtro_atual)
+        #print("Codigos filtrados:", codigos_filtrados)
         interface_processos(self.dados, novo_filtro, self.scrollable_frame, self.alteracoes_checkboxes, codigos_filtrados=codigos_filtrados)
-        print(self.filtro_atual)
+
 
 class Carregar(ctk.CTkFrame):
     def __init__(self, parent, menu, app):
@@ -251,11 +322,12 @@ class Registrar_cordenada(ctk.CTkFrame):
         botao2.grid(row=2, column=1, pady=(5, 600), padx=5, sticky="nsew")
 
 class Formatar_texto(ctk.CTkFrame):
-    def __init__(self, parent, check_list, app):
+    def __init__(self, parent, check_list, editar_dados, app):
         super().__init__(parent)
 
         self.parent = parent
         self.check_list = check_list
+        self.editar_dados = editar_dados
         self.app = app
 
         
@@ -295,6 +367,9 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_formatar_texto = ctk.CTkButton(self.frame_coluna1, text="Formatar Texto", width=400, height=35, command=self.organizar_texto)
         self.btn_formatar_texto.grid(row=3, column=0, pady=(15, 0), padx=(10, 23), sticky="ew")
 
+        self.btn_editar_texto = ctk.CTkButton(self.frame_coluna1, text="Editar", width=400, height=35, command=self.tela_editar_dados)
+        self.btn_editar_texto.grid(row=4, column=0, pady=(10, 0), padx=(10, 23), sticky="ew")
+
         self.btn_formatar_parecer = ctk.CTkButton(self.frame_coluna1, text="Formatar Parecer", width=400, height=35, command=self.organizar_parecer)
         self.btn_formatar_parecer.grid(row=5, column=0, pady=(10, 10), padx=(10, 23), sticky="ew")
 
@@ -307,6 +382,30 @@ class Formatar_texto(ctk.CTkFrame):
 
         self.btn_check_list = ctk.CTkButton(self.frame_coluna2, width=170, text="Check List", command=self.tela_check_list)
         self.btn_check_list.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
+    def tela_editar_dados(self):
+        self.app.nome = self.input_nome.get()
+        caminho_arquivo = ler_arquivo(self.parent.caminho)
+
+        # Validação dos dados antes de continuar
+        if not self.validar_entrada_editar(self.app.nome, caminho_arquivo):
+            return  
+
+        # Obtém as informações do médico
+        info_medico = exibir_info_medico(caminho_arquivo, self.app.nome)
+
+        # Criar ou atualizar a janela de edição
+        if not self.editar_dados:
+            self.editar_dados = Editar_dados(self.app)
+        else:
+            self.editar_dados.entry_nome.configure(state="normal")
+            self.editar_dados.entry_nome.delete(0, "end")  
+            self.editar_dados.entry_nome.insert(0, self.app.nome)  
+            self.editar_dados.textarea.delete("1.0", "end")  
+            self.editar_dados.textarea.insert("1.0", info_medico) 
+            self.editar_dados.entry_nome.configure(state="readonly")  
+
+        self.editar_dados.deiconify()
 
     def tela_check_list(self):
         if not self.check_list:
@@ -325,7 +424,27 @@ class Formatar_texto(ctk.CTkFrame):
 
         textarea.delete('0.0', 'end')
         textarea.insert('0.0', mensagem)
-        return False  
+        return False
+    
+    def validar_entrada_editar(self, nome, df):
+    
+        if not nome:
+            messagebox.showwarning("Aviso", "Nenhum nome foi digitado.")
+            return False
+
+        if df is None or df.empty:
+            messagebox.showwarning("Aviso", "Nenhum dado encontrado no arquivo.")
+            return False
+
+        if "nome" not in df.columns:
+            messagebox.showwarning("Erro", "A coluna 'nome' não foi encontrada no arquivo.")
+            return False
+
+        if not (df["nome"] == nome).any():
+            messagebox.showwarning("Aviso", "Nome não encontrado no arquivo.")
+            return False
+
+        return True   
   
     def organizar_texto(self):
         nome_digitado = self.input_nome.get()

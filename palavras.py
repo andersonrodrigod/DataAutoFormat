@@ -77,7 +77,7 @@ regras_substituicao = [
     (r"(DE|APOS|APÓS|E)\s*$", "") 
 ]
 
-cordenadas =  {
+cordenadas = {
     "codigo_carteira_x": 61,
     "codigo_carteira_y": 592,
     "info_medico_x": 75,
@@ -85,7 +85,19 @@ cordenadas =  {
     "info_assistente_x": 38,
     "info_assistente_y": 774,
     "codigo_procedimento_x": 534,
-    "codigo_procedimento_y": 931
+    "codigo_procedimento_y": 931,
+    "codigo_carteira_t22a3x": 0,
+    "codigo_carteira_t22a3y": 0,
+    "info_telefone_1x": 0,
+    "info_telefone_1y": 0, 
+    "info_telefone_2x": 0,
+    "info_telefone_2y": 0,
+    "info_telefone_3x": 0,
+    "info_telefone_3y": 0,
+    "click_telefone_baixo_x": 0,
+    "click_telefone_baixo_y": 0,
+    "tela_amop": "viado 1",
+    "tela_t22a3": "viado 2"
 }
 
 

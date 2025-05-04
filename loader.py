@@ -68,19 +68,19 @@ def editar_dados_teste(atualizacoes, caminho_arquivo):
     for dado_alterado in atualizacoes:
         codigo = dado_alterado["codigo"]
         campos = dado_alterado["alteracoes"]
-        print(f"\n📬 Código alterado: {codigo}")
+        #print(f"\n📬 Código alterado: {codigo}")
 
         for dado in dados:
             if dado.get("codigo") == codigo:
-                print(f"✅ Encontrado: {dado['nome']} ({codigo})")
-                print("🛠️ Atualizando campos...")
+                #print(f"✅ Encontrado: {dado['nome']} ({codigo})")
+                #print("🛠️ Atualizando campos...")
                 for chave, novo_valor in campos.items():
                     dado[chave] = novo_valor
-                    print(f"   ✏️ {chave} atualizado para: {novo_valor}")
+                    #print(f"   ✏️ {chave} atualizado para: {novo_valor}")
     
     with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
         json.dump(dados, arquivo, indent=4, ensure_ascii=False)
-    print("\n💾 Dados atualizados e salvos com sucesso!")
+    #print("\n💾 Dados atualizados e salvos com sucesso!")
 
 
 def editar_dados(codigo, atualizacoes, caminho_arquivo):

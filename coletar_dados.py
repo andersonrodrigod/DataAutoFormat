@@ -115,7 +115,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
     processando_cordenadas = carregar_cordenada(cordenadas_caminho)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
     
@@ -208,7 +208,7 @@ def save_info_assistente(caminho_arquivo, cordenadas, caminho_coletar_dados):
 
     processando_cordenadas = carregar_cordenada(cordenadas)
 
-    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento = processando_cordenadas
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
 
     cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
 
@@ -306,7 +306,6 @@ def save_info_assistente(caminho_arquivo, cordenadas, caminho_coletar_dados):
             "visto_data_hora": [],
             "resolvido_data_hora": []
         }
-
 
 
         dados_existentes.append(processos)

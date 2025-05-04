@@ -81,6 +81,14 @@ def exibir_processos(df):
     # Retorna o resultado final
     return resultado
 
+def exibir_info_medico(df, nome):
+    bf = filtrar_nome(df, nome)
+
+    texto_info_medico = str(bf["info_medico"].iloc[0])
+
+    if not bf.empty:
+        return texto_info_medico
+
 
 
 

@@ -102,8 +102,15 @@ def salvar_alteracoes_processos_teste(arquivo, alteracoes_checkboxes):
                 "verificar": pessoa.get("verificar"),
                 "resolvido": pessoa.get("resolvido"),
                 "visto_data_hora": pessoa.get("visto_data_hora"),
-                "resolvido_data_hora": pessoa.get("resolvido_data_hora")
+                "resolvido_data_hora": pessoa.get("resolvido_data_hora"),
+                "removido": pessoa.get("removido")
             }
+
+            if pessoa.get("resolvido") == True:
+                campos["visto"] = False
+                campos["verificar"] = False
+                campos["resolvido"] = False
+                campos["removido"] = True
 
             alteracoes_salvas.append({
                 "codigo": codigo,
@@ -113,7 +120,6 @@ def salvar_alteracoes_processos_teste(arquivo, alteracoes_checkboxes):
 
             
         editar_dados_teste(alteracoes_salvas, arquivo)
-        
         
          
     except AttributeError as e:
@@ -201,25 +207,12 @@ def interface_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes, co
         widget.destroy()
 
     dados_filtrados = filtrar_dados(dados, tipo, codigos_filtrados)
+    #print(f">>>{dados_filtrados}")
 
     for i, pessoa in enumerate(dados_filtrados):
         criar_linha_interface(pessoa, scrollable_frame, i, dados, alteracoes_checkboxes)
 
     return tipo
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -276,10 +269,10 @@ def filtrar_nome_processos(dados, tipo, scrollable_frame, alteracoes_checkboxes,
 def buscar_info_medico_assistente(caminho_arquivo, campo, nome_digitado):
     df = ler_arquivo(caminho_arquivo)
 
-    resultado = df[df[campo].str.contains(nome_digitado, case=False, na=False)]  # Adicionando case=False para ignorar maiúsculas/minúsculas
+    resultado = df[df[campo].str.contains(nome_digitado, case=False, na=False)] 
 
     if not resultado.empty:
-        return resultado["codigo"].tolist()
+        return resultado["codigo"].drop_duplicates().tolist()
     else:
         return []
 
