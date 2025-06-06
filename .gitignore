@@ -1,0 +1,16 @@
+# Ignorar diretórios __pycache__
+__pycache__/
+
+# Ignorar arquivos JSON específicos
+cordenadas.json
+dados_coletados.json
+dados_coletados_padrao.json
+erro.json
+credenciais.json
+parecer_telegrama.json
+processos.json
+melores_codigo.txt
+teste.py
+processos.json
+temp.json
+

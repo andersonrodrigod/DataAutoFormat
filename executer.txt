@@ -1,0 +1,8 @@
+pyinstaller --onefile --add-data "coletar_dados.py;." --add-data "cordenadas.py;." --add-data "execucao_texto.py;." --add-data "loader.py;." --add-data "funcoes.py;." --add-data "palavras.py;." app.py
+
+
+
+resetar branch
+
+git reset --hard test
+git push origin master --force
