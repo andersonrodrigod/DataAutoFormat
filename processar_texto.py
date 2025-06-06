@@ -156,7 +156,7 @@ def formatar_questionamento(texto, questionamento_texto, condicoes):
 def formatar_texto(nome, procedimento, solicitacao, questionamento, consulta_plano, endereco):
     resultado = []
     if nome:
-        resultado.append(f'Olá tudo bom? aqui é do *HAPVIDA* falo com *{nome}*?\n\n') 
+        resultado.append(f'Olá, aqui é do *HAPVIDA* falo com *{nome}*?\n\n') 
 
     if procedimento:
         resultado.append(f'É sobre o procedimento que foi dado entrada *{procedimento}*\n\n')
@@ -227,7 +227,7 @@ def formatar_texto_parecer(nome, codigo, procedimentos, info_medico):
 
 
 def texto_nome(nome):
-    return f'Olá tudo bom? aqui é do *HAPVIDA* falo com *{nome}*?\n\n'
+    return f'Olá, aqui é do *HAPVIDA* falo com *{nome}*?\n\n'
 
 def texto_procedimento(procedimento):
     return f'É sobre o procedimento que foi dado entrada *{procedimento}*\n\n'
