@@ -1,6 +1,6 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_info_medico, exibir_processos
 from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, criar_arquivo_processos
-from coletar_dados import save_data, save_info_assistente, copy_vazio
+from coletar_dados import save_data, save_info_assistente, copy_vazio, save_data_analitics
 from funcoes import filtrar_nome_processos, bottoes_processos, buscar_info_medico_assistente, salvar_alteracoes_processos, filtrar_dados, criar_linha_interface, interface_processos, salvar_alteracoes_processos_teste
 import customtkinter as ctk
 from tkinter import messagebox
@@ -346,8 +346,11 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_coletar_dados_info_assistente = ctk.CTkButton(self.frame_coluna0, text="Coletar Info Assistente", command=lambda: self.quantidade_coletar_dados("assistente"), width=170)
         self.btn_coletar_dados_info_assistente.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
+        self.btn_coletar_dados = ctk.CTkButton(self.frame_coluna0, text="Coletar Dados", command=lambda: self.quantidade_coletar_dados("dados_analitics"), width=170)
+        self.btn_coletar_dados.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+
         self.btn_enviar_erro = ctk.CTkButton(self.frame_coluna0, text="Enviar Erro", command=self.enviar_erro, width=170)
-        self.btn_enviar_erro.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
+        self.btn_enviar_erro.grid(row=3, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
         # ==== Coluna 1 (com Frame para Botões) ====
         self.frame_coluna1 = ctk.CTkFrame(self)
@@ -490,6 +493,8 @@ class Formatar_texto(ctk.CTkFrame):
                 self.coletar_dados(quantidade)
             elif tipo == "assistente":
                 self.coletar_info_assistente(quantidade)
+            elif tipo == "dados_analitics":
+                self.coletar_dados_analitics(quantidade)
 
         except (ValueError, TypeError):
             messagebox.showerror("Erro", "Por favor, insira um número inteiro válido.")
@@ -501,6 +506,17 @@ class Formatar_texto(ctk.CTkFrame):
             copy_vazio()
             for i in range(quantidade):
                 dados = save_data(caminho, cordenada)
+
+        except Exception as e:
+            print(f"Erro em coletar_dados: {e}")
+
+    def coletar_dados_analitics(self, quantidade):
+        cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
+        try:
+            caminho = self.parent.caminho
+            copy_vazio()
+            for i in range(quantidade):
+                dados = save_data_analitics(caminho, cordenada)
 
         except Exception as e:
             print(f"Erro em coletar_dados: {e}")

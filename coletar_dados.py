@@ -120,6 +120,8 @@ def editar_dados(codigo, atualizacoes, caminho_arquivo):
     
     salvar_dados(dados, caminho_arquivo)
 
+
+
 def save_data(caminho_arquivo, cordenadas_caminho):
 
     processando_cordenadas = carregar_cordenada(cordenadas_caminho)
@@ -198,7 +200,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
             "nome_procedimento": nome_procedimento,
             "info_assistente": f"{info_assistente}.",
             "info_medico": f"{info_medic}.",
-            "medico_solicitante": medico_solicitante
+            "medico_solicitante": medico_solicitante,
         }
 
         dados_existentes.append(dados)
@@ -212,6 +214,126 @@ def save_data(caminho_arquivo, cordenadas_caminho):
         import traceback
         traceback.print_exc()
         raise
+
+def save_data_analitics(caminho_arquivo, cordenadas_caminho):
+
+    processando_cordenadas = carregar_cordenada(cordenadas_caminho)
+
+    cordenada_codigo_carteira, cordenada_info_medico, cordenada_info_assistente, cordenada_codigo_procedimento, codigo_carteira_t, telefone_1, telefone_2, telefone_3, telefone_baixo, amop, t22a3 = processando_cordenadas
+
+    cordenada_codigo_carteira_x, cordenada_codigo_carteira_y = cordenada_codigo_carteira
+    
+    cordenada_info_medico_x, cordenada_info_medico_y = cordenada_info_medico
+
+    cordenada_info_assistente_x, cordenada_info_assistente_y = cordenada_info_assistente 
+
+    cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y = cordenada_codigo_procedimento
+
+    fuso_horario = timezone("America/Sao_Paulo")
+    agora = datetime.now(fuso_horario)
+    data = agora.strftime("%d/%m/%Y")
+    hora = agora.strftime("%H:%M")
+
+    try:
+        dados_existentes = carregar_dados_existentes(caminho_arquivo)
+
+        df = pd.DataFrame(dados_existentes)
+
+        
+        copy()
+        codigo = cod()
+
+        copy_vazio()
+        tab()
+
+        copy()
+        nome = name()
+
+        copy_vazio()
+
+        copy_click(cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y)
+        codigo_procedimento = cod_proc()
+
+        if not df.empty and "codigo" in df.columns and codigo in df["codigo"].values:
+            codigo_in_dados = df[df["codigo"] == codigo]
+            procedimento_in_dados = codigo_in_dados["codigo_procedimento"].values
+            if codigo_procedimento in procedimento_in_dados:
+                #print("código em banco de dados")
+                copy_click_info(cordenada_info_assistente_x, cordenada_info_assistente_y)
+                info_assistente = info_assistent()
+                copy_vazio()
+                
+                copy_click_info(cordenada_info_medico_x, cordenada_info_medico_y)
+                info_medic = info_medico()
+                copy_vazio()
+
+                atualizacoes = {
+                    "info_assistente": f"{info_assistente}.",
+                    "info_medico": f"{info_medic}.",
+                    "data_hora_bot": f"{data} {hora}"
+                }
+
+                editar_dados(codigo, atualizacoes, caminho_arquivo)
+
+                py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+                py.press("down")
+                return
+
+        copy_vazio()
+        tab()
+
+        copy()
+        nome_procedimento = name_proc()
+
+        copy_vazio()
+        tab()
+        tab()
+
+        copy()
+        medico_solicitante = medico_requesting()
+
+        copy_vazio()
+
+        copy_click_info(cordenada_info_assistente_x, cordenada_info_assistente_y)
+        info_assistente = info_assistent()
+
+        copy_vazio()
+
+        copy_click_info(cordenada_info_medico_x, cordenada_info_medico_y)
+        info_medic = info_medico()
+
+        copy_vazio()
+
+        py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)
+        py.press("down")
+
+        dados = {
+            "codigo": codigo,
+            "nome": nome,
+            "codigo_procedimento": f"{codigo_procedimento}",
+            "nome_procedimento": nome_procedimento,
+            "info_assistente": f"{info_assistente}.",
+            "info_medico": f"{info_medic}.",
+            "medico_solicitante": medico_solicitante,
+            "data_hora_bot": [f"{data} {hora}"]
+        }
+
+        dados_existentes.append(dados)
+
+        salvar_dados(dados_existentes, caminho_arquivo)
+
+        return dados
+
+    except Exception as e:
+        print(f"Erro em save_data: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+
+
+
 
 def save_info_assistente(caminho_arquivo, cordenadas, caminho_coletar_dados):
 
@@ -323,7 +445,7 @@ def save_info_assistente(caminho_arquivo, cordenadas, caminho_coletar_dados):
 
         salvar_dados(dados_existentes, caminho_arquivo)
 
-        if palavra_processo == "SEM OBSERVACAO":
+        if palavra_processo == "PRIMEIRO CONTATO":
             save_data(caminho_coletar_dados, cordenadas)
         else:
             py.press("down")
