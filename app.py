@@ -89,6 +89,9 @@ class Editar_dados(ctk.CTkToplevel):
 
         df.loc[df["nome"] == nome, "info_medico"] = novo_texto
 
+        if "codigo_procedimento" in df.columns:
+            df["codigo_procedimento"] = df["codigo_procedimento"].astype(str)
+
         # Converte para lista de dicionários
         dados = df.to_dict(orient="records")
 

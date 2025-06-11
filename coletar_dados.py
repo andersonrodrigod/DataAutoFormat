@@ -136,6 +136,11 @@ def save_data(caminho_arquivo, cordenadas_caminho):
 
     cordenada_codigo_procedimento_x, cordenada_codigo_procedimento_y = cordenada_codigo_procedimento
 
+    fuso_horario = timezone("America/Sao_Paulo")
+    agora = datetime.now(fuso_horario)
+    data = agora.strftime("%d/%m/%Y")
+    hora = agora.strftime("%H:%M")
+
     try:
         dados_existentes = carregar_dados_existentes(caminho_arquivo)
 
@@ -201,6 +206,7 @@ def save_data(caminho_arquivo, cordenadas_caminho):
             "info_assistente": f"{info_assistente}.",
             "info_medico": f"{info_medic}.",
             "medico_solicitante": medico_solicitante,
+            "data_hora_bot": [f"{data} {hora}"]
         }
 
         dados_existentes.append(dados)
@@ -445,7 +451,7 @@ def save_info_assistente(caminho_arquivo, cordenadas, caminho_coletar_dados):
 
         salvar_dados(dados_existentes, caminho_arquivo)
 
-        if palavra_processo == "PRIMEIRO CONTATO":
+        if palavra_processo == "SEM OBSERVACAO":
             save_data(caminho_coletar_dados, cordenadas)
         else:
             py.press("down")
