@@ -162,16 +162,13 @@ def formatar_texto(nome, procedimento, solicitacao, questionamento, consulta_pla
         resultado.append(f'É sobre o procedimento que foi dado entrada *{procedimento}*\n\n')
 
     if solicitacao:
-        resultado.append(f'A análise está solicitando: *{solicitacao}* para dar continuidade a análise do procedimento.\n\n')
+        resultado.append(f'A análise está solicitando o resultado dos seguintes exames para dar continuidade a análise de procedimento: *{solicitacao}*')
 
     if questionamento:
         resultado.append(f'A análise questiona se: *{questionamento}?*\n\n')
     
     if consulta_plano:
         resultado.append(f'A análise questiona se: *{consulta_plano}?*\n\n')
-
-    if solicitacao:
-        resultado.append("*Obs:* Gentileza enviar a foto legível (através deste whatsapp) A foto precisa ser da folha inteira e sem cortar nenhuma informação.\n\n")
 
     if endereco:
         resultado.append(endereco)
