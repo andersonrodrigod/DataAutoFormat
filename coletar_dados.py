@@ -321,7 +321,7 @@ def save_data_analitics(caminho_arquivo, cordenadas_caminho):
             "info_assistente": f"{info_assistente}.",
             "info_medico": f"{info_medic}.",
             "medico_solicitante": medico_solicitante,
-            "data_hora_bot": [f"{data} {hora}"]
+            "data_hora_bot": f"{data} {hora}"
         }
 
         dados_existentes.append(dados)
@@ -388,7 +388,7 @@ def save_info_assistente(caminho_arquivo, cordenadas, caminho_coletar_dados):
             }
 
             if removido_atual:
-                atualizacoes["removido"] = False
+                atualizacoes["removido"] = False # type: ignore
 
             editar_dados(codigo, atualizacoes, caminho_arquivo)
             py.click(cordenada_codigo_carteira_x, cordenada_codigo_carteira_y)

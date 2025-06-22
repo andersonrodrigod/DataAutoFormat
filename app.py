@@ -1,7 +1,7 @@
 from execucao_texto import processar_dados_por_nome, processar_parecer_nome, exibir_info_medico, exibir_processos
-from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, criar_arquivo_processos
+from loader import carregar_arquivo_json, ler_arquivo, criar_arquivo_cordenadas, criar_arquivo_erro, filtrar_nome, salvar_dados, criar_arquivo_novo_dados, criar_arquivo_processos, criar_arquivo_dados_analitics
 from coletar_dados import save_data, save_info_assistente, copy_vazio, save_data_analitics
-from funcoes import filtrar_nome_processos, bottoes_processos, buscar_info_medico_assistente, salvar_alteracoes_processos, filtrar_dados, criar_linha_interface, interface_processos, salvar_alteracoes_processos_teste
+from funcoes import bottoes_processos, buscar_info_medico_assistente, interface_processos, salvar_alteracoes_processos
 import customtkinter as ctk
 from tkinter import messagebox
 import mouseinfo
@@ -180,7 +180,7 @@ class Check_list(ctk.CTkToplevel):
     
     def confirmar_botao(self):
         caminho_arquivo = f'{self.parent.caminho_pasta}/processos.json'
-        salvar_alteracoes_processos_teste(caminho_arquivo, self.alteracoes_checkboxes)
+        salvar_alteracoes_processos(caminho_arquivo, self.alteracoes_checkboxes)
 
         self.atualizar_interface()
 
@@ -254,6 +254,7 @@ class Carregar(ctk.CTkFrame):
             self.app.df = df
             self.app.caminho = caminho
             self.app.caminho_pasta = caminho_pasta
+            criar_arquivo_dados_analitics(caminho_pasta)
             criar_arquivo_cordenadas(caminho_pasta)
             criar_arquivo_erro(caminho_pasta)
             criar_arquivo_processos(caminho_pasta)
@@ -349,7 +350,7 @@ class Formatar_texto(ctk.CTkFrame):
         self.btn_coletar_dados_info_assistente = ctk.CTkButton(self.frame_coluna0, text="Coletar Info Assistente", command=lambda: self.quantidade_coletar_dados("assistente"), width=170)
         self.btn_coletar_dados_info_assistente.grid(row=1, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
-        self.btn_coletar_dados = ctk.CTkButton(self.frame_coluna0, text="Coletar Dados", command=lambda: self.quantidade_coletar_dados("dados_analitics"), width=170)
+        self.btn_coletar_dados = ctk.CTkButton(self.frame_coluna0, text="Dados Analitics", command=lambda: self.quantidade_coletar_dados("dados_analitics"), width=170)
         self.btn_coletar_dados.grid(row=2, column=0, pady=(5, 5), padx=(10, 10), sticky="w")
 
         self.btn_enviar_erro = ctk.CTkButton(self.frame_coluna0, text="Enviar Erro", command=self.enviar_erro, width=170)
@@ -515,8 +516,9 @@ class Formatar_texto(ctk.CTkFrame):
 
     def coletar_dados_analitics(self, quantidade):
         cordenada = f"{self.parent.caminho_pasta}/cordenadas.json"
+        caminho = f"{self.parent.caminho_pasta}/dados_analitics.json"
         try:
-            caminho = self.parent.caminho
+            
             copy_vazio()
             for i in range(quantidade):
                 dados = save_data_analitics(caminho, cordenada)

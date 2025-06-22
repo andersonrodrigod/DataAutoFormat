@@ -76,12 +76,12 @@ def on_checkbox_click(codigo, tipo, checkbox_var, dados, alteracoes_checkboxes):
         pessoa[tipo] = novo_valor
 
     atualizar_data_hora(tipo, novo_valor, pessoa)
-    alteracoes_checkboxes[pessoa["codigo"]] = pessoa
-    print(f"[{tipo.upper()}] Alterado para {novo_valor} | Código: {pessoa['codigo']}")
+    alteracoes_checkboxes[pessoa["codigo"]] = pessoa # type: ignore
+    print(f"[{tipo.upper()}] Alterado para {novo_valor} | Código: {pessoa['codigo']}") # type: ignore
     print(f"→ Dados atuais: {pessoa}")
 
 
-def salvar_alteracoes_processos_teste(arquivo, alteracoes_checkboxes):
+def salvar_alteracoes_processos(arquivo, alteracoes_checkboxes):
     print("\n[ETAPA 1] Verificando alterações...")
 
     try:
@@ -124,55 +124,6 @@ def salvar_alteracoes_processos_teste(arquivo, alteracoes_checkboxes):
          
     except AttributeError as e:
         messagebox.showerror("Erro", f"Ocorreu um erro ao salvar as alterações: {e}")
-
-
-
-def salvar_alteracoes_processos(arquivo, top_level_window, alteracoes_checkboxes):
-    try:
-        dados_alterados = [alteracoes_checkboxes[codigo] for codigo in alteracoes_checkboxes]
-
-        if not dados_alterados:
-            messagebox.showinfo("Nenhuma alteração", "Não houve alterações para salvar.")
-            return
-        
-        
-        for pessoa in dados_alterados:
-            codigo = pessoa.get("codigo")
-            campos = {
-                "visto": pessoa.get("visto", False),
-                "verificar": pessoa.get("verificar", False),
-                "resolvido": pessoa.get("resolvido", False)
-            }
-
-            if pessoa["resolvido"] == True:
-                campos["removido"] = True
-                campos["visto"] = False
-                campos["verificar"] = False
-                campos["resolvido"] = False
-            else:
-                campos["removido"] = False
-
-
-            if campos.get("visto") == True and pessoa.get("visto_data_hora"):
-                campos["visto_data_hora"] = pessoa["visto_data_hora"]
-
-            if pessoa.get("resolvido") == True and pessoa.get("resolvido_data_hora"):
-                campos["resolvido_data_hora"] = pessoa["resolvido_data_hora"]
-
-            
-
-            print(campos)
-         
-            editar_dados(codigo, campos, arquivo)
-
-        top_level_window.lift()
-        messagebox.showinfo("Sucesso", "Alterações salvas com sucesso!")
-        top_level_window.lift()
-
-    except Exception as e:
-        top_level_window.lift()
-        messagebox.showerror("Erro", f"Ocorreu um erro ao salvar as alterações: {e}")
-        top_level_window.lift()
 
 
 def filtrar_dados(dados, tipo, codigos_filtrados=None):

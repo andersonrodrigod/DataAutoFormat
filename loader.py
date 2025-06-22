@@ -21,6 +21,12 @@ def criar_arquivo_novo_dados():
         df.to_json("dados_coletados.json", orient="records", indent=4)
         messagebox.showinfo("Sucesso", "Arquivo criado com sucesso, carregue o arquivo criado de dados_coletadoas para continuar")
 
+def criar_arquivo_dados_analitics(caminho_pasta):
+    if caminho_pasta and not os.path.exists(caminho_pasta + "/dados_analitics.json"):
+        df = pd.DataFrame()
+        df.to_json("dados_analitics.json", orient="records", indent=4)
+        print("arquivo criado com sucesso")
+
 def criar_arquivo_cordenadas(caminho_pasta):
     if caminho_pasta and not os.path.exists(caminho_pasta + "/cordenadas.json"):
         df = pd.DataFrame([cordenadas])
@@ -70,7 +76,7 @@ def editar_dados_teste(atualizacoes, caminho_arquivo):
         campos = dado_alterado["alteracoes"]
         #print(f"\n📬 Código alterado: {codigo}")
 
-        for dado in dados:
+        for dado in dados: # type: ignore
             if dado.get("codigo") == codigo:
                 #print(f"✅ Encontrado: {dado['nome']} ({codigo})")
                 #print("🛠️ Atualizando campos...")
@@ -86,7 +92,7 @@ def editar_dados_teste(atualizacoes, caminho_arquivo):
 def editar_dados(codigo, atualizacoes, caminho_arquivo):
     dados = carregar_dados_existentes(caminho_arquivo)
 
-    for usuario in dados:
+    for usuario in dados: # type: ignore
         if usuario.get("codigo") == codigo:
             for chave, novo_valor in atualizacoes.items():
                 if isinstance(usuario.get(chave), list):
